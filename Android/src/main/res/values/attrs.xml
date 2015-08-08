@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <declare-styleable name="AnnotationToolbar">
+        <attr name="menu_items" format="reference"/>
+        <attr name="tint_color" format="color"/>
+        <attr name="background_color" format="color"/>
+        <attr name="color_strings" format="reference"/>
+    </declare-styleable>
+</resources>
