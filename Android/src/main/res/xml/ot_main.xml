@@ -2,29 +2,35 @@
 <ot-menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/item_pen"
+        app:icon="@drawable/ic_freehand"/>
+    <item
+        android:id="@+id/item_line"
+        app:icon="@drawable/ic_line"/>
     <menu-item
-        android:id="@+id/menu_mode"
-        app:icon="@drawable/ic_freehand">
+        android:id="@+id/menu_shape"
+        app:icon="@drawable/ic_shapes">
         <item
-            android:id="@+id/item_pen"
-            app:icon="@drawable/ic_freehand"/>
+            android:id="@+id/item_arrow"
+            app:icon="@drawable/ic_arrow"/>
         <item
-            android:id="@+id/item_line"
-            app:icon="@drawable/ic_line"/>
+            android:id="@+id/item_rectangle"
+            app:icon="@drawable/ic_rectangle"/>
         <item
-            android:id="@+id/item_shape"
-            app:icon="@drawable/ic_triangle"/>
-        <item
-            android:id="@+id/item_text"
-            app:icon="@drawable/ic_text"/>
+            android:id="@+id/item_oval"
+            app:icon="@drawable/ic_oval"/>
     </menu-item>
+    <item
+        android:id="@+id/item_text"
+        app:icon="@drawable/ic_text"/>
     <menu-item
         android:id="@+id/menu_colors">
         <!-- Items added dynamically -->
     </menu-item>
     <menu-item
         android:id="@+id/menu_line_width"
-        app:icon="@drawable/ic_line">
+        app:icon="@drawable/ic_line_width">
         <!-- Items added dynamically -->
     </menu-item>
     <item

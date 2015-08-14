@@ -9,6 +9,7 @@ import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
 import android.graphics.drawable.ShapeDrawable;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -31,18 +32,28 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 
     private static final String TAG = "ot-annotations-canvas";
 
+    private String mycid;
+    private String canvascid;
+
 	public int width;
 	public int height;
 	private Bitmap mBitmap;
 	private Canvas mCanvas;
     // TODO Merge these three lists so that they can be used for history (undo)
-	private List<DrawingPath> mPaths;
-	private List<DrawingShape> mShapes;
-	private List<DrawingText> mLabels;
+	private List<AnnotationPath> mPaths;
+	private List<AnnotationText> mLabels;
 	Context context;
 	private float mX, mY;
 	private float mLastX, mLastY;
+	private float mStartX, mStartY;
 	private static final float TOLERANCE = 5;
+
+    /**
+     * Indicates if you are drawing
+     */
+    protected boolean isDrawing = false;
+
+    private boolean allowsSizing = false;
 
     private AnnotationToolbar toolbar;
 
@@ -52,6 +63,44 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
         "Shapes",
         "Line",
         "Text"
+    };
+
+    // TODO May want to put these in their own file
+    private FloatPoint[] linePoints = {
+            new FloatPoint(0, 0),
+            new FloatPoint(0, 1)
+    };
+
+    private FloatPoint[] arrowPoints = {
+            new FloatPoint(0, 1),
+            new FloatPoint(3, 1),
+            new FloatPoint(3, 0),
+            new FloatPoint(5, 2),
+            new FloatPoint(3, 4),
+            new FloatPoint(3, 3),
+            new FloatPoint(0, 3),
+            new FloatPoint(0, 1) // Reconnect point
+    };
+
+    private FloatPoint[] rectanglePoints = {
+            new FloatPoint(0, 0),
+            new FloatPoint(1, 0),
+            new FloatPoint(1, 1),
+            new FloatPoint(0, 1),
+            new FloatPoint(0, 0)
+    };
+
+    // TODO Need to ensure this uses Path.quadTo
+    private FloatPoint[] circlePoints = {
+            new FloatPoint(0, 0.5f),
+            new FloatPoint(0.5f + 0.5f*(float)Math.cos(5*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(5*Math.PI/4)),
+            new FloatPoint(0.5f, 0),
+            new FloatPoint(0.5f + 0.5f*(float)Math.cos(7*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(7*Math.PI/4)),
+            new FloatPoint(1, 0.5f),
+            new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.PI/4), 0.5f + 0.5f*(float)Math.sin(Math.PI/4)),
+            new FloatPoint(0.5f, 1),
+            new FloatPoint(0.5f + 0.5f*(float)Math.cos(3*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(3*Math.PI/4)),
+            new FloatPoint(0, 0.5f)
     };
 
     private String action = "Pen"; // Default to pen
@@ -89,6 +138,7 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
         }
     }
 
+    // FIXME Should really only have update, clear, and possibly text (since text handling will be different)
     private enum Mode {
         Pen("otAnnotation_pen"),
         Clear("otAnnotation_clear"),
@@ -128,24 +178,36 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 		super(c, attrs);
 		context = c;
 
-		mPaths = new ArrayList<DrawingPath>();
-		mShapes = new ArrayList<DrawingShape>();
-		mLabels = new ArrayList<DrawingText>();
+		mPaths = new ArrayList<AnnotationPath>();
+		mLabels = new ArrayList<AnnotationText>();
 
         // Default stroke and color
         userColor = activeColor = Color.RED;
         userStrokeWidth = activeStrokeWidth = 6f;
-
-		// Initialize a default path
-        createPath(false);
 	}
 
     // TODO Could create attach(subscriber, toolbar) and attach(publisher, toolbar) instead
 
     // FIXME These need to test for a custom renderer - if one was already added, it should override ours (disable screenshots)
-    public void attachSubscriber(Subscriber subscriber) {
+    // INFO We pass in a subscriber or publisher so that the canvas can be auto scaled to match the video frame
+    public void attachSubscriber(@NonNull Subscriber subscriber) {
         this.setLayoutParams(subscriber.getView().getLayoutParams());
         mSubscriber = subscriber;
+
+        new Thread() {
+            @Override
+            public void run() {
+                while (mSubscriber.getStream() == null) { /* Wait */ }
+                while (mSubscriber.getStream().getConnection() == null) { /* Wait */ }
+                canvascid = mSubscriber.getStream().getConnection().getConnectionId();
+
+                Log.i("Canvas Signal", "Subscriber: " + canvascid);
+
+                // Initialize a default path
+                createPath(false, canvascid);
+            }
+        }.start();
+
 //        mSubscriber.setRenderer(new AnnotationVideoRenderer(getContext()));
 
 //        ViewGroup parent = (ViewGroup) subscriber.getView().getParent();
@@ -153,9 +215,24 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 //        parent.addView(mSubscriber.getView());
     }
 
-    public void attachPublisher(Publisher publisher) {
+    public void attachPublisher(@NonNull Publisher publisher) {
         this.setLayoutParams(publisher.getView().getLayoutParams());
         mPublisher = publisher;
+
+        new Thread() {
+            @Override
+            public void run() {
+                while (mPublisher.getStream() == null) { /* Wait */ }
+                while (mPublisher.getStream().getConnection() == null) { /* Wait */ }
+                canvascid = mPublisher.getStream().getConnection().getConnectionId();
+
+                Log.i("Canvas Signal", "Publisher: " + canvascid);
+
+                // Initialize a default path
+                createPath(false, canvascid);
+            }
+        }.start();
+
 //        mPublisher.setRenderer(new AnnotationVideoRenderer(getContext()));
     }
 
@@ -177,58 +254,67 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
     public void signalReceived(Session session, String type, String data, Connection connection) {
         // TODO Add logging to monitor session and connection info
 
-        String mycid = session.getConnection().getConnectionId();
+        mycid = session.getConnection().getConnectionId();
         String cid = connection.getConnectionId();
-        if (!cid.equals(mycid)) { // Ensure that we only handle signals from other users
-            if (type.equalsIgnoreCase(Mode.Pen.toString())) {
-                Log.i(TAG, data);
-                // Build object from JSON array
-                JSONParser parser = new JSONParser();
 
-                try {
-                    JSONArray updates = (JSONArray) parser.parse(data);
+//        Log.i("Canvas Signal", cid + "|||" + mycid + "|||" + canvascid);
+        Log.i("Canvas Signal", cid);
+        if (!cid.equals(mycid)) { // Ensure that we only handle signals from other users on the current canvas
+            if (type.contains("otAnnotation")) {
+                // TODO Do initial parse up here? Iterate below where required?
+                if (type.equalsIgnoreCase(Mode.Pen.toString())) {
+                    Log.i(TAG, data);
+                    // Build object from JSON array
+                    JSONParser parser = new JSONParser();
 
-                    Iterator<String> iterator = updates.iterator();
-                    // The data will be batched
-                    while (iterator.hasNext()) {
-                        Object obj = iterator.next();
-                        JSONObject json = (JSONObject) obj;
+                    try {
+                        JSONArray updates = (JSONArray) parser.parse(data);
 
-                        changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()));
-                        changeStrokeWidth(((Number) json.get("lineWidth")).floatValue());
-                        startTouch(((Number) json.get("fromX")).floatValue(), ((Number) json.get("fromY")).floatValue());
-                        moveTouch(((Number) json.get("toX")).floatValue(), ((Number) json.get("toY")).floatValue());
-                        upTouch(); // TODO Should this only get called at the end?
-                        invalidate(); // Need this to finalize the drawing on the screen
+                        Iterator<String> iterator = updates.iterator();
+                        // The data will be batched
+                        while (iterator.hasNext()) {
+                            Object obj = iterator.next();
+                            JSONObject json = (JSONObject) obj;
+
+                            String id = (String) json.get("id"); // The id of the view to be drawn on
+                            if (canvascid.equals(id)) {
+                                changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()), id);
+                                changeStrokeWidth(((Number) json.get("lineWidth")).floatValue(), id);
+                                startTouch(((Number) json.get("fromX")).floatValue(), ((Number) json.get("fromY")).floatValue());
+                                moveTouch(((Number) json.get("toX")).floatValue(), ((Number) json.get("toY")).floatValue(), true);
+                                upTouch(); // TODO Should this only get called at the end?
+                                invalidate(); // Need this to finalize the drawing on the screen
+                            }
+                        }
+                    } catch (ParseException e) {
+                        Log.e(TAG, e.getMessage());
                     }
-                } catch (ParseException e) {
-                    Log.e(TAG, e.getMessage());
+                } else if (type.equalsIgnoreCase(Mode.Clear.toString())) {
+                    Log.i(TAG, "Clearing canvas");
+                    this.clearCanvas();
                 }
-            } else if (type.equalsIgnoreCase(Mode.Clear.toString())) {
-                Log.i(TAG, "Clearing canvas");
-                this.clearCanvas();
             }
         }
     }
 
     public void setAnnotationColor(int color) {
         userColor = color;
-        createPath(false); // Create a new paint object to allow for color change
+        createPath(false, canvascid); // Create a new paint object to allow for color change
     }
 
     public void setAnnotationSize(float width) {
         userStrokeWidth = width;
-        createPath(false); // Create a new paint object to allow for new stroke size
+        createPath(false, canvascid); // Create a new paint object to allow for new stroke size
     }
 
-	private void changeColor(int color) {
+	private void changeColor(int color, String cid) {
         activeColor = color;
-		createPath(true); // Create a new paint object to allow for color change
+		createPath(true, cid); // Create a new paint object to allow for color change
 	}
 
-	private void changeStrokeWidth(float width) {
+	private void changeStrokeWidth(float width, String cid) {
         activeStrokeWidth = width;
-        createPath(true); // Create a new paint object to allow for new stroke size
+        createPath(true, cid); // Create a new paint object to allow for new stroke size
 	}
 
 	// override onSizeChanged
@@ -246,16 +332,25 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		// draw the mPath with the mPaint on the canvas when onDraw
-        for (DrawingPath drawing : mPaths) {
+        for (AnnotationPath drawing : mPaths) {
             canvas.drawPath(drawing.path, drawing.paint);
         }
 
-        for (DrawingShape shape : mShapes) {
-            shape.drawable.draw(canvas);
+        for (AnnotationText label : mLabels) {
+            canvas.drawText(label.text, label.x, label.y, label.paint);
         }
 
-        for (DrawingText label : mLabels) {
-            canvas.drawText(label.text, label.x, label.y, label.paint);
+        if (isDrawing) {
+            // TODO Use generic method and switch based on the base path (points) from active menu item
+            if (action.equalsIgnoreCase("Line")) {
+                onDrawPoints(canvas, linePoints);
+            } else if (action.equalsIgnoreCase("Arrow")) {
+                onDrawPoints(canvas, arrowPoints);
+            } else if(action.equalsIgnoreCase("Rectangle")) {
+                onDrawPoints(canvas, rectanglePoints);
+            } else if (action.equalsIgnoreCase("Oval")) {
+                onDrawPoints(canvas, circlePoints);
+            }
         }
 	}
 
@@ -267,22 +362,146 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 	}
 
 	// when ACTION_MOVE move touch according to the x,y values
-	private void moveTouch(float x, float y) {
+	private void moveTouch(float x, float y, boolean curved) {
 		float dx = Math.abs(x - mX);
 		float dy = Math.abs(y - mY);
 		if (dx >= TOLERANCE || dy >= TOLERANCE) {
-            getActivePath().quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            if (curved) {
+                getActivePath().quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            } else {
+                getActivePath().lineTo(x, y);
+            }
 			mX = x;
 			mY = y;
 		}
 	}
 
+    private void onDrawPoints(Canvas canvas, FloatPoint[] points) {
+        float dx = Math.abs(mX - mLastX);
+        float dy = Math.abs(mY - mLastY);
+        if (dx >= TOLERANCE || dy >= TOLERANCE) {
+            FloatPoint scale = scaleForPoints(points);
+            Path path = new Path();
+
+            if (points.length == 2) {
+                // We have a line
+                path.moveTo(mStartX, mStartY);
+                path.lineTo(mX, mY);
+            } else {
+                for (int i = 0; i < points.length; i++) {
+                    // Scale the points according to the difference between the start and end points
+                    float pointX = mStartX + (scale.x * points[i].x);
+                    float pointY = mStartY + (scale.y * points[i].y);
+
+                    if (i == 0) {
+                        path.moveTo(pointX, pointY);
+                    } else {
+                        path.lineTo(pointX, pointY);
+                    }
+                }
+            }
+
+            canvas.drawPath(path, getActivePaint());
+        }
+    }
+
+    private void onTouchEvent(MotionEvent event, FloatPoint[] points) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                isDrawing = true;
+                // Last x and y for shape paths is the start touch point
+                mStartX = mX;
+                mStartY = mY;
+                invalidate();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                invalidate();
+                break;
+            case MotionEvent.ACTION_UP:
+                isDrawing = false;
+
+                if (points.length == 2) {
+                    // We have a line
+                    startTouch(mStartX, mStartY);
+                    moveTouch(mX, mY, false);
+                    Log.i(TAG, "Points: (" + mStartX + ", " + mStartY + "), (" + mX + ", " + mY + ")");
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(mX, mY));
+                } else {
+                    FloatPoint scale = scaleForPoints(points);
+
+                    for (int i = 0; i < points.length; i++) {
+                        // Scale the points according to the difference between the start and end points
+                        float pointX = mStartX + (scale.x * points[i].x);
+                        float pointY = mStartY + (scale.y * points[i].y);
+
+                        // TODO Way to know whether to use curved/smooth or not?
+                        if (i == 0) {
+                            mLastX = pointX;
+                            mLastY = pointY;
+                            startTouch(pointX, pointY);
+                        } else {
+                            moveTouch(pointX, pointY, false);
+                        }
+
+                        sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(pointX, pointY));
+
+                        mLastX = pointX;
+                        mLastY = pointY;
+                    }
+                }
+
+                invalidate();
+                break;
+        }
+    }
+
+    private FloatPoint scaleForPoints(FloatPoint[] points) {
+        // mX and mY refer to the end point of the enclosing rectangle (touch up)
+        float minX = Float.MAX_VALUE;
+        float minY = Float.MAX_VALUE;
+        float maxX = 0;
+        float maxY = 0;
+        for (int i = 0; i < points.length; i++) {
+            if (points[i].x < minX) {
+                minX = points[i].x;
+            } else if (points[i].x > maxX) {
+                maxX = points[i].x;
+            }
+
+            if (points[i].y < minY) {
+                minY = points[i].y;
+            } else if (points[i].y > maxY) {
+                maxY = points[i].y;
+            }
+        }
+        float dx = Math.abs(maxX - minX);
+        float dy = Math.abs(maxY - minY);
+
+        Log.i("AnnotationView", "Delta: " + dx + ", " + dy);
+
+        float scaleX = (mX - mStartX) / dx;
+        float scaleY = (mY - mStartY) / dy;
+
+        Log.i("AnnotationView", "Scale: " + scaleX + ", " + scaleY);
+
+        return new FloatPoint(scaleX, scaleY);
+    }
+
 	public void clearCanvas() {
-		mPaths.clear();
-		mShapes.clear();
-		mLabels.clear();
+        Iterator<AnnotationPath> iter = mPaths.iterator();
+
+        while (iter.hasNext()) {
+            AnnotationPath path = iter.next();
+
+            if (path.connectionId.equals(mycid)) {
+                iter.remove();
+            }
+        }
+
+        // TODO Send signal to clear paths with connection ID
+
 		invalidate();
-        createPath(false);
+        createPath(false, canvascid);
 	}
 
 	// when ACTION_UP stop touch
@@ -303,41 +522,30 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 		float x = event.getX();
 		float y = event.getY();
 
-        // TODO Generate a new path if necessary
+        if (canvascid == null) {
+            throw new IllegalStateException("An OpenTok Publisher or Subscriber must be passed into the class. " +
+                    "See AnnotationView.attachSubscriber() or AnnotationView.attachPublisher().");
+        }
 
         // FIXME Switch on global action (pen, shape (subshape), text, etc.)
         if (action.equalsIgnoreCase("Pen")) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    createPath(false);
+                    createPath(false, canvascid);
                     startTouch(x, y);
                     mLastX = x;
                     mLastY = y;
                     invalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    moveTouch(x, y);
-
-                    JSONArray jsonArray = new JSONArray();
-                    JSONObject jsonObject = new JSONObject();
-
-                    jsonObject.put("id", "android-test");//mSession.getSessionId() & mSession.getConnection().getConnectionId());
-                    jsonObject.put("fromX", mLastX);
-                    jsonObject.put("fromY", mLastY);
-                    jsonObject.put("toX", x);
-                    jsonObject.put("toY", y);
-                    jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
-                    jsonObject.put("lineWidth", userStrokeWidth);
-
-                    // TODO These need to be batched
-                    jsonArray.add(jsonObject);
-
-                    String update = jsonArray.toJSONString();
-                    mLastX = x;
-                    mLastY = y;
+                    moveTouch(x, y, true);
                     invalidate();
 
-                    sendUpdate(Mode.Pen.toString(), update);
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(x, y));
+
+                    mLastX = x;
+                    mLastY = y;
+
                     break;
                 case MotionEvent.ACTION_UP:
                     upTouch();
@@ -345,6 +553,7 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
                     break;
             }
         } else if (action.equalsIgnoreCase("Text")) {
+            // INFO Per Meeta Dash, omit text for now (include if time)
             // TODO Add text input and submit data below as user types
 
             Log.i(TAG, "Adding text...");
@@ -353,14 +562,15 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
             paint.setColor(Color.RED);
             paint.setTextSize(16);
 
-            mLabels.add(new DrawingText("This is a test", x, y, paint));
+            mLabels.add(new AnnotationText("This is a test", x, y, paint));
             invalidate();
 
             JSONArray jsonArray = new JSONArray();
             JSONObject jsonObject = new JSONObject();
 
-            // TODO This ID should refer to the path, as well - this way it can be removed using history
-            jsonObject.put("id", "android-test");//mSession.getSessionId() & mSession.getConnection().getConnectionId());
+            // TODO Include a unique ID for the path? - this way it can be removed using history
+            jsonObject.put("id", canvascid);
+            jsonObject.put("fromid", mycid);
             jsonObject.put("x", x);
             jsonObject.put("y", y);
             jsonObject.put("text", "This is a test");
@@ -373,69 +583,67 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
             String update = jsonArray.toJSONString();
 
             sendUpdate(Mode.Text.toString(), update);
-        } else if (action.equalsIgnoreCase("Shape")) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    createPath(false);
-                    startTouch(x, y);
-                    mLastX = x;
-                    mLastY = y;
-                    invalidate();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    moveTouch(x, y);
+        } else if (action.equalsIgnoreCase("Arrow")) { // TODO Switch points based on selection (pull from menu item)
+            mX = x;
+            mY = y;
 
-                    JSONArray jsonArray = new JSONArray();
-                    JSONObject jsonObject = new JSONObject();
+            onTouchEvent(event, arrowPoints);
+        } else if (action.equalsIgnoreCase("Rectangle")) {
+            mX = x;
+            mY = y;
 
-                    // TODO This ID should refer to the path, as well - this way it can be removed using history
-                    jsonObject.put("id", "android-test");//mSession.getSessionId() & mSession.getConnection().getConnectionId());
-                    jsonObject.put("fromX", mLastX);
-                    jsonObject.put("fromY", mLastY);
-                    jsonObject.put("toX", x);
-                    jsonObject.put("toY", y);
-                    jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
-                    jsonObject.put("lineWidth", userStrokeWidth);
+            onTouchEvent(event, rectanglePoints);
+        } else if (action.equalsIgnoreCase("Oval")) {
+            mX = x;
+            mY = y;
 
-                    // TODO These need to be batched
-                    jsonArray.add(jsonObject);
-
-                    String update = jsonArray.toJSONString();
-                    mLastX = x;
-                    mLastY = y;
-                    invalidate();
-
-                    sendUpdate(Mode.Pen.toString(), update);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    upTouch();
-                    invalidate();
-                    break;
-            }
+            onTouchEvent(event, circlePoints);
         } else if (action.equalsIgnoreCase("Line")) {
-
+            mX = x;
+            mY = y;
+            onTouchEvent(event, linePoints);
         } else if (action.equalsIgnoreCase("Capture")) {
             captureView();
         }
 		return true;
 	}
 
-    private void createPath(boolean incoming) {
+    private String buildSignalFromPoints(float x, float y) {
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+
+        // TODO Include a unique ID for the path?
+        jsonObject.put("id", canvascid);
+        jsonObject.put("fromid", mycid);
+        jsonObject.put("fromX", mLastX);
+        jsonObject.put("fromY", mLastY);
+        jsonObject.put("toX", x);
+        jsonObject.put("toY", y);
+        jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
+        jsonObject.put("lineWidth", userStrokeWidth);
+
+        // TODO These need to be batched
+        jsonArray.add(jsonObject);
+
+        return jsonArray.toJSONString();
+    }
+
+    private void createPath(boolean incoming, String cid) {
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setColor(incoming ? activeColor : userColor);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeWidth(activeStrokeWidth);
+        paint.setStrokeWidth(incoming ? activeStrokeWidth : userStrokeWidth);
 
-        mPaths.add(new DrawingPath(new Path(), paint)); // Generate a new drawing path
-    }
+        if (mPublisher == null && mSubscriber == null) {
+            throw new IllegalStateException("An OpenTok Publisher or Subscriber must be passed into the class. " +
+                    "See AnnotationView.attachSubscriber() or AnnotationView.attachPublisher().");
+        }
 
-    // TODO Reference http://developer.android.com/guide/topics/graphics/2d-graphics.html for an example of
-    // TODO adding custom shapes
-    /*internal*/ void draw(ShapeDrawable d, int x, int y, int width, int height) {
-        d.getPaint().setColor(0xff74AC23);
-        d.setBounds(x, y, x + width, y + height);
+        Log.i(TAG, cid);
+
+        mPaths.add(new AnnotationPath(new Path(), paint, cid)); // Generate a new drawing path
     }
 
     void drawText(String text, int x, int y) {
@@ -460,36 +668,8 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
         }
     }
 
-    /**
-     * Converts dp to real pixels, according to the screen density.
-     *
-     * @param dp A number of density-independent pixels.
-     * @return The equivalent number of real pixels.
-     */
-    private int dpToPx(int dp) {
-        double screenDensity = this.getResources().getDisplayMetrics().density;
-        return (int) (screenDensity * (double) dp);
-    }
-
     private void setAction(String action) {
         this.action = action;
-    }
-
-    public void drawPathFromPoints(FloatPoint[] points) {
-        // Start with point 0
-        startTouch(points[0].x, points[0].y);
-
-        // Iterate through the rest
-        int i = 0;
-        for (FloatPoint point : points) {
-            if (i != 0) {
-                moveTouch(point.x, point.y);
-            }
-            i++;
-        }
-
-        // Close the path
-        upTouch();
     }
 
     // INFO This method shouldn't be necessary, but in case we need it...
@@ -515,6 +695,7 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
     }
 
     public void captureView() {
+        // TODO Add a "flash" animation to indicate the screenshot was captured
         try {
             boolean notSupported = false;
             // Use custom renderer to get screenshot from publisher/subscriber
