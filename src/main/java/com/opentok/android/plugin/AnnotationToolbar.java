@@ -27,7 +27,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
     private int mHeight;
     private List<ActionListener> listeners = new ArrayList<ActionListener>();
 
-    // FIXME These should be dynamic (allow toolbar to be extensible)
+    // FIXME These should be dynamic (allow users to add their own array or individual colors)
     private String[] colors = {
             "#000000",  // Black
             "#0000FF",  // Blue
@@ -50,7 +50,6 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
             this.setBackgroundColor(Color.parseColor("#CC000000"));
         }
 
-        // TODO Init with xml res with menu items
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.AnnotationToolbar, 0, 0);
         try {
             int tintColor = ta.getColor(R.styleable.AnnotationToolbar_tint_color, Color.WHITE);
@@ -164,6 +163,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
     @Override
     public void didTapItem(AnnotationToolbarItem item) {
+        hideSubmenu(); // If the submenu is visible
         for (ActionListener listener : listeners) {
             listener.didTapItem(item);
         }
@@ -191,12 +191,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
                         listener.didTapItem(item);
                     }
 
-                    // TODO Add animation to hide the toolbar
-                    AnnotationToolbar.this.removeViewAt(AnnotationToolbar.this.getChildCount() - 1);
-
-                    ViewGroup.LayoutParams p = AnnotationToolbar.this.getLayoutParams();
-                    p.height = mHeight;
-                    AnnotationToolbar.this.setLayoutParams(p);
+                    hideSubmenu();
 
                     // TODO Update the main button color
                 }
@@ -225,12 +220,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
                         listener.didTapItem(item);
                     }
 
-                    // TODO Add animation to hide the toolbar
-                    AnnotationToolbar.this.removeViewAt(AnnotationToolbar.this.getChildCount() - 1);
-
-                    ViewGroup.LayoutParams p = AnnotationToolbar.this.getLayoutParams();
-                    p.height = mHeight;
-                    AnnotationToolbar.this.setLayoutParams(p);
+                    hideSubmenu();
 
                     // TODO Update the main button image
                 }
@@ -247,6 +237,17 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         this.setLayoutParams(p);
 
         this.addView(subToolbar);
+    }
+
+    // TODO Add animation to hide the toolbar?
+    private void hideSubmenu() {
+        if (this.getChildCount() > 1) {
+            AnnotationToolbar.this.removeViewAt(AnnotationToolbar.this.getChildCount() - 1);
+
+            ViewGroup.LayoutParams p = AnnotationToolbar.this.getLayoutParams();
+            p.height = mHeight;
+            AnnotationToolbar.this.setLayoutParams(p);
+        }
     }
 
     public void attachSignal(Session session, String type, String data, Connection connection) {
