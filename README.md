@@ -97,12 +97,37 @@ private void attachPublisherView(Publisher publisher) {
 }
 ```
 
-Last, pass signals through the `AnnotationToolbar` object in the onSignalReceived method.
+Last, pass signals through the `AnnotationToolbar` object in the `onSignalReceived` method.
 
-    @Override
-    public void onSignalReceived(Session session, String type, String data, Connection connection) {
-        // Attach the signals to the canvas objects
-        mToolbar.attachSignal(session, type, data, connection);
-    }
+```java
+@Override
+public void onSignalReceived(Session session, String type, String data, Connection connection) {
+    // Attach the signals to the canvas objects
+    mToolbar.attachSignal(session, type, data, connection);
+}
+```
 
-Note: Make sure that your class implements `Session.SignalListener`. See []() for more details.
+Note: Make sure that your class implements `Session.SignalListener`. See the [docs]() for more details.
+
+Customizing the toolbar
+----------------
+
+(Coming soon)
+
+### Adding/removing menu items
+
+### Menu items created from XML
+
+#### Defaults
+
+#### Handling custom items
+
+### Custom colors
+
+For best results
+----------------
+
+In order to ensure that all annotations are visible across devices, it is recommended to use predefined
+aspect ratios for your video frames.
+
+[code sample]

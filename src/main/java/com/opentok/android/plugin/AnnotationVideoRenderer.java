@@ -350,6 +350,10 @@ public class AnnotationVideoRenderer extends BaseVideoRenderer {
         mView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
+    public boolean isMirrored() {
+        return mRenderer.mCurrentFrame != null && mRenderer.mCurrentFrame.isMirroredX();
+    }
+
     public Bitmap captureScreenshot() {
         ByteBuffer bb = mRenderer.mCurrentFrame.getBuffer();
         bb.clear();

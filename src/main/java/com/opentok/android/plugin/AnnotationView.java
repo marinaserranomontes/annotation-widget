@@ -8,8 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
-import android.graphics.drawable.ShapeDrawable;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -48,6 +46,9 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 	private float mLastX, mLastY;
 	private float mStartX, mStartY;
 	private static final float TOLERANCE = 5;
+
+    private boolean mMirrored = false;
+    private boolean mSignalMirrored = false;
 
     /**
      * Indicates if you are drawing
@@ -197,7 +198,7 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
      * Attaches an annotation canvas to the provided {@code Subscriber}.
      * @param subscriber The OpenTok {@code Subscriber}.
      */
-    public void attachSubscriber(@NonNull Subscriber subscriber) {
+    public void attachSubscriber(Subscriber subscriber) {
         this.setLayoutParams(subscriber.getView().getLayoutParams());
         mSubscriber = subscriber;
 
@@ -209,6 +210,11 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
                 canvascid = mSubscriber.getStream().getConnection().getConnectionId();
 
                 Log.i("Canvas Signal", "Subscriber: " + canvascid);
+
+                // TODO Make sure this also gets called onSizeChanged
+                if (mSubscriber.getRenderer() instanceof AnnotationVideoRenderer) {
+                    mMirrored = ((AnnotationVideoRenderer) mSubscriber.getRenderer()).isMirrored();
+                }
 
                 // Initialize a default path
                 createPath(false, canvascid);
@@ -226,7 +232,7 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
      * Attaches an annotation canvas to the provided {@code Publisher}.
      * @param publisher The OpenTok {@code Publisher}.
      */
-    public void attachPublisher(@NonNull Publisher publisher) {
+    public void attachPublisher(Publisher publisher) {
         this.setLayoutParams(publisher.getView().getLayoutParams());
         mPublisher = publisher;
 
@@ -238,6 +244,11 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
                 canvascid = mPublisher.getStream().getConnection().getConnectionId();
 
                 Log.i("Canvas Signal", "Publisher: " + canvascid);
+
+//                // TODO Make sure this also gets called onSizeChanged
+                if (mPublisher.getRenderer() instanceof AnnotationVideoRenderer) {
+                    mMirrored = ((AnnotationVideoRenderer) mPublisher.getRenderer()).isMirrored();
+                }
 
                 // Initialize a default path
                 createPath(false, canvascid);
@@ -332,6 +343,7 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 
     @Override
     public void signalReceived(Session session, String type, String data, Connection connection) {
+        Log.i("Canvas Signal", type + ": " + data);
         // TODO Add logging to monitor session and connection info
 
         mycid = session.getConnection().getConnectionId();
@@ -357,10 +369,32 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 
                             String id = (String) json.get("id");
                             if (canvascid.equals(id)) {
+                                mSignalMirrored = (boolean) json.get("mirrored");
+
                                 changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()));
                                 changeStrokeWidth(((Number) json.get("lineWidth")).floatValue());
-                                startTouch(((Number) json.get("fromX")).floatValue(), ((Number) json.get("fromY")).floatValue());
-                                moveTouch(((Number) json.get("toX")).floatValue(), ((Number) json.get("toY")).floatValue(), true);
+
+                                // Adjust values with offset
+                                float width = ((Number) json.get("canvasWidth")).floatValue();
+                                float height = ((Number) json.get("canvasHeight")).floatValue();
+
+                                Log.i("CanvasOffset", "Size: " + width + ", " + height);
+                                Log.i("CanvasOffset", "CanvasSize: " + this.width + ", " + this.height);
+
+                                // The offset is meant to center the canvases
+                                float offsetX = (this.width/2) - (width/2);
+                                float offsetY = (this.height/2) - (height/2);
+
+                                Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
+
+                                float fromX = ((Number) json.get("fromX")).floatValue() + offsetX;
+                                float fromY = ((Number) json.get("fromY")).floatValue() + offsetY;
+
+                                float toX = ((Number) json.get("toX")).floatValue() + offsetX;
+                                float toY = ((Number) json.get("toY")).floatValue() + offsetY;
+
+                                startTouch(fromX, fromY);
+                                moveTouch(toX, toY, true);
                                 upTouch();
                                 invalidate(); // Need this to finalize the drawing on the screen
                             }
@@ -380,6 +414,14 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonObject = new JSONObject();
 
+        boolean mirrored = false;
+
+        if (mPublisher != null) {
+            mirrored = ((AnnotationVideoRenderer) mPublisher.getRenderer()).isMirrored();
+        } else if (mSubscriber != null) {
+            mirrored = ((AnnotationVideoRenderer) mSubscriber.getRenderer()).isMirrored();
+        }
+
         // TODO Include a unique ID for the path?
         jsonObject.put("id", canvascid);
         jsonObject.put("fromid", mycid);
@@ -389,6 +431,9 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
         jsonObject.put("toY", y);
         jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
         jsonObject.put("lineWidth", userStrokeWidth);
+        jsonObject.put("canvasWidth", this.width);
+        jsonObject.put("canvasHeight", this.height);
+        jsonObject.put("mirrored", mirrored);
 
         // TODO These need to be batched
         jsonArray.add(jsonObject);
@@ -417,10 +462,10 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
         float x = event.getX();
         float y = event.getY();
 
-        if (mPublisher == null || mSubscriber == null) {
-            throw new IllegalStateException("An OpenTok Publisher or Subscriber must be passed into the class. " +
-                    "See AnnotationView.attachSubscriber() or AnnotationView.attachPublisher().");
-        }
+//        if (mPublisher == null || mSubscriber == null) {
+//            throw new IllegalStateException("An OpenTok Publisher or Subscriber must be passed into the class. " +
+//                    "See AnnotationView.attachSubscriber() or AnnotationView.attachPublisher().");
+//        }
 
         // FIXME Switch on global action (pen, shape (subshape), text, etc.)
         if (action.equalsIgnoreCase("Pen")) {
@@ -584,6 +629,9 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
+        this.width = w;
+        this.height = h;
+
         // your Canvas will draw onto the defined Bitmap
         mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
@@ -592,6 +640,16 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+
+        if (mSignalMirrored) {
+            canvas.scale(-1, 1, width / 2, height / 2);
+
+            if (mMirrored) {
+                // Revert back (double negative)
+                canvas.scale(-1, 1, width / 2, height / 2);
+            }
+        }
+
 		// draw the mPath with the mPaint on the canvas when onDraw
         for (AnnotationPath drawing : mPaths) {
             canvas.drawPath(drawing.path, drawing.paint);
