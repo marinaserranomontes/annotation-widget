@@ -387,11 +387,24 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 
                                 Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
 
+                                // TODO Handle scale
+
                                 float fromX = ((Number) json.get("fromX")).floatValue() + offsetX;
                                 float fromY = ((Number) json.get("fromY")).floatValue() + offsetY;
 
                                 float toX = ((Number) json.get("toX")).floatValue() + offsetX;
                                 float toY = ((Number) json.get("toY")).floatValue() + offsetY;
+
+                                if (mSignalMirrored) {
+                                    fromX = this.width - fromX;
+                                    toX = this.width - toX;
+                                }
+
+                                if (mMirrored) {
+                                    // Revert (Double negative)
+                                    fromX = this.width - fromX;
+                                    toX = this.width - toX;
+                                }
 
                                 startTouch(fromX, fromY);
                                 moveTouch(toX, toY, true);
@@ -641,14 +654,16 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-        if (mSignalMirrored) {
-            canvas.scale(-1, 1, width / 2, height / 2);
-
-            if (mMirrored) {
-                // Revert back (double negative)
-                canvas.scale(-1, 1, width / 2, height / 2);
-            }
-        }
+        // INFO This won't work because the canvas would need to be flipped back and forth (messing up the annotations)
+        // INFO We need to manually handle it for each individual point
+//        if (mSignalMirrored) {
+//            canvas.scale(-1, 1, width / 2, height / 2);
+//
+//            if (mMirrored) {
+//                // Revert back (double negative)
+//                canvas.scale(-1, 1, width / 2, height / 2);
+//            }
+//        }
 
 		// draw the mPath with the mPaint on the canvas when onDraw
         for (AnnotationPath drawing : mPaths) {
