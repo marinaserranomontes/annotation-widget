@@ -7,9 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		85E1270D1B8227BC0015B1A3 /* OTAnnotations.h in Headers */ = {isa = PBXBuildFile; fileRef = 85E1270C1B8227BC0015B1A3 /* OTAnnotations.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		85E127131B8227BD0015B1A3 /* OTAnnotations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E127071B8227BC0015B1A3 /* OTAnnotations.framework */; };
 		85E1271A1B8227BD0015B1A3 /* OTAnnotationsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */; };
+		85E127271B822A3F0015B1A3 /* OTAnnotationToolbar.h in Headers */ = {isa = PBXBuildFile; fileRef = 85E127231B822A3F0015B1A3 /* OTAnnotationToolbar.h */; };
+		85E127281B822A3F0015B1A3 /* OTAnnotationToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 85E127241B822A3F0015B1A3 /* OTAnnotationToolbar.m */; };
+		85E127291B822A3F0015B1A3 /* OTAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = 85E127251B822A3F0015B1A3 /* OTAnnotationView.h */; };
+		85E1272A1B822A3F0015B1A3 /* OTAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 85E127261B822A3F0015B1A3 /* OTAnnotationView.m */; };
+		85E1272C1B822A750015B1A3 /* OTAnnotations.h in Headers */ = {isa = PBXBuildFile; fileRef = 85E1272B1B822A750015B1A3 /* OTAnnotations.h */; };
+		85E1272E1B822C420015B1A3 /* OpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E1272D1B822C420015B1A3 /* OpenTok.framework */; };
+		85E127301B822C950015B1A3 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 85E1272F1B822C950015B1A3 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,10 +31,16 @@
 /* Begin PBXFileReference section */
 		85E127071B8227BC0015B1A3 /* OTAnnotations.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OTAnnotations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		85E1270B1B8227BC0015B1A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		85E1270C1B8227BC0015B1A3 /* OTAnnotations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OTAnnotations.h; sourceTree = "<group>"; };
 		85E127121B8227BD0015B1A3 /* OTAnnotationsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OTAnnotationsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		85E127181B8227BD0015B1A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationsTests.m; sourceTree = "<group>"; };
+		85E127231B822A3F0015B1A3 /* OTAnnotationToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationToolbar.h; sourceTree = "<group>"; };
+		85E127241B822A3F0015B1A3 /* OTAnnotationToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationToolbar.m; sourceTree = "<group>"; };
+		85E127251B822A3F0015B1A3 /* OTAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationView.h; sourceTree = "<group>"; };
+		85E127261B822A3F0015B1A3 /* OTAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationView.m; sourceTree = "<group>"; };
+		85E1272B1B822A750015B1A3 /* OTAnnotations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotations.h; sourceTree = "<group>"; };
+		85E1272D1B822C420015B1A3 /* OpenTok.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenTok.framework; path = "../../../../../../../../Downloads/OpenTok-iOS-2.6.0/OpenTok.framework"; sourceTree = "<group>"; };
+		85E1272F1B822C950015B1A3 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				85E1272E1B822C420015B1A3 /* OpenTok.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,6 +66,7 @@
 		85E126FD1B8227BB0015B1A3 = {
 			isa = PBXGroup;
 			children = (
+				85E1272D1B822C420015B1A3 /* OpenTok.framework */,
 				85E127091B8227BC0015B1A3 /* OTAnnotations */,
 				85E127161B8227BD0015B1A3 /* OTAnnotationsTests */,
 				85E127081B8227BC0015B1A3 /* Products */,
@@ -71,7 +85,11 @@
 		85E127091B8227BC0015B1A3 /* OTAnnotations */ = {
 			isa = PBXGroup;
 			children = (
-				85E1270C1B8227BC0015B1A3 /* OTAnnotations.h */,
+				85E1272B1B822A750015B1A3 /* OTAnnotations.h */,
+				85E127231B822A3F0015B1A3 /* OTAnnotationToolbar.h */,
+				85E127241B822A3F0015B1A3 /* OTAnnotationToolbar.m */,
+				85E127251B822A3F0015B1A3 /* OTAnnotationView.h */,
+				85E127261B822A3F0015B1A3 /* OTAnnotationView.m */,
 				85E1270A1B8227BC0015B1A3 /* Supporting Files */,
 			);
 			path = OTAnnotations;
@@ -80,6 +98,7 @@
 		85E1270A1B8227BC0015B1A3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				85E1272F1B822C950015B1A3 /* README.md */,
 				85E1270B1B8227BC0015B1A3 /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -109,7 +128,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				85E1270D1B8227BC0015B1A3 /* OTAnnotations.h in Headers */,
+				85E1272C1B822A750015B1A3 /* OTAnnotations.h in Headers */,
+				85E127271B822A3F0015B1A3 /* OTAnnotationToolbar.h in Headers */,
+				85E127291B822A3F0015B1A3 /* OTAnnotationView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +230,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				85E127301B822C950015B1A3 /* README.md in Sources */,
+				85E1272A1B822A3F0015B1A3 /* OTAnnotationView.m in Sources */,
+				85E127281B822A3F0015B1A3 /* OTAnnotationToolbar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,6 +350,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/TrevorBoyer/Downloads/OpenTok-iOS-2.6.0",
+				);
 				INFOPLIST_FILE = OTAnnotations/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -341,6 +369,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/TrevorBoyer/Downloads/OpenTok-iOS-2.6.0",
+				);
 				INFOPLIST_FILE = OTAnnotations/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";

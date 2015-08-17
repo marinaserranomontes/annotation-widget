@@ -14,6 +14,6 @@ FOUNDATION_EXPORT double OTAnnotationsVersionNumber;
 //! Project version string for OTAnnotations.
 FOUNDATION_EXPORT const unsigned char OTAnnotationsVersionString[];
 
-// In this header, you should import all the public headers of your framework using statements like #import <OTAnnotations/PublicHeader.h>
-
+#import <OTAnnotations/OTAnnotationToolbar.h>
+#import <OTAnnotations/OTAnnotationView.h>
 
