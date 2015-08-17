@@ -6,7 +6,7 @@ This plugin adds annotation and screen capture capabilities to OpenTok for Andro
 Notes
 -----
 
-* See [OpenTok Android SDK developer and client requirements](http://tokbox.com/opentok/libraries/client/android/#developerandclientrequirements) for a list or system requirements and supported devices.
+* See [OpenTok Android SDK developer and client requirements](http://tokbox.com/opentok/libraries/client/android/#developerandclientrequirements) for a list of system requirements and supported devices.
 
 * See the [OpenTok Android SDK Reference](http://tokbox.com/opentok/libraries/client/android/reference/index.html)
 for details on the API.
@@ -114,15 +114,15 @@ Customizing the toolbar
 
 (Coming soon)
 
-### Adding/removing menu items
+#### Adding/removing menu items
 
-### Menu items created from XML
+#### Menu items created from XML
 
 #### Defaults
 
 #### Handling custom items
 
-### Custom colors
+#### Custom colors
 
 For best results
 ----------------

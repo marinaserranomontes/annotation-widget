@@ -382,18 +382,38 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
                                 Log.i("CanvasOffset", "CanvasSize: " + this.width + ", " + this.height);
 
                                 // The offset is meant to center the canvases
-                                float offsetX = (this.width/2) - (width/2);
-                                float offsetY = (this.height/2) - (height/2);
+                                float offsetX = 0;
+                                float offsetY = 0;
 
                                 Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
 
-                                // TODO Handle scale
+                                // Handle scale
+                                float scale = 1;
 
-                                float fromX = ((Number) json.get("fromX")).floatValue() + offsetX;
-                                float fromY = ((Number) json.get("fromY")).floatValue() + offsetY;
+                                /**
+                                 * This assumes that if the width is the greater value, video frames
+                                 * can be scaled so that they have equal widths, which can be used to
+                                 * find the offset in the y axis. Therefore, the offset on the x axis
+                                 * will be 0.
+                                 */
+                                if (this.width > this.height) {
+                                    scale = this.width / width;
+                                    offsetY = (this.height/2) - (scale*height/2);
+                                } else {
+                                    scale = this.height / height;
+                                    offsetX = (this.width/2) - (scale*width/2);
+                                }
 
-                                float toX = ((Number) json.get("toX")).floatValue() + offsetX;
-                                float toY = ((Number) json.get("toY")).floatValue() + offsetY;
+                                Log.i("CanvasOffset", "Scale: " + scale);
+
+                                // FIXME If possible, the scale should also scale the line width (use a min width value?)
+
+                                // INFO Since the offset is calculated on the "scaled" frame, we need to scale it back
+                                float fromX = scale *  (((Number) json.get("fromX")).floatValue() + offsetX);
+                                float fromY = scale * (((Number) json.get("fromY")).floatValue() + offsetY);
+
+                                float toX = scale * (((Number) json.get("toX")).floatValue() + offsetX);
+                                float toY = scale * (((Number) json.get("toY")).floatValue() + offsetY);
 
                                 if (mSignalMirrored) {
                                     fromX = this.width - fromX;
