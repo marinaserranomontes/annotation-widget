@@ -2,41 +2,42 @@
 <ot-menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- INFO Should be able to -->
     <item
-        android:id="@+id/item_pen"
+        android:id="@+id/ot_item_pen"
         app:icon="@drawable/ic_freehand"/>
     <item
-        android:id="@+id/item_line"
+        android:id="@+id/ot_item_line"
         app:icon="@drawable/ic_line"/>
     <menu-item
-        android:id="@+id/menu_shape"
+        android:id="@+id/ot_menu_shape"
         app:icon="@drawable/ic_shapes">
         <item
-            android:id="@+id/item_arrow"
+            android:id="@+id/ot_item_arrow"
             app:icon="@drawable/ic_arrow"/>
         <item
-            android:id="@+id/item_rectangle"
+            android:id="@+id/ot_item_rectangle"
             app:icon="@drawable/ic_rectangle"/>
         <item
-            android:id="@+id/item_oval"
+            android:id="@+id/ot_item_oval"
             app:icon="@drawable/ic_oval"/>
     </menu-item>
     <item
-        android:id="@+id/item_text"
+        android:id="@+id/ot_item_text"
         app:icon="@drawable/ic_text"/>
     <menu-item
         android:id="@+id/menu_colors">
         <!-- Items added dynamically -->
     </menu-item>
     <menu-item
-        android:id="@+id/menu_line_width"
+        android:id="@+id/ot_menu_line_width"
         app:icon="@drawable/ic_line_width">
         <!-- Items added dynamically -->
     </menu-item>
     <item
-        android:id="@+id/menu_clear"
+        android:id="@+id/ot_item_clear"
         app:icon="@drawable/ic_clear" />
     <item
-        android:id="@+id/menu_capture"
+        android:id="@+id/ot_item_capture"
         app:icon="@android:drawable/ic_menu_camera" />
 </ot-menu>

@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 // TODO Determine if this class should be allowed to be extended
-public class AnnotationView extends View implements AnnotationToolbar.ActionListener {
+public class AnnotationView extends View implements AnnotationToolbar.SignalListener, AnnotationToolbar.ActionListener {
 
     private static final String TAG = "ot-annotations-canvas";
 
@@ -59,86 +59,42 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 
     private AnnotationToolbar toolbar;
 
-    // FIXME This should be an enum built into the annotation item
-    private String[] actions = {
-        "Pen",
-        "Shapes",
-        "Line",
-        "Text"
-    };
-
-    // TODO May want to put these in their own file
-    private FloatPoint[] linePoints = {
-            new FloatPoint(0, 0),
-            new FloatPoint(0, 1)
-    };
-
-    private FloatPoint[] arrowPoints = {
-            new FloatPoint(0, 1),
-            new FloatPoint(3, 1),
-            new FloatPoint(3, 0),
-            new FloatPoint(5, 2),
-            new FloatPoint(3, 4),
-            new FloatPoint(3, 3),
-            new FloatPoint(0, 3),
-            new FloatPoint(0, 1) // Reconnect point
-    };
-
-    private FloatPoint[] rectanglePoints = {
-            new FloatPoint(0, 0),
-            new FloatPoint(1, 0),
-            new FloatPoint(1, 1),
-            new FloatPoint(0, 1),
-            new FloatPoint(0, 0)
-    };
-
-    // TODO Need to ensure this uses Path.quadTo
-    private FloatPoint[] circlePoints = {
-            new FloatPoint(0, 0.5f),
-            new FloatPoint(0.5f + 0.5f*(float)Math.cos(5*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(5*Math.PI/4)),
-            new FloatPoint(0.5f, 0),
-            new FloatPoint(0.5f + 0.5f*(float)Math.cos(7*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(7*Math.PI/4)),
-            new FloatPoint(1, 0.5f),
-            new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.PI/4), 0.5f + 0.5f*(float)Math.sin(Math.PI/4)),
-            new FloatPoint(0.5f, 1),
-            new FloatPoint(0.5f + 0.5f*(float)Math.cos(3*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(3*Math.PI/4)),
-            new FloatPoint(0, 0.5f)
-    };
-
-    // TODO This should come from the first menu item, if possible
-    private String action = "Pen"; // Default to pen
+    private int selectedResourceId = -1;
 
     @Override
-    public void didTapMenuItem(AnnotationToolbarMenuItem menuItem) {
+    public void onAnnotationMenuItemSelected(AnnotationToolbarMenuItem menuItem) {
 //        setAction(menuItem.getAction());
     }
 
     @Override
-    public void didTapItem(AnnotationToolbarItem item) { // INFO This method will be available to users to handle their own actions
-        try {
-            int color = Color.parseColor(item.getAction());
+    public void onAnnotationItemSelected(AnnotationToolbarItem item) {
+        if (item.getColor() != null) {
+            int color = Color.parseColor(item.getColor());
             setAnnotationColor(color);
-        } catch (Exception e) {
+        } else {
+            Log.i("MainActivityMenu", "Menu item tapped");
             // We don't have a color selection
-            if (item.getAction() != null) {
-                if (item.getAction().equalsIgnoreCase("Clear")) {
-                    clearCanvas();
-                    if (mSubscriber != null) {
-                        mSubscriber.getSession().sendSignal(Mode.Clear.toString(), null);
-                    } else if (mPublisher != null) {
-                        mPublisher.getSession().sendSignal(Mode.Clear.toString(), null);
-                    } else {
-                        throw new IllegalStateException("A publisher or subscriber must be passed into the class. " +
-                                "See attachSubscriber() or attachPublisher().");
-                    }
-                } else if (item.getAction().equalsIgnoreCase("Capture")) {
-                    // Add a tap listener to the canvas - if it gets tapped, snap a screenshot
-                    this.setAction("Capture");
+            if (item.getItemId() == R.id.ot_item_clear) {
+                clearCanvas();
+                if (mSubscriber != null) {
+                    mSubscriber.getSession().sendSignal(Mode.Clear.toString(), null);
+                } else if (mPublisher != null) {
+                    mPublisher.getSession().sendSignal(Mode.Clear.toString(), null);
                 } else {
-                    setAction(item.getAction());
+                    throw new IllegalStateException("A publisher or subscriber must be passed into the class. " +
+                            "See attachSubscriber() or attachPublisher().");
                 }
+            } else {
+                selectedResourceId = item.getItemId();
+                Log.i("MainActivityMenu", "id: " + selectedResourceId);
             }
         }
+    }
+
+    @Override
+    public boolean onCreateAnnotationMenu(AnnotationMenuView menu) {
+        // TODO Default the selected item to the first in the list
+        return false;
     }
 
     // FIXME Should really only have update, clear, and possibly text (since text handling will be different)
@@ -266,6 +222,7 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
      */
     public void attachToolbar(AnnotationToolbar toolbar) {
         this.toolbar = toolbar;
+        this.toolbar.addSignalListener(this);
         this.toolbar.addActionListener(this);
         this.toolbar.bringToFront();
     }
@@ -291,11 +248,6 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
     }
 
     /** ==== Private Getters/Setters ==== **/
-
-    // TODO Not sure I want this method - we should be able to get a path from the menu item, but users can use the res id to switch handling on taps
-    private void setAction(String action) {
-        this.action = action;
-    }
 
     /**
      * Changes the color of incoming annotations (set by the signal string).
@@ -495,13 +447,9 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
         float x = event.getX();
         float y = event.getY();
 
-//        if (mPublisher == null || mSubscriber == null) {
-//            throw new IllegalStateException("An OpenTok Publisher or Subscriber must be passed into the class. " +
-//                    "See AnnotationView.attachSubscriber() or AnnotationView.attachPublisher().");
-//        }
+        Log.i("MainActivityMenu", "pen id: " + R.id.ot_item_pen);
 
-        // FIXME Switch on global action (pen, shape (subshape), text, etc.)
-        if (action.equalsIgnoreCase("Pen")) {
+        if (selectedResourceId == R.id.ot_item_pen) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     createPath(false, canvascid);
@@ -525,7 +473,7 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
                     invalidate();
                     break;
             }
-        } else if (action.equalsIgnoreCase("Text")) {
+        } else if (selectedResourceId == R.id.ot_item_text) {
             // INFO Per Meeta Dash, omit text for now (include if time)
             // TODO Add text input and submit data below as user types
 
@@ -556,27 +504,29 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
             String update = jsonArray.toJSONString();
 
             sendUpdate(Mode.Text.toString(), update);
-        } else if (action.equalsIgnoreCase("Arrow")) { // TODO Switch points based on selection (pull from menu item)
+        } else if (selectedResourceId == R.id.ot_item_arrow) { // TODO Switch points based on selection (pull from menu item)
             mX = x;
             mY = y;
 
-            onTouchEvent(event, arrowPoints);
-        } else if (action.equalsIgnoreCase("Rectangle")) {
+            onTouchEvent(event, AnnotationShapes.arrowPoints);
+        } else if (selectedResourceId == R.id.ot_item_rectangle) {
             mX = x;
             mY = y;
 
-            onTouchEvent(event, rectanglePoints);
-        } else if (action.equalsIgnoreCase("Oval")) {
+            onTouchEvent(event, AnnotationShapes.rectanglePoints);
+        } else if (selectedResourceId == R.id.ot_item_oval) {
             mX = x;
             mY = y;
 
-            onTouchEvent(event, circlePoints);
-        } else if (action.equalsIgnoreCase("Line")) {
+            onTouchEvent(event, AnnotationShapes.circlePoints);
+        } else if (selectedResourceId == R.id.ot_item_line) {
             mX = x;
             mY = y;
-            onTouchEvent(event, linePoints);
-        } else if (action.equalsIgnoreCase("Capture")) {
+            onTouchEvent(event, AnnotationShapes.linePoints);
+        } else if (selectedResourceId == R.id.ot_item_capture) {
             captureView();
+        } else {
+            // TODO Get the points from the selected item, if available
         }
         return true;
     }
@@ -696,14 +646,14 @@ public class AnnotationView extends View implements AnnotationToolbar.ActionList
 
         if (isDrawing) {
             // TODO Use generic method and switch based on the base path (points) from active menu item
-            if (action.equalsIgnoreCase("Line")) {
-                onDrawPoints(canvas, linePoints);
-            } else if (action.equalsIgnoreCase("Arrow")) {
-                onDrawPoints(canvas, arrowPoints);
-            } else if(action.equalsIgnoreCase("Rectangle")) {
-                onDrawPoints(canvas, rectanglePoints);
-            } else if (action.equalsIgnoreCase("Oval")) {
-                onDrawPoints(canvas, circlePoints);
+            if (selectedResourceId == R.id.ot_item_line) {
+                onDrawPoints(canvas, AnnotationShapes.linePoints);
+            } else if (selectedResourceId == R.id.ot_item_arrow) {
+                onDrawPoints(canvas, AnnotationShapes.arrowPoints);
+            } else if (selectedResourceId == R.id.ot_item_rectangle) {
+                onDrawPoints(canvas, AnnotationShapes.rectanglePoints);
+            } else if (selectedResourceId == R.id.ot_item_oval) {
+                onDrawPoints(canvas, AnnotationShapes.circlePoints);
             }
         }
 	}

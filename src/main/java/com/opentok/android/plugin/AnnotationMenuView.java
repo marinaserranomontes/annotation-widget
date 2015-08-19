@@ -19,7 +19,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
-class AnnotationMenuView extends LinearLayout implements MenuBuilder.ItemInvoker, MenuView {
+public class AnnotationMenuView extends LinearLayout implements MenuBuilder.ItemInvoker, MenuView {
     private static final String TAG = "AnnotationMenuView";
 
     private MenuBuilder mMenu;
@@ -60,13 +60,7 @@ class AnnotationMenuView extends LinearLayout implements MenuBuilder.ItemInvoker
     }
 
     public void inflateMenu(int menuId, AnnotationMenuInflator.ActionListener listener) {
-        try {
-            AnnotationMenuInflator.inflate(getContext(), menuId, this, listener);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        }
+        AnnotationMenuInflator.inflate(getContext(), menuId, this, listener);
     }
 
     @Override

@@ -2,65 +2,64 @@ package com.opentok.android.plugin;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class AnnotationToolbarMenuItem extends ImageButton {
     private int imageResource;
-    private String action;
     private Drawable mIcon;
+    private int mId = -1;
     private int mMinWidth;
     // List of submenu items
     private List<AnnotationToolbarItem> items = new ArrayList<AnnotationToolbarItem>();
+
+    String color;
 
     private static final int MAX_ICON_SIZE = 32; // dp
     private int mMaxIconSize;
 
     public AnnotationToolbarMenuItem(Context context) {
-        this(context, null);
+        this(null, context);
     }
 
-    public AnnotationToolbarMenuItem(Context context, AttributeSet attrs) {
+    public AnnotationToolbarMenuItem(AttributeSet attrs, Context context) {
         super(context, attrs);
 
         final float density = context.getResources().getDisplayMetrics().density;
         mMaxIconSize = (int) (MAX_ICON_SIZE * density + 0.5f);
 
-        // TODO Handle attrs so that this can be added in XML
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(dpToPx(35), dpToPx(35));
+        btnParams.setMargins(10,0,10,0);
+        this.setLayoutParams(btnParams);
     }
 
-    public AnnotationToolbarMenuItem(Context context, String action, int resource) {
+    public AnnotationToolbarMenuItem(Context context, int resource) {
         this(context);
-        this.action = action;
         imageResource = resource;
 
         this.setImageResource(resource);
         this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
-    public AnnotationToolbarMenuItem(Context context, String action, Drawable icon) {
+    public AnnotationToolbarMenuItem(Context context, Drawable icon) {
         this(context);
-        this.action = action;
+//        setIcon(icon);
 
-        if (icon == null) {
-            try {
-                ViewGroup.LayoutParams btnParams = new ViewGroup.LayoutParams(dpToPx(35), dpToPx(35));
-                this.setLayoutParams(btnParams);
-                int color = Color.parseColor(action);
-                this.setBackgroundResource(R.drawable.circle_button);
-                GradientDrawable drawable = (GradientDrawable) this.getBackground();
-                drawable.setColor(color);
-            } catch (Exception e) {
-                // The action wasn't a color, so we should have an icon passed in
-            }
-        } else {
-            setIcon(icon);
+        if (icon != null) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) icon;
+            this.setImageBitmap(bitmapDrawable.getBitmap());
         }
+
+        this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
     @Override
@@ -124,12 +123,41 @@ public class AnnotationToolbarMenuItem extends ImageButton {
         return items;
     }
 
-    public void setItems(List<AnnotationToolbarItem> items) {
+    void setItems(List<AnnotationToolbarItem> items) {
         this.items = items;
     }
 
-    public String getAction() {
-        return action;
+    // TODO Extend this class to make an AnnotationToolbarColorItem (or similar)?
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+        updateColorBackground(Color.parseColor(color));
+    }
+
+    public void setColor(int color) {
+        this.color = String.format("#%06X", 0xFFFFFF & color);
+        updateColorBackground(color);
+    }
+
+    @ViewDebug.CapturedViewProperty
+    public int getItemId() {
+        return mId;
+    }
+
+    public void setItemId(int id) {
+        this.mId = id;
+    }
+
+    private void updateColorBackground(int color) {
+        ViewGroup.LayoutParams btnParams = new ViewGroup.LayoutParams(dpToPx(35), dpToPx(35));
+        this.setLayoutParams(btnParams);
+        this.setBackgroundResource(R.drawable.circle_button);
+        GradientDrawable drawable = (GradientDrawable) this.getBackground();
+        drawable.setColor(color);
     }
 
     /**

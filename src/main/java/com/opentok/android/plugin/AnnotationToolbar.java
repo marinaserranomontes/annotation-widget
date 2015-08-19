@@ -13,6 +13,8 @@ import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import com.opentok.android.Connection;
@@ -25,7 +27,10 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
     private int mGravity;
     private int mWidth;
     private int mHeight;
-    private List<ActionListener> listeners = new ArrayList<ActionListener>();
+    private List<SignalListener> signalListeners = new ArrayList<SignalListener>();
+    private List<ActionListener> actionListeners = new ArrayList<ActionListener>();
+
+    private AnnotationMenuView menu;
 
     // FIXME These should be dynamic (allow users to add their own array or individual colors)
     private String[] colors = {
@@ -50,30 +55,51 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
             this.setBackgroundColor(Color.parseColor("#CC000000"));
         }
 
+        int[] systemAttrs = new int[] {
+                android.R.attr.id,
+                android.R.attr.background,
+                android.R.attr.layout_width,
+                android.R.attr.layout_height
+        };
+
+        TypedArray android_ta = context.obtainStyledAttributes(attrs, systemAttrs, 0, 0);
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.AnnotationToolbar, 0, 0);
         try {
             int tintColor = ta.getColor(R.styleable.AnnotationToolbar_tint_color, Color.WHITE);
-            int menuRes = ta.getResourceId(R.styleable.AnnotationToolbar_menu_items, R.xml.ot_main);
 
             mGravity = ta.getInt(R.styleable.LinearLayoutCompat_android_gravity, Gravity.CENTER_HORIZONTAL);
-            mWidth = ta.getInt(R.styleable.LinearLayoutCompat_Layout_android_layout_width, ViewGroup.LayoutParams.MATCH_PARENT);
-            mHeight = ta.getInt(R.styleable.LinearLayoutCompat_Layout_android_layout_height, dpToPx(48)); // FIXME Need to get the value from attrs
+            // FIXME If match_parent or wrap_content is used, these will throw UnsupportedOperationException: Can't convert to dimension: type=0x10
+            mWidth = android_ta.getInt(2, ViewGroup.LayoutParams.MATCH_PARENT);
+            mHeight = android_ta.getLayoutDimension(3, dpToPx(48));
 
-            AnnotationMenuView toolbar = new AnnotationMenuView(getContext());
-            toolbar.inflateMenu(menuRes, this);
-            this.addView(toolbar);
-
-            ViewGroup.LayoutParams p = toolbar.getLayoutParams();
-            p.height = mHeight; // Match the value passed in by the user
-            toolbar.setLayoutParams(p);
         } finally {
             ta.recycle();
+            android_ta.recycle();
         }
     }
 
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        if (menu == null) {
+            menu = new AnnotationMenuView(getContext());
+            menu.inflateMenu(R.xml.ot_main, this);
+            this.addView(menu);
+
+            for (ActionListener listener : actionListeners) {
+                listener.onCreateAnnotationMenu(menu);
+            }
+
+            ViewGroup.LayoutParams p = menu.getLayoutParams();
+            p.height = mHeight; // Match the value passed in by the user
+            menu.setLayoutParams(p);
+        }
     }
 
     @Override
@@ -117,20 +143,12 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         }
     }
 
-    public void addMenuItem(String title, Drawable icon, Path path) {
-
-    }
-
-    public void addMenuItem(String title, Drawable icon, ShapeDrawable shape) {
-
-    }
-
-    public void addMenuItem(String title, Drawable icon, Drawable drawable) {
-
+    public void addSignalListener(SignalListener listener) {
+        this.signalListeners.add(listener);
     }
 
     public void addActionListener(ActionListener listener) {
-        this.listeners.add(listener);
+        this.actionListeners.add(listener);
     }
 
     /**
@@ -146,32 +164,33 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
     @Override
     public void didTapMenuItem(AnnotationToolbarMenuItem menuItem) {
-        if (menuItem.getAction() != null) {
-            try {
-                Color.parseColor(menuItem.getAction());
-                showColorSubmenu();
-            } catch (IllegalArgumentException e) { // TODO See if there is a better way to do this
-                showSubmenu(menuItem);
-                e.printStackTrace();
-            }
+        if (menuItem.getColor() != null) {
+            Color.parseColor(menuItem.getColor());
+            showColorSubmenu();
+        } else {
+            showSubmenu(menuItem);
         }
 
-        for (ActionListener listener : listeners) {
-            listener.didTapMenuItem(menuItem);
+        for (ActionListener listener : actionListeners) {
+            listener.onAnnotationMenuItemSelected(menuItem);
         }
     }
 
     @Override
     public void didTapItem(AnnotationToolbarItem item) {
         hideSubmenu(); // If the submenu is visible
-        for (ActionListener listener : listeners) {
-            listener.didTapItem(item);
+        for (ActionListener listener : actionListeners) {
+            listener.onAnnotationItemSelected(item);
         }
     }
 
     public interface ActionListener {
-        public void didTapMenuItem(AnnotationToolbarMenuItem menuItem);
-        public void didTapItem(AnnotationToolbarItem item);
+        public void onAnnotationMenuItemSelected(AnnotationToolbarMenuItem menuItem);
+        public void onAnnotationItemSelected(AnnotationToolbarItem item);
+        public boolean onCreateAnnotationMenu(AnnotationMenuView menu);
+    }
+
+    public interface SignalListener {
         public void signalReceived(Session session, String type, String data, Connection connection);
     }
 
@@ -183,12 +202,12 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         AnnotationMenuView colorToolbar = new AnnotationMenuView(getContext());
 
         for (final String color : colors) {
-            final AnnotationToolbarItem item = new AnnotationToolbarItem(getContext(), color, null);
+            final AnnotationToolbarItem item = new AnnotationToolbarItem(getContext(), color);
             item.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    for (ActionListener listener : listeners) {
-                        listener.didTapItem(item);
+                    for (ActionListener listener : actionListeners) {
+                        listener.onAnnotationItemSelected(item);
                     }
 
                     hideSubmenu();
@@ -216,8 +235,8 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
             item.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    for (ActionListener listener : listeners) {
-                        listener.didTapItem(item);
+                    for (ActionListener listener : actionListeners) {
+                        listener.onAnnotationItemSelected(item);
                     }
 
                     hideSubmenu();
@@ -251,7 +270,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
     }
 
     public void attachSignal(Session session, String type, String data, Connection connection) {
-        for (ActionListener listener : listeners) {
+        for (SignalListener listener : signalListeners) {
             listener.signalReceived(session, type, data, connection);
         }
     }

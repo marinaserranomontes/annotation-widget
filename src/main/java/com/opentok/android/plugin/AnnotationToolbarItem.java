@@ -2,57 +2,125 @@ package com.opentok.android.plugin;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 public class AnnotationToolbarItem extends ImageButton {
 
     int imageResource;
-    String action;
+    FloatPoint[] points;
+    String color;
+    int mId = -1;
 
     public AnnotationToolbarItem(Context context) {
-        this(context, null);
+        this(null, context);
     }
 
-    public AnnotationToolbarItem(Context context, AttributeSet attrs) {
+    public AnnotationToolbarItem(AttributeSet attrs, Context context) {
         super(context, attrs);
 
-        ViewGroup.LayoutParams btnParams = new ViewGroup.LayoutParams(dpToPx(35), dpToPx(35));
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(dpToPx(35), dpToPx(35));
+        btnParams.setMargins(10,0,10,0);
         this.setLayoutParams(btnParams);
-
-        // TODO Handle attrs so that this can be added in XML
     }
 
-    public AnnotationToolbarItem(Context context, String action, int resource) {
+    /**
+     *
+     * @param context
+     * @param points
+     * @param resource
+     */
+    public AnnotationToolbarItem(Context context, FloatPoint[] points, int resource) {
         this(context);
-        this.action = action;
         imageResource = resource;
+        this.points = points;
 
         this.setImageResource(resource);
         this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
-    public AnnotationToolbarItem(Context context, String action, Drawable icon) {
+    /**
+     *
+     * @param context
+     * @param points
+     * @param icon
+     */
+    public AnnotationToolbarItem(Context context, FloatPoint[] points, Drawable icon) {
         this(context);
-        this.action = action;
+        this.points = points;
 
-        if (icon == null) {
-            try {
-                int color = Color.parseColor(action);
-                this.setBackgroundResource(R.drawable.circle_button);
-                GradientDrawable drawable = (GradientDrawable) this.getBackground();
-                drawable.setColor(color);
-            } catch (Exception e) {
-                // The action wasn't a color, so we should have an icon passed in
-            }
+        if (icon != null) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) icon;
+            this.setImageBitmap(bitmapDrawable.getBitmap());
+        } else {
+            Log.e("AnnotationToolbarItem", "Icon is null");
+        }
+
+        this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
+    }
+
+    /**
+     *
+     * @param context
+     * @param colorString
+     */
+    AnnotationToolbarItem(Context context, String colorString) {
+        this(context);
+
+        try {
+            int color = Color.parseColor(colorString);
+            this.setBackgroundResource(R.drawable.circle_button);
+            GradientDrawable drawable = (GradientDrawable) this.getBackground();
+            drawable.setColor(color);
+        } catch (Exception e) {
+            // The action wasn't a color, so we should have an icon passed in
         }
     }
 
-    public String getAction() {
-        return action;
+    /**
+     * Sets a list of points that will be used to describe an annotation path.
+     * @param points The points representing the annotation path.
+     */
+    public void setPoints(FloatPoint[] points) {
+        this.points = points;
+    }
+
+    /**
+     * Retrieves the array of points representing the annotation path.
+     * @return The list of annotation points.
+     */
+    public FloatPoint[] getPoints() {
+        return points;
+    }
+
+    // TODO Extend this class to make an AnnotationToolbarColorItem (or similar)?
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public void setColor(int color) {
+        this.color = String.format("#%06X", 0xFFFFFF & color);
+    }
+
+    @ViewDebug.CapturedViewProperty
+    public int getItemId() {
+        return mId;
+    }
+
+    public void setItemId(int id) {
+        this.mId = id;
     }
 
     /**
