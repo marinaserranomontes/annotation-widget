@@ -53,13 +53,7 @@ Add the following lines to the end of the `attachSubscriberView` method (Note: t
 
 ```java
 private void attachSubscriberView(Subscriber subscriber) {
-    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-            getResources().getDisplayMetrics().widthPixels, getResources()
-            .getDisplayMetrics().heightPixels);
-    mSubscriberViewContainer.removeView(subscriber.getView());
-    mSubscriberViewContainer.addView(subscriber.getView(), layoutParams);
-    subscriber.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
-            BaseVideoRenderer.STYLE_VIDEO_FILL);
+    ...
 
     // Add these 3 lines to attach the annotation view to the subscriber view
     AnnotationView annotationView = new AnnotationView(this);
@@ -75,17 +69,7 @@ Add the following lines to the ends of the `attachPublisherView` method (Note: t
 
 ```java
 private void attachPublisherView(Publisher publisher) {
-    publisher.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
-            BaseVideoRenderer.STYLE_VIDEO_FILL);
-    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-            320, 240);
-    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,
-            RelativeLayout.TRUE);
-    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT,
-            RelativeLayout.TRUE);
-    layoutParams.bottomMargin = dpToPx(8);
-    layoutParams.rightMargin = dpToPx(8);
-    mPublisherViewContainer.addView(publisher.getView(), layoutParams);
+    ...
 
     // Add these 3 lines to attach the annotation view to the publisher view
     AnnotationView annotationView = new AnnotationView(this);
@@ -112,17 +96,142 @@ Note: Make sure that your class implements `Session.SignalListener`. See the [do
 Customizing the toolbar
 ----------------
 
-(Coming soon)
+#### <a name="menu-xml"></a>Menu items created from XML
 
-#### Adding/removing menu items
+Below is an example of a custom annotation menu, located in <var>res/xml</var>. Here, we create a custom `item_star` menu item in the `ot_menu_shape` group.
+See a list of (default menu items) below to find out what actions come built into the plugin.
 
-#### Menu items created from XML
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<ot-menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/ot_item_pen"
+        app:icon="@drawable/ic_freehand"/>
+    <item
+        android:id="@+id/ot_item_line"
+        app:icon="@drawable/ic_line"/>
+    <menu-item
+        android:id="@+id/ot_menu_shape"
+        app:icon="@drawable/ic_shapes">
+        <item
+            android:id="@+id/ot_item_arrow"
+            app:icon="@drawable/ic_arrow"/>
+        <item
+            android:id="@+id/ot_item_rectangle"
+            app:icon="@drawable/ic_rectangle"/>
+        <item
+            android:id="@+id/ot_item_oval"
+            app:icon="@drawable/ic_oval"/>
+        <!-- User-added custom item -->
+        <item
+            android:id="@+id/item_star"
+            app:icon="@drawable/ic_star"/>
+    </menu-item>
+    <menu-item
+        android:id="@+id/ot_menu_colors">
+        <!-- Items added dynamically -->
+    </menu-item>
+    <menu-item
+        android:id="@+id/ot_menu_line_width"
+        app:icon="@drawable/ic_line_width">
+        <!-- Items added dynamically -->
+    </menu-item>
+    <item
+        android:id="@+id/ot_item_clear"
+        app:icon="@drawable/ic_clear" />
+</ot-menu>
+```
 
-#### Defaults
+To inflate the custom menu in the toolbar, make sure you add an action listener to the toolbar object using `mToolbar.addActionListener(this);`
+(make sure your class implements `AnnotationToolbar.ActionListener`) and add the following to the `onCreateAnnotationMenu` method.
+
+```java
+@Override
+public boolean onCreateAnnotationMenu(AnnotationMenuView menu) {
+    // ot_extended is the name of the annotation menu xml file in 'res/xml'
+    menu.inflateMenu(R.xml.ot_extended, mToolbar);
+
+    return true;
+}
+```
+
+Note: The annotation toolbar only supports a single submenu. For additional group/menu options, you can use the `onAnnotationMenuItemSelected`
+listener method to add a popover, dropdown, dialog, or any other view to allow more options.
+
+#### <a name="menu-xml"></a>Default menu items
+
+| id            | Action        |
+| ------------- | ------------- |
+| R.id.ot_item_pen | Freehand/Pen tool |
+| R.id.ot_item_line | Line tool |
+| R.id.ot_menu_shape | Shapes group/submenu |
+| R.id.ot_item_arrow | Arrow tool |
+| R.id.ot_item_rectangle | Rectangle tool |
+| R.id.ot_item_oval | Oval tool |
+| R.id.ot_menu_colors | Color picker submenu |
+| R.id.ot_menu_line_width | Line width picker submenu |
+| R.id.ot_item_clear | Clears active user annotations |
+| R.id.ot_item_capture | Tap a video frame to capture a screenshot |
 
 #### Handling custom items
 
-#### Custom colors
+First, make sure you add an action listener (`mToolbar.addActionListener(this);`) to the toolbar (implement `AnnotationToolbar.ActionListener`).
+
+Below is an example of adding a star annotation shape to the `R.id.item_star` menu item created [above](#menu-xml).
+
+```java
+@Override
+public void onAnnotationItemSelected(AnnotationToolbarItem item) {
+    int id = item.getItemId();
+
+    switch (id) {
+        case R.id.item_star: {
+            FloatPoint[] starPoints = {
+                    // INFO To invert the star, use 360-a for the angle
+                    new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.toRadians(90)), 0.5f + 0.5f*(float)Math.sin(Math.toRadians(90))),
+                    new FloatPoint(0.5f + 0.25f*(float)Math.cos(Math.toRadians(126)), 0.5f + 0.25f*(float)Math.sin(Math.toRadians(126))),
+                    new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.toRadians(162)), 0.5f + 0.5f*(float)Math.sin(Math.toRadians(162))),
+                    new FloatPoint(0.5f + 0.25f*(float)Math.cos(Math.toRadians(198)), 0.5f + 0.25f*(float)Math.sin(Math.toRadians(198))),
+                    new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.toRadians(234)), 0.5f + 0.5f*(float)Math.sin(Math.toRadians(234))),
+                    new FloatPoint(0.5f + 0.25f*(float)Math.cos(Math.toRadians(270)), 0.5f + 0.25f*(float)Math.sin(Math.toRadians(270))),
+                    new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.toRadians(306)), 0.5f + 0.5f*(float)Math.sin(Math.toRadians(306))),
+                    new FloatPoint(0.5f + 0.25f*(float)Math.cos(Math.toRadians(342)), 0.5f + 0.25f*(float)Math.sin(Math.toRadians(342))),
+                    new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.toRadians(18)), 0.5f + 0.5f*(float)Math.sin(Math.toRadians(18))),
+                    new FloatPoint(0.5f + 0.25f*(float)Math.cos(Math.toRadians(54)), 0.5f + 0.25f*(float)Math.sin(Math.toRadians(54))),
+                    new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.toRadians(90)), 0.5f + 0.5f*(float)Math.sin(Math.toRadians(90))),
+            };
+
+            item.setPoints(starPoints);
+        }
+            break;
+    }
+}
+```
+
+#### Custom annotation colors
+
+To add a completely new custom palette, create an array of colors and pass it into the toolbar object.
+
+```java
+int[] colors = {
+        Color.BLUE,
+        Color.RED,
+        Color.GREEN,
+        Color.parseColor("#FF8C00"),  // Orange
+        Color.parseColor("#FFD700"),  // Yellow
+        Color.parseColor("#4B0082")   // Purple
+};
+
+mToolbar.setColorChoices(colors);
+```
+
+To add a new color to the existing palette, pass the <var>int</var> value for the color into the toolbar object.
+
+```java
+mToolbar.addColorChoice(Color.parseColor("#008080")); /* Teal */
+```
 
 For best results
 ----------------
