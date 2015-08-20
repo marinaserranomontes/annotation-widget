@@ -38,8 +38,10 @@ public class AnnotationToolbarMenuItem extends ImageButton {
         mMaxIconSize = (int) (MAX_ICON_SIZE * density + 0.5f);
 
         LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(dpToPx(35), dpToPx(35));
-        btnParams.setMargins(10,0,10,0);
+        // INFO Margins are set in onMeasure in AnnotationMenuView
         this.setLayoutParams(btnParams);
+
+        this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
     public AnnotationToolbarMenuItem(Context context, int resource) {
@@ -47,7 +49,6 @@ public class AnnotationToolbarMenuItem extends ImageButton {
         imageResource = resource;
 
         this.setImageResource(resource);
-        this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
     public AnnotationToolbarMenuItem(Context context, Drawable icon) {
@@ -58,8 +59,6 @@ public class AnnotationToolbarMenuItem extends ImageButton {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) icon;
             this.setImageBitmap(bitmapDrawable.getBitmap());
         }
-
-        this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
     @Override
@@ -153,8 +152,6 @@ public class AnnotationToolbarMenuItem extends ImageButton {
     }
 
     private void updateColorBackground(int color) {
-        ViewGroup.LayoutParams btnParams = new ViewGroup.LayoutParams(dpToPx(35), dpToPx(35));
-        this.setLayoutParams(btnParams);
         this.setBackgroundResource(R.drawable.circle_button);
         GradientDrawable drawable = (GradientDrawable) this.getBackground();
         drawable.setColor(color);

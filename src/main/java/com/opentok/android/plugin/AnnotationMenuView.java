@@ -7,6 +7,7 @@ import android.support.v7.internal.view.menu.MenuBuilder;
 import android.support.v7.internal.view.menu.MenuItemImpl;
 import android.support.v7.internal.view.menu.MenuView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
@@ -18,6 +19,8 @@ import android.widget.LinearLayout;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AnnotationMenuView extends LinearLayout implements MenuBuilder.ItemInvoker, MenuView {
     private static final String TAG = "AnnotationMenuView";
@@ -45,9 +48,6 @@ public class AnnotationMenuView extends LinearLayout implements MenuBuilder.Item
         mMinCellSize = (int) (MIN_CELL_SIZE * density);
         mGeneratedItemPadding = (int) (GENERATED_ITEM_PADDING * density);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AnnotationToolbar, R.attr.actionBarStyle, 0);
-        mMaxItemHeight = a.getDimensionPixelSize(R.styleable.ActionBar_height, 0);
-        a.recycle();
     }
 
 //    public void setPresenter(ActionMenuPresenter presenter) {
@@ -93,16 +93,17 @@ public class AnnotationMenuView extends LinearLayout implements MenuBuilder.Item
         }
 
         if (mFormatItems) {
-            onMeasureExactFormat(widthMeasureSpec, 48); // FIXME This value should come from the toolbar height
+            onMeasureExactFormat(widthMeasureSpec, heightMeasureSpec);
         } else {
             // Previous measurement at exact format may have set margins - reset them.
             final int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                lp.leftMargin = lp.rightMargin = 0;
+                lp.gravity = Gravity.CENTER_VERTICAL;
+                lp.leftMargin = lp.rightMargin = 10;
             }
-            super.onMeasure(widthMeasureSpec, 48);
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
     }
 
@@ -353,6 +354,7 @@ public class AnnotationMenuView extends LinearLayout implements MenuBuilder.Item
 
         final int childCount = getChildCount();
         final int midVertical = (top + bottom) / 2;
+        Log.i("AnnotationMenuView", "Dimens: " + top + ", " + midVertical + ", " + bottom);
         int itemWidth = 0;
         int count = 0;
         int widthRemaining = right - left - getPaddingRight() - getPaddingLeft();
@@ -456,6 +458,32 @@ public class AnnotationMenuView extends LinearLayout implements MenuBuilder.Item
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p != null && p instanceof LayoutParams;
+    }
+
+    public List<AnnotationToolbarItem> getItems() {
+        List<AnnotationToolbarItem> items = new ArrayList<AnnotationToolbarItem>();
+
+        for (int i = 0; i < this.getChildCount(); i++) {
+            View v = this.getChildAt(i);
+            if (v instanceof AnnotationToolbarItem) {
+                items.add((AnnotationToolbarItem) v);
+            }
+        }
+
+        return items;
+    }
+
+    public List<AnnotationToolbarMenuItem> getMenuItems() {
+        List<AnnotationToolbarMenuItem> items = new ArrayList<AnnotationToolbarMenuItem>();
+
+        for (int i = 0; i < this.getChildCount(); i++) {
+            View v = this.getChildAt(i);
+            if (v instanceof AnnotationToolbarMenuItem) {
+                items.add((AnnotationToolbarMenuItem) v);
+            }
+        }
+
+        return items;
     }
 
     @Override

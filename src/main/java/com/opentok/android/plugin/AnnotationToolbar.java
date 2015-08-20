@@ -4,19 +4,16 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Path;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import com.opentok.android.Connection;
 import com.opentok.android.Session;
 import java.util.ArrayList;
@@ -89,8 +86,15 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
         if (menu == null) {
             menu = new AnnotationMenuView(getContext());
+            menu.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mHeight));
             menu.inflateMenu(R.xml.ot_main, this);
-            this.addView(menu);
+
+            HorizontalScrollView scrollView = new HorizontalScrollView(getContext());
+            scrollView.setLayoutParams(new ViewGroup.LayoutParams(mWidth, mHeight));
+            scrollView.setHorizontalScrollBarEnabled(false);
+            scrollView.addView(menu);
+
+            this.addView(scrollView);
 
             for (ActionListener listener : actionListeners) {
                 listener.onCreateAnnotationMenu(menu);
@@ -194,15 +198,21 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         public void signalReceived(Session session, String type, String data, Connection connection);
     }
 
-    public void showColorSubmenu() {
+    void showColorSubmenu() {
         // Show color picker
         if (this.getChildCount() > 1) {
             this.removeViewAt(this.getChildCount() - 1); // Remove the last added view
         }
         AnnotationMenuView colorToolbar = new AnnotationMenuView(getContext());
+        colorToolbar.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mHeight));
+        HorizontalScrollView scrollView = new HorizontalScrollView(getContext());
+        scrollView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        scrollView.setHorizontalScrollBarEnabled(false);
+        scrollView.addView(colorToolbar);
 
         for (final String color : colors) {
             final AnnotationToolbarItem item = new AnnotationToolbarItem(getContext(), color);
+            item.setColor(color);
             item.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -212,7 +222,16 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
                     hideSubmenu();
 
-                    // TODO Update the main button color
+                    // Update the main button color
+                    for (int i = 0; i < menu.getChildCount(); i++) {
+                        View itemView = menu.getChildAt(i);
+                        if (itemView instanceof AnnotationToolbarMenuItem) {
+                            AnnotationToolbarMenuItem menuItem = ((AnnotationToolbarMenuItem) itemView);
+                            if (menuItem.getItemId() == R.id.ot_menu_colors) {
+                                menuItem.setColor(color);
+                            }
+                        }
+                    }
                 }
             });
             colorToolbar.addView(item);
@@ -222,14 +241,20 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         p.height = 2*mHeight;
         this.setLayoutParams(p);
 
-        this.addView(colorToolbar);
+        this.addView(scrollView);
     }
 
     private void showSubmenu(AnnotationToolbarMenuItem menuItem) {
         if (this.getChildCount() > 1) {
+            // TODO Add an id to the submenu to ensure we remove the correct view?
             this.removeViewAt(this.getChildCount() - 1); // Remove the last added view
         }
         AnnotationMenuView subToolbar = new AnnotationMenuView(getContext());
+        subToolbar.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mHeight));
+        HorizontalScrollView scrollView = new HorizontalScrollView(getContext());
+        scrollView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        scrollView.setHorizontalScrollBarEnabled(false);
+        scrollView.addView(subToolbar);
 
         for (final AnnotationToolbarItem item : menuItem.getItems()) {
             item.setOnClickListener(new OnClickListener() {
@@ -241,7 +266,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
                     hideSubmenu();
 
-                    // TODO Update the main button image
+                    // TODO Update the main button image to match sub menu item?
                 }
             });
 
@@ -255,10 +280,9 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         p.height = 2*mHeight;
         this.setLayoutParams(p);
 
-        this.addView(subToolbar);
+        this.addView(scrollView);
     }
 
-    // TODO Add animation to hide the toolbar?
     private void hideSubmenu() {
         if (this.getChildCount() > 1) {
             AnnotationToolbar.this.removeViewAt(AnnotationToolbar.this.getChildCount() - 1);

@@ -66,9 +66,6 @@ class AnnotationMenuInflator {
         int eventType = xrp.getEventType();
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
-//                String idAttr = xrp.getAttributeValue("http://schemas.android.com/apk/res/android", "id");
-//                String iconAttr = xrp.getAttributeValue("http://schemas.android.com/apk/res-auto", "icon");
-
                 if (xrp.getName().equalsIgnoreCase(XML_MENU)) {
                     AnnotationToolbarMenuItem menuItem = null;
                     List<AnnotationToolbarItem> items = new ArrayList<AnnotationToolbarItem>();
@@ -79,39 +76,42 @@ class AnnotationMenuInflator {
                     int id = a.getResourceId(0, -1);
                     Drawable icon = a.getDrawable(1);
 
-                    Log.i("AnnotationsToolbar", "Found menu item: " + id);
+//                    Log.i("AnnotationsToolbar", "Found menu item: " + id);
 
                     // Iterate through the <item>s until we reach an end tag
                     do {
                         eventType = xrp.next();
 
-                        if (eventType == XmlPullParser.START_TAG && xrp.getName().equalsIgnoreCase("item")) {
+                        if (eventType == XmlPullParser.START_TAG && xrp.getName().equalsIgnoreCase(XML_ITEM)) {
                             attrs = Xml.asAttributeSet(xrp);
                             a = mContext.obtainStyledAttributes(attrs, attrsArray, 0, 0);
 
                             int itemId = a.getResourceId(0, -1);
                             Drawable itemIcon = a.getDrawable(1);
 
-                            Log.i("AnnotationsToolbar", "Found submenu item: " + itemId);
+//                            Log.i("AnnotationsToolbar", "Found submenu item: " + itemId);
 
                             FloatPoint[] points = null;
 
                             if (itemId == R.id.ot_item_arrow) {
-                                Log.i("MainActivityMenu", "ot_item_arrow id: " + R.id.ot_item_arrow);
                                 points = AnnotationShapes.arrowPoints;
                             } else if (itemId == R.id.ot_item_rectangle) {
                                 points = AnnotationShapes.rectanglePoints;
                             } else if (itemId == R.id.ot_item_oval) {
-                                points = AnnotationShapes.rectanglePoints;
+                                points = AnnotationShapes.circlePoints;
                             }
 
                             AnnotationToolbarItem item = new AnnotationToolbarItem(mContext, points, itemIcon);
                             item.setItemId(itemId);
                             items.add(item);
+                        } else if (eventType == XmlPullParser.START_TAG && xrp.getName().equalsIgnoreCase(XML_MENU)) {
+                            // TODO Handle submenu items (we only want to handle a single level of
+                            // TODO menu items, so notify the dev that this isn't supported and convert
+                            // TODO this to an AnnotationToolbarItem, ignoring any inner items
                         }
-                    } while (xrp.getName().equalsIgnoreCase(XML_ITEM));
+                    } while (xrp.getName().equalsIgnoreCase(XML_ITEM)); // FIXME Should be !XML_MENU end tag without running into an inner menu_item
 
-                    if (id == R.id.menu_colors) {
+                    if (id == R.id.ot_menu_colors) {
                         // TODO Use tintColor to handle this?
                         final AnnotationToolbarMenuItem item = menuItem = new AnnotationToolbarMenuItem(mContext, null);
                         menuItem.setColor("#ff0000");
@@ -147,7 +147,7 @@ class AnnotationMenuInflator {
                     int id = a.getResourceId(0, -1);
                     Drawable icon = a.getDrawable(1);
 
-                    Log.i("AnnotationsToolbar", "Found item: " + id);
+//                    Log.i("AnnotationsToolbar", "Found item: " + id);
 
                     if (id == R.id.ot_item_line) {
                         final AnnotationToolbarItem item = new AnnotationToolbarItem(mContext, AnnotationShapes.linePoints, icon);

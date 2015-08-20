@@ -27,8 +27,10 @@ public class AnnotationToolbarItem extends ImageButton {
         super(context, attrs);
 
         LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(dpToPx(35), dpToPx(35));
-        btnParams.setMargins(10,0,10,0);
+        // INFO Margins are set in onMeasure in AnnotationMenuView
         this.setLayoutParams(btnParams);
+
+        this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
     /**
@@ -43,7 +45,6 @@ public class AnnotationToolbarItem extends ImageButton {
         this.points = points;
 
         this.setImageResource(resource);
-        this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
     /**
@@ -62,8 +63,6 @@ public class AnnotationToolbarItem extends ImageButton {
         } else {
             Log.e("AnnotationToolbarItem", "Icon is null");
         }
-
-        this.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
     }
 
     /**

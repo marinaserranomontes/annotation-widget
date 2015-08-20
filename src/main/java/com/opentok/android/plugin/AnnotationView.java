@@ -60,6 +60,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     private AnnotationToolbar toolbar;
 
     private int selectedResourceId = -1;
+    private AnnotationToolbarItem selectedItem;
 
     @Override
     public void onAnnotationMenuItemSelected(AnnotationToolbarMenuItem menuItem) {
@@ -72,7 +73,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
             int color = Color.parseColor(item.getColor());
             setAnnotationColor(color);
         } else {
-            Log.i("MainActivityMenu", "Menu item tapped");
+//            Log.i("MainActivityMenu", "Menu item tapped");
             // We don't have a color selection
             if (item.getItemId() == R.id.ot_item_clear) {
                 clearCanvas();
@@ -85,8 +86,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                             "See attachSubscriber() or attachPublisher().");
                 }
             } else {
+                selectedItem = item;
                 selectedResourceId = item.getItemId();
-                Log.i("MainActivityMenu", "id: " + selectedResourceId);
             }
         }
     }
@@ -447,8 +448,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         float x = event.getX();
         float y = event.getY();
 
-        Log.i("MainActivityMenu", "pen id: " + R.id.ot_item_pen);
-
         if (selectedResourceId == R.id.ot_item_pen) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -504,7 +503,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
             String update = jsonArray.toJSONString();
 
             sendUpdate(Mode.Text.toString(), update);
-        } else if (selectedResourceId == R.id.ot_item_arrow) { // TODO Switch points based on selection (pull from menu item)
+        } else if (selectedResourceId == R.id.ot_item_arrow) { // FIXME These can all be lumped into the 'else' clause (grab points from item)
             mX = x;
             mY = y;
 
@@ -526,7 +525,11 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         } else if (selectedResourceId == R.id.ot_item_capture) {
             captureView();
         } else {
-            // TODO Get the points from the selected item, if available
+            if (selectedItem != null && selectedItem.getPoints() != null) {
+                mX = x;
+                mY = y;
+                onTouchEvent(event, selectedItem.getPoints());
+            }
         }
         return true;
     }
@@ -645,15 +648,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         }
 
         if (isDrawing) {
-            // TODO Use generic method and switch based on the base path (points) from active menu item
-            if (selectedResourceId == R.id.ot_item_line) {
-                onDrawPoints(canvas, AnnotationShapes.linePoints);
-            } else if (selectedResourceId == R.id.ot_item_arrow) {
-                onDrawPoints(canvas, AnnotationShapes.arrowPoints);
-            } else if (selectedResourceId == R.id.ot_item_rectangle) {
-                onDrawPoints(canvas, AnnotationShapes.rectanglePoints);
-            } else if (selectedResourceId == R.id.ot_item_oval) {
-                onDrawPoints(canvas, AnnotationShapes.circlePoints);
+            if (selectedItem != null && selectedItem.getPoints() != null) {
+                onDrawPoints(canvas, selectedItem.getPoints());
             }
         }
 	}
@@ -753,8 +749,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
             throw new IllegalStateException("An OpenTok Publisher or Subscriber must be passed into the class. " +
                     "See AnnotationView.attachSubscriber() or AnnotationView.attachPublisher().");
         }
-
-        Log.i(TAG, cid);
 
         mPaths.add(new AnnotationPath(new Path(), paint, cid)); // Generate a new drawing path
     }

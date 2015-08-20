@@ -26,7 +26,7 @@
         android:id="@+id/ot_item_text"
         app:icon="@drawable/ic_text"/>
     <menu-item
-        android:id="@+id/menu_colors">
+        android:id="@+id/ot_menu_colors">
         <!-- Items added dynamically -->
     </menu-item>
     <menu-item
