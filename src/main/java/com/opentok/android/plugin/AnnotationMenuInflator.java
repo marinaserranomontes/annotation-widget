@@ -136,7 +136,7 @@ class AnnotationMenuInflator {
                                 }
                             }
                         });
-                        menuItem.setId(id);
+                        menuItem.setItemId(id);
                         menuItem.setItems(items);
                         menu.addView(menuItem);
                     }

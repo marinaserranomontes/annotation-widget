@@ -85,6 +85,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     throw new IllegalStateException("A publisher or subscriber must be passed into the class. " +
                             "See attachSubscriber() or attachPublisher().");
                 }
+            } else if (item.getPoints() == null && item.getTag() != null && item.getTag() instanceof Float) {
+                userStrokeWidth = (Float) item.getTag();
             } else {
                 selectedItem = item;
                 selectedResourceId = item.getItemId();
@@ -94,7 +96,17 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
     @Override
     public boolean onCreateAnnotationMenu(AnnotationMenuView menu) {
-        // TODO Default the selected item to the first in the list
+        // Default the selected item to the first in the list
+        if (menu.getChildCount() > 0) {
+            View v = menu.getChildAt(0);
+
+            // TODO If the first item is a menu group, should we keep searching until we find an item?
+            if (v instanceof AnnotationToolbarItem) {
+                AnnotationToolbarItem item = (AnnotationToolbarItem) v;
+                selectedItem = item;
+                selectedResourceId = item.getItemId();
+            }
+        }
         return false;
     }
 
@@ -472,38 +484,40 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     invalidate();
                     break;
             }
-        } else if (selectedResourceId == R.id.ot_item_text) {
-            // INFO Per Meeta Dash, omit text for now (include if time)
-            // TODO Add text input and submit data below as user types
-
-            Log.i(TAG, "Adding text...");
-
-            Paint paint = new Paint();
-            paint.setColor(Color.RED);
-            paint.setTextSize(16);
-
-            mLabels.add(new AnnotationText("This is a test", x, y, paint));
-            invalidate();
-
-            JSONArray jsonArray = new JSONArray();
-            JSONObject jsonObject = new JSONObject();
-
-            // TODO Include a unique ID for the path? - this way it can be removed using history
-            jsonObject.put("id", canvascid);
-            jsonObject.put("fromid", mycid);
-            jsonObject.put("x", x);
-            jsonObject.put("y", y);
-            jsonObject.put("text", "This is a test");
-            jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
-            jsonObject.put("textSize", 16/*userTextSize*/);
-
-            // TODO These need to be batched
-            jsonArray.add(jsonObject);
-
-            String update = jsonArray.toJSONString();
-
-            sendUpdate(Mode.Text.toString(), update);
-        } else if (selectedResourceId == R.id.ot_item_arrow) { // FIXME These can all be lumped into the 'else' clause (grab points from item)
+        }
+//        else if (selectedResourceId == R.id.ot_item_text) {
+//            // INFO Per Meeta Dash, omit text for now (include if time)
+//            // TODO Add text input and submit data below as user types
+//
+//            Log.i(TAG, "Adding text...");
+//
+//            Paint paint = new Paint();
+//            paint.setColor(Color.RED);
+//            paint.setTextSize(16);
+//
+//            mLabels.add(new AnnotationText("This is a test", x, y, paint));
+//            invalidate();
+//
+//            JSONArray jsonArray = new JSONArray();
+//            JSONObject jsonObject = new JSONObject();
+//
+//            // TODO Include a unique ID for the path? - this way it can be removed using history
+//            jsonObject.put("id", canvascid);
+//            jsonObject.put("fromid", mycid);
+//            jsonObject.put("x", x);
+//            jsonObject.put("y", y);
+//            jsonObject.put("text", "This is a test");
+//            jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
+//            jsonObject.put("textSize", 16/*userTextSize*/);
+//
+//            // TODO These need to be batched
+//            jsonArray.add(jsonObject);
+//
+//            String update = jsonArray.toJSONString();
+//
+//            sendUpdate(Mode.Text.toString(), update);
+//        }
+        else if (selectedResourceId == R.id.ot_item_arrow) { // FIXME These can all be lumped into the 'else' clause (grab points from item)
             mX = x;
             mY = y;
 

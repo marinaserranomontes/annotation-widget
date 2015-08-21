@@ -16,6 +16,9 @@ import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import com.opentok.android.Connection;
 import com.opentok.android.Session;
+
+import junit.framework.Assert;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,17 +32,8 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
     private AnnotationMenuView menu;
 
-    // FIXME These should be dynamic (allow users to add their own array or individual colors)
-    private String[] colors = {
-            "#000000",  // Black
-            "#0000FF",  // Blue
-            "#FF0000",  // Red
-            "#00FF00",  // Green
-            "#FF8C00",  // Orange
-            "#FFD700",  // Yellow
-            "#4B0082",  // Purple
-            "#800000"   // Brown
-    };
+    private List<Integer> colors = new ArrayList<Integer>();
+    private List<Integer> lineWidths = new ArrayList<Integer>();
 
     public AnnotationToolbar(Context context) {
         this(context, null);
@@ -47,6 +41,9 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
     public AnnotationToolbar(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        initDefaultColors();
+        initDefaultLineWidths();
 
         if (this.getBackground() == null) {
             this.setBackgroundColor(Color.parseColor("#CC000000"));
@@ -72,6 +69,37 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         } finally {
             ta.recycle();
             android_ta.recycle();
+        }
+    }
+
+    private void initDefaultColors() {
+        colors.add(Color.parseColor("#000000"));  // Black
+        colors.add(Color.parseColor("#0000FF"));  // Blue
+        colors.add(Color.parseColor("#FF0000"));  // Red
+        colors.add(Color.parseColor("#00FF00"));  // Green
+        colors.add(Color.parseColor("#FF8C00"));  // Orange
+        colors.add(Color.parseColor("#FFD700"));  // Yellow
+        colors.add(Color.parseColor("#4B0082"));  // Purple
+        colors.add(Color.parseColor("#800000"));  // Brown
+    }
+
+    private void initDefaultLineWidths() {
+        lineWidths.add(4);
+        lineWidths.add(6);
+        lineWidths.add(8);
+        lineWidths.add(10);
+        lineWidths.add(12);
+        lineWidths.add(14);
+    }
+
+    public void addColorChoice(int color) {
+        colors.add(color);
+    }
+
+    public void setColorChoices(int[] colors) {
+        this.colors.clear();
+        for (int i = 0; i < colors.length; i++) {
+            this.colors.add(colors[i]);
         }
     }
 
@@ -168,9 +196,13 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
     @Override
     public void didTapMenuItem(AnnotationToolbarMenuItem menuItem) {
-        if (menuItem.getColor() != null) {
+        int id = menuItem.getItemId();
+
+        if (id == R.id.ot_menu_colors) {
             Color.parseColor(menuItem.getColor());
             showColorSubmenu();
+        } else if (id == R.id.ot_menu_line_width) {
+            showLineWidthSubmenu();
         } else {
             showSubmenu(menuItem);
         }
@@ -199,10 +231,9 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
     }
 
     void showColorSubmenu() {
+        hideSubmenu();
+
         // Show color picker
-        if (this.getChildCount() > 1) {
-            this.removeViewAt(this.getChildCount() - 1); // Remove the last added view
-        }
         AnnotationMenuView colorToolbar = new AnnotationMenuView(getContext());
         colorToolbar.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mHeight));
         HorizontalScrollView scrollView = new HorizontalScrollView(getContext());
@@ -210,7 +241,8 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         scrollView.setHorizontalScrollBarEnabled(false);
         scrollView.addView(colorToolbar);
 
-        for (final String color : colors) {
+        for (Integer dColor : colors) {
+            final String color = String.format("#%06X", 0xFFFFFF & dColor);
             final AnnotationToolbarItem item = new AnnotationToolbarItem(getContext(), color);
             item.setColor(color);
             item.setOnClickListener(new OnClickListener() {
@@ -244,19 +276,22 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         this.addView(scrollView);
     }
 
-    private void showSubmenu(AnnotationToolbarMenuItem menuItem) {
-        if (this.getChildCount() > 1) {
-            // TODO Add an id to the submenu to ensure we remove the correct view?
-            this.removeViewAt(this.getChildCount() - 1); // Remove the last added view
-        }
-        AnnotationMenuView subToolbar = new AnnotationMenuView(getContext());
-        subToolbar.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mHeight));
+    void showLineWidthSubmenu() {
+        hideSubmenu();
+
+        // Show color picker
+        AnnotationMenuView colorToolbar = new AnnotationMenuView(getContext());
+        colorToolbar.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mHeight));
         HorizontalScrollView scrollView = new HorizontalScrollView(getContext());
         scrollView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         scrollView.setHorizontalScrollBarEnabled(false);
-        scrollView.addView(subToolbar);
+        scrollView.addView(colorToolbar);
 
-        for (final AnnotationToolbarItem item : menuItem.getItems()) {
+        for (Integer width : lineWidths) {
+            float tag = (float) width;
+            String iconName = "line_" + width + "px";
+            final AnnotationToolbarItem item = new AnnotationToolbarItem(getContext(), null, getDrawable(iconName));
+            item.setTag(tag);
             item.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -265,15 +300,9 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
                     }
 
                     hideSubmenu();
-
-                    // TODO Update the main button image to match sub menu item?
                 }
             });
-
-            if (item.getParent() != null ) {
-                ((ViewGroup)item.getParent()).removeView(item);
-            }
-            subToolbar.addView(item);
+            colorToolbar.addView(item);
         }
 
         ViewGroup.LayoutParams p = this.getLayoutParams();
@@ -283,8 +312,49 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         this.addView(scrollView);
     }
 
+    private void showSubmenu(AnnotationToolbarMenuItem menuItem) {
+        hideSubmenu();
+
+        // Only add the submenu if it has items (menuItem.getItems().size() > 0)
+        if (menuItem.getItems().size() > 0) {
+            AnnotationMenuView subToolbar = new AnnotationMenuView(getContext());
+            subToolbar.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mHeight));
+            HorizontalScrollView scrollView = new HorizontalScrollView(getContext());
+            scrollView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            scrollView.setHorizontalScrollBarEnabled(false);
+            scrollView.addView(subToolbar);
+
+            for (final AnnotationToolbarItem item : menuItem.getItems()) {
+                item.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        for (ActionListener listener : actionListeners) {
+                            listener.onAnnotationItemSelected(item);
+                        }
+
+                        hideSubmenu();
+
+                        // TODO Update the main button image to match sub menu item?
+                    }
+                });
+
+                if (item.getParent() != null ) {
+                    ((ViewGroup)item.getParent()).removeView(item);
+                }
+                subToolbar.addView(item);
+            }
+
+            ViewGroup.LayoutParams p = this.getLayoutParams();
+            p.height = 2 * mHeight;
+            this.setLayoutParams(p);
+
+            this.addView(scrollView);
+        }
+    }
+
     private void hideSubmenu() {
         if (this.getChildCount() > 1) {
+            // TODO Add an id to the submenu to ensure we remove the correct view?
             AnnotationToolbar.this.removeViewAt(AnnotationToolbar.this.getChildCount() - 1);
 
             ViewGroup.LayoutParams p = AnnotationToolbar.this.getLayoutParams();
@@ -297,6 +367,14 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         for (SignalListener listener : signalListeners) {
             listener.signalReceived(session, type, data, connection);
         }
+    }
+
+    public int getDrawable(String name) {
+        Assert.assertNotNull(getContext());
+        Assert.assertNotNull(name);
+
+        return getContext().getResources().getIdentifier(name,
+                "drawable", getContext().getPackageName());
     }
 
     /**

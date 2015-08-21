@@ -2,7 +2,7 @@
 <ot-menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!-- INFO Should be able to -->
+    <!-- INFO Should be able to use drawables with "[un]selected" states -->
     <item
         android:id="@+id/ot_item_pen"
         app:icon="@drawable/ic_freehand"/>
@@ -22,9 +22,9 @@
             android:id="@+id/ot_item_oval"
             app:icon="@drawable/ic_oval"/>
     </menu-item>
-    <item
-        android:id="@+id/ot_item_text"
-        app:icon="@drawable/ic_text"/>
+    <!--<item-->
+        <!--android:id="@+id/ot_item_text"-->
+        <!--app:icon="@drawable/ic_text"/>-->
     <menu-item
         android:id="@+id/ot_menu_colors">
         <!-- Items added dynamically -->
@@ -39,5 +39,5 @@
         app:icon="@drawable/ic_clear" />
     <item
         android:id="@+id/ot_item_capture"
-        app:icon="@android:drawable/ic_menu_camera" />
+        app:icon="@drawable/ic_camera" />
 </ot-menu>

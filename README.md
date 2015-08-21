@@ -99,7 +99,7 @@ Customizing the toolbar
 #### <a name="menu-xml"></a>Menu items created from XML
 
 Below is an example of a custom annotation menu, located in <var>res/xml</var>. Here, we create a custom `item_star` menu item in the `ot_menu_shape` group.
-See a list of (default menu items) below to find out what actions come built into the plugin.
+See a list of (default menu items)[#menu-defaults] below to find out what actions come built into the plugin.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -160,7 +160,7 @@ public boolean onCreateAnnotationMenu(AnnotationMenuView menu) {
 Note: The annotation toolbar only supports a single submenu. For additional group/menu options, you can use the `onAnnotationMenuItemSelected`
 listener method to add a popover, dropdown, dialog, or any other view to allow more options.
 
-#### <a name="menu-xml"></a>Default menu items
+#### <a name="menu-defaults"></a>Default menu items
 
 | id            | Action        |
 | ------------- | ------------- |
