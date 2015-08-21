@@ -65,7 +65,6 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
             // FIXME If match_parent or wrap_content is used, these will throw UnsupportedOperationException: Can't convert to dimension: type=0x10
             mWidth = android_ta.getInt(2, ViewGroup.LayoutParams.MATCH_PARENT);
             mHeight = android_ta.getLayoutDimension(3, dpToPx(48));
-
         } finally {
             ta.recycle();
             android_ta.recycle();

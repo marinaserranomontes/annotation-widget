@@ -76,7 +76,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 //            Log.i("MainActivityMenu", "Menu item tapped");
             // We don't have a color selection
             if (item.getItemId() == R.id.ot_item_clear) {
-                clearCanvas();
+                clearCanvas(false, mycid);
                 if (mSubscriber != null) {
                     mSubscriber.getSession().sendSignal(Mode.Clear.toString(), null);
                 } else if (mPublisher != null) {
@@ -185,8 +185,15 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     mMirrored = ((AnnotationVideoRenderer) mSubscriber.getRenderer()).isMirrored();
                 }
 
+                // Force a dummy signal so that we can grab the current user's cid
+                Log.i("AnnotationTest", "Getting connection ID");
+                sendUpdate("otAnnotationConnect", "");
+
+                while (mycid == null) { /* Wait */ }
+
                 // Initialize a default path
-                createPath(false, canvascid);
+                Log.i("AnnotationTest", "Got connection ID!");
+                createPath(false, mycid);
             }
         }.start();
 
@@ -248,7 +255,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
      */
     public void setAnnotationColor(int color) {
         userColor = color;
-        createPath(false, canvascid); // Create a new paint object to allow for color change
+        createPath(false, mycid); // Create a new paint object to allow for color change
     }
 
     /**
@@ -257,7 +264,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
      */
     public void setAnnotationSize(float width) {
         userStrokeWidth = width;
-        createPath(false, canvascid); // Create a new paint object to allow for new stroke size
+        createPath(false, mycid); // Create a new paint object to allow for new stroke size
     }
 
     /** ==== Private Getters/Setters ==== **/
@@ -266,18 +273,18 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
      * Changes the color of incoming annotations (set by the signal string).
      * @param color The integer representation of the color.
      */
-    private void changeColor(int color) {
+    private void changeColor(int color, String cid) {
         activeColor = color;
-        createPath(true, canvascid); // Create a new path/paint object to allow for color change
+        createPath(true, cid); // Create a new path/paint object to allow for color change
     }
 
     /**
      * Sets the line width for incoming annotations (set by the signal string).
      * @param width The line width (dp).
      */
-    private void changeStrokeWidth(float width) {
+    private void changeStrokeWidth(float width, String cid) {
         activeStrokeWidth = width;
-        createPath(true, canvascid); // Create a new path/paint object to allow for new stroke size
+        createPath(true, cid); // Create a new path/paint object to allow for new stroke size
     }
 
     /**
@@ -336,8 +343,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                             if (canvascid.equals(id)) {
                                 mSignalMirrored = (boolean) json.get("mirrored");
 
-                                changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()));
-                                changeStrokeWidth(((Number) json.get("lineWidth")).floatValue());
+                                changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()), cid);
+                                changeStrokeWidth(((Number) json.get("lineWidth")).floatValue(), cid);
 
                                 // Adjust values with offset
                                 float width = ((Number) json.get("canvasWidth")).floatValue();
@@ -402,7 +409,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     }
                 } else if (type.equalsIgnoreCase(Mode.Clear.toString())) {
                     Log.i(TAG, "Clearing canvas");
-                    this.clearCanvas();
+                    this.clearCanvas(true, cid);
                 }
             }
         }
@@ -440,8 +447,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     }
 
     private void sendUpdate(String type, String update) {
-        Log.i(TAG, update);
-
         // Pass this through signal
         if (mSubscriber != null) {
             mSubscriber.getSession().sendSignal(type, update);
@@ -463,7 +468,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         if (selectedResourceId == R.id.ot_item_pen) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    createPath(false, canvascid);
+                    createPath(false, mycid);
                     startTouch(x, y);
                     mLastX = x;
                     mLastY = y;
@@ -734,21 +739,24 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         return new FloatPoint(scaleX, scaleY);
     }
 
-	public void clearCanvas() {
+	public void clearCanvas(boolean incoming, String cid) {
         Iterator<AnnotationPath> iter = mPaths.iterator();
 
         while (iter.hasNext()) {
             AnnotationPath path = iter.next();
 
-            if (path.connectionId.equals(mycid)) {
+            if (path.connectionId.equals(cid)) {
                 iter.remove();
             }
         }
 
-        // TODO Send signal to clear paths with connection ID
+        if (!incoming) {
+            // Send signal to clear paths with connection ID
+            sendUpdate(Mode.Clear.toString(), null);
+        }
 
 		invalidate();
-        createPath(false, canvascid);
+        createPath(false, mycid);
 	}
 
     private void createPath(boolean incoming, String cid) {
