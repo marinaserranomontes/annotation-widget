@@ -21,10 +21,12 @@ Installing
 
 ### .AAR in Android Studio
 
-1. Right click on your project module (usually called "app" but may be something else) and choose "Open Module Settings" from the bottom of the menu.
-2. Click the '+' sign in the upper left hand corner.
-3. Choose "Import .JAR or .AAR Package" from the list in the popup.
-4. Follow the prompts and build your project.
+1. Download the [latest version]() of the plugin.
+2. Right click on your project module (usually called "app" but may be something else) and choose "Open Module Settings" from the bottom of the menu.
+3. Click the '+' sign in the upper left hand corner.
+4. Choose "Import .JAR or .AAR Package" from the list in the popup.
+5. Locate the AAR file in the zip downloaded in step 1.
+6. Follow the prompts and build your project.
 
 Using the plugin
 ----------------
@@ -96,10 +98,10 @@ Note: Make sure that your class implements `Session.SignalListener`. See the [do
 Customizing the toolbar
 ----------------
 
-#### <a name="menu-xml"></a>Menu items created from XML
+#### <a name="menu-xml"></a>Create menu items through XML
 
 Below is an example of a custom annotation menu, located in <var>res/xml</var>. Here, we create a custom `item_star` menu item in the `ot_menu_shape` group.
-See a list of (default menu items)[#menu-defaults] below to find out what actions come built into the plugin.
+See a list of [default menu items](#menu-defaults) below to find out what actions come built into the plugin.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -161,6 +163,9 @@ Note: The annotation toolbar only supports a single submenu. For additional grou
 listener method to add a popover, dropdown, dialog, or any other view to allow more options.
 
 #### <a name="menu-defaults"></a>Default menu items
+
+Below is a list of default menu items that can be used in your custom menu. These come pre-built with the action specified. If no custom menu is inflated
+in the `onCreateAnnotationMenu` listener method, these will be automatically added to your toolbar.
 
 | id            | Action        |
 | ------------- | ------------- |
