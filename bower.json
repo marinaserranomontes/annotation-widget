@@ -1,0 +1,22 @@
+{
+  "name": "opentok-annotations",
+  "version": "0.1.0",
+  "authors": [
+    "Trevor Boyer <trevor@tokbox.com>"
+  ],
+  "description": "Annotation plugin that provides drawing capabilities on top of OpenTok",
+  "keywords": [
+    "opentok",
+    "webrtc",
+    "annotation",
+    "canvas"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
