@@ -14,15 +14,26 @@
 //  OPENTOK ANNOTATION CANVAS/VIEW
 //--------------------------------------
 
-OT.Annotations = function(parent, session) {
+OT.Annotations = function(options) {
+    options || (options = {});
+    console.log(options);
 
-    var canvas = document.createElement("canvas");
-    canvas.setAttribute('id', 'opentok_canvas'); // session.connection.id?
-    canvas.style.width =  parent.clientWidth + "px";
-    canvas.style.height = parent.clientHeight + "px";
-    parent.appendChild(canvas);
+    this.parent = options.container;
+    // canvasSession differs from the session - this allows us to grab publisher.connection.connectionId
+    this.canvasSession = options.session;
+
+    if (this.parent) {
+        var canvas = document.createElement("canvas");
+        canvas.setAttribute('id', 'opentok_canvas'); // session.connection.id?
+        canvas.style.width = parent.clientWidth + 'px';
+        canvas.style.height = parent.clientHeight + 'px';
+        canvas.style.position = 'relative';
+        canvas.zIndex = 100;
+        this.parent.appendChild(canvas);
+    }
 
     var ctx,
+        colors,
         color,
         lineWidth,
         mirrored,
@@ -30,17 +41,6 @@ OT.Annotations = function(parent, session) {
         drawHistory = [],
         drawHistoryReceivedFrom,
         client = {dragging: false};
-
-    var colors = [
-        {'background-color': '#000000'},  // Black
-        {'background-color': '#0000FF'},  // Blue
-        {'background-color': '#FF0000'},  // Red
-        {'background-color': '#00FF00'},  // Green
-        {'background-color': '#FF8C00'},  // Orange
-        {'background-color': '#FFD700'},  // Yellow
-        {'background-color': '#4B0082'},  // Purple
-        {'background-color': '#800000'}   // Brown
-    ];
 
 // OT.Annotations.Shape
 
@@ -92,7 +92,10 @@ OT.Annotations = function(parent, session) {
         this.lineWidth = size;
     };
 
-    this.changeColor(colors[2]); // FIXME Default to the first color choice
+    this.colors = function (colors) {
+        this.colors = colors;
+        this.changeColor(colors[2]); // FIXME Default to the first color choice
+    };
 
     this.clear = function () {
         clearCanvas();
@@ -286,11 +289,119 @@ OT.Annotations = function(parent, session) {
 //  OPENTOK ANNOTATION TOOLBAR
 //--------------------------------------
 
-OT.Annotations.Toolbar = function(session) {
+OT.Annotations.Toolbar = function(options) {
+    options || (options = {});
+    console.log(options);
+
+    this.session = options.session;
+    this.parent = options.container;
+    this.backgroundColor = options.backgroundColor || 'rgba(0, 0, 0, 0.7)';
+    this.buttonWidth = options.buttonWidth || '40px';
+    this.buttonHeight = options.buttonHeight || '40px';
+    this.items = options.items || [
+        {
+            title: 'Pen',
+            icon: '../img/freehand.png', // FIXME All of these need to be relative to where the script is located or a full url
+            selectedIcon: '../img/freehand.png' // TODO Create an icon for selected states
+        },
+        {
+            title: 'Line',
+            icon: '../img/line.png'
+        },
+        {
+            title: 'Shapes',
+            icon: '../img/shapes.png',
+            items: [
+                {
+                    title: 'Arrow',
+                    icon: '../img/arrow.png'
+                },
+                {
+                    title: 'Rectangle',
+                    icon: '../img/rectangle.png'
+                },
+                {
+                    title: 'Oval',
+                    icon: '../img/oval.png'
+                }
+            ]
+        },
+        {
+            title: 'Colors',
+            icon: '',
+            items: { /* Built dynamically */ }
+        },
+        {
+            title: 'Line Width',
+            icon: '../img/line_width.png',
+            items: { /* Built dynamically */ }
+        },
+        {
+            title: 'Clear',
+            icon: '../img/clear.png'
+        },
+        {
+            title: 'Capture',
+            icon: '../img/camera.png'
+        }
+    ];
+    this.colors = options.colors || [
+        {'background-color': '#000000'},  // Black
+        {'background-color': '#0000FF'},  // Blue
+        {'background-color': '#FF0000'},  // Red
+        {'background-color': '#00FF00'},  // Green
+        {'background-color': '#FF8C00'},  // Orange
+        {'background-color': '#FFD700'},  // Yellow
+        {'background-color': '#4B0082'},  // Purple
+        {'background-color': '#800000'}   // Brown
+    ];
+
+    if (this.parent) {
+        var panel = document.createElement("div");
+        panel.setAttribute('id', 'opentok_toolbar');
+        panel.setAttribute('class', 'OT_panel');
+        panel.style.width = '100%';
+        panel.style.height = '100%';
+        panel.style.backgroundColor = this.backgroundColor;
+        panel.style.paddingLeft = '15px';
+        this.parent.appendChild(panel);
+        this.parent.style.position = 'relative';
+        this.parent.zIndex = 1000;
+
+        var toolbarItems = [];
+
+        console.log(this.items);
+        for (var i = 0, total = this.items.length; i < total; i++) {
+            var item = this.items[i];
+
+            var button = document.createElement("input");
+            button.setAttribute('type', 'button');
+            button.setAttribute('id', 'OT-Annotation-' + item.title.replace(" ", "-"));
+            button.style.background = 'url("' + item.icon + '") no-repeat';
+            button.style.top = '50%';
+            button.style.transform = 'translateY(25%)';
+            button.style.backgroundSize = '30px 30px';
+            button.style.border = 'none';
+            button.style.cursor = 'pointer';
+            button.style.width = this.buttonWidth;
+            button.style.height = this.buttonHeight;
+
+            if (item.items) {
+                // TODO We have a group - build a submenu
+            }
+
+            toolbarItems.push(button.outerHTML);
+        }
+
+        panel.innerHTML = toolbarItems.join('');
+    }
+
     var canvases = [];
 
     var add = function(canvas) {
+        var self = this;
         canvas.link(session);
+        canvas.colors(self.colors);
         canvases.push(canvas);
     }
 };
