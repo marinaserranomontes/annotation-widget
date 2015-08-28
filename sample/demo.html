@@ -53,15 +53,6 @@
         "#7f8c8d"
     ];
 
-    window.onload = function(e) {
-        // Initialize a toolbar for controlling annotation canvases
-        toolbar = OT.Annotations.Toolbar({
-            session: session,
-            container: document.getElementById('toolbar'),
-            colors: palette
-        });
-    };
-
     // Add event listeners to the session
     session.addEventListener('sessionConnected', sessionConnectedHandler);
     session.addEventListener('sessionDisconnected', sessionDisconnectedHandler);
@@ -80,6 +71,8 @@
     }
 
     function disconnect() {
+        // TODO Handle removing the annotation toolbar and all canvases
+
         session.disconnect();
         hide('disconnectLink');
         hide('publishLink');
@@ -102,11 +95,18 @@
                 }
             });
 
-            var canvas = OT.Annotations({
+            // Initialize a toolbar for controlling annotation canvases
+            toolbar = new OT.Annotations.Toolbar({
+                session: session,
+                container: document.getElementById('toolbar'),
+                colors: palette
+            });
+
+            var canvas = new OT.Annotations({
                 session:  publisher.session,
                 container: parentDiv
             });
-            toolbar.add(canvas);
+            toolbar.addCanvas(canvas);
 
             show('unpublishLink');
             hide('publishLink');
@@ -114,6 +114,10 @@
     }
 
     function stopPublishing() {
+        // Clean up toolbar and canvas elements
+        toolbar.removeCanvas(publisher.session.connection.connectionId);
+        toolbar.remove();
+
         if (publisher) {
             session.unpublish(publisher);
         }
@@ -223,7 +227,7 @@
         padding: 0;
     }
 
-    #opentok_publisher, .publisherContainer, ot-canvas {
+    #opentok_publisher, .publisherContainer {
         display: block;
         width: 100% !important;
         height: 100% !important;
@@ -244,7 +248,6 @@
 </div>
 <div id="myCamera" class="publisherContainer"></div>
 <div id="subscribers"></div>
-<div id="signals"></div>
 <div id="toolbar" style="height: 50px"></div>
 </body>
 </html>

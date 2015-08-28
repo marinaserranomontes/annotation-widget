@@ -17,13 +17,20 @@ Using the plugin
 Link the active OpenTok session to the annotation toolbar
 
 ```javascript
-toolbar = OT.Annotations.Toolbar(session);
+toolbar = new OT.Annotations.Toolbar({
+    session: session,
+    container: document.getElementById('toolbar'),
+    colors: palette
+});
 ```
 
 When the publisher is created, attach the annotation canvas and link it to the toolbar
 
 ```javascript
-var canvas = OT.Annotations(parentDiv, publisher.session);
+var canvas = new OT.Annotations({
+    session:  publisher.session,
+    container: parentDiv
+});
 toolbar.add(canvas);
 ```
 

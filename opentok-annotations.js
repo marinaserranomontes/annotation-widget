@@ -25,16 +25,17 @@ OT.Annotations = function(options) {
     if (this.parent) {
         var canvas = document.createElement("canvas");
         canvas.setAttribute('id', 'opentok_canvas'); // session.connection.id?
-        canvas.style.width = parent.clientWidth + 'px';
-        canvas.style.height = parent.clientHeight + 'px';
-        canvas.style.position = 'relative';
-        canvas.zIndex = 100;
+        canvas.style.position = 'absolute';
         this.parent.appendChild(canvas);
+        canvas.setAttribute('width', this.parent.clientWidth + 'px');
+        canvas.style.width = this.parent.clientWidth + 'px';
+        canvas.setAttribute('height', this.parent.clientHeight + 'px');
+        canvas.style.height = this.parent.clientHeight + 'px';
     }
 
-    var ctx,
+    var self = this,
+        ctx,
         colors,
-        color,
         lineWidth,
         mirrored,
         batchUpdates = [],
@@ -77,12 +78,17 @@ OT.Annotations = function(options) {
         [0, 0] // Reconnect point
     ];
 
+    this.canvas = function() {
+        return canvas;
+    };
+
     this.link = function(session) {
         this.session = session;
     };
 
     this.changeColor = function (color) {
-        this.color = color['background-color'];
+        console.log(color);
+        this.userColor = color;
         if (!this.lineWidth) {
             this.lineWidth = 2;
         }
@@ -94,7 +100,7 @@ OT.Annotations = function(options) {
 
     this.colors = function (colors) {
         this.colors = colors;
-        this.changeColor(colors[2]); // FIXME Default to the first color choice
+        this.changeColor(colors[0]);
     };
 
     this.clear = function () {
@@ -116,10 +122,8 @@ OT.Annotations = function(options) {
         }
         event.preventDefault();
 
-        var self = this;
-
-        var scaleX = canvas.width / parent.clientWidth,
-            scaleY = canvas.height / parent.clientHeight,
+        var scaleX = canvas.width / self.parent.clientWidth,
+            scaleY = canvas.height / self.parent.clientHeight,
             offsetX = event.offsetX || event.pageX - canvas.offsetLeft ||
                 event.changedTouches[0].pageX - canvas.offsetLeft,
             offsetY = event.offsetY || event.pageY - canvas.offsetTop ||
@@ -128,7 +132,9 @@ OT.Annotations = function(options) {
             y = offsetY * scaleY;
 
 //        console.log("Offset X: " + offsetX + ", Offset Y: " + offsetY);
-        console.log("x: " + x + ", y: " + y);
+//        console.log("x: " + x + ", y: " + y);
+
+        console.log(self.userColor);
 
         switch (event.type) {
             case 'mousedown':
@@ -147,8 +153,8 @@ OT.Annotations = function(options) {
                         fromY: client.lastY,
                         toX: x,
                         toY: y,
-                        color: this.color,
-                        lineWidth: this.lineWidth,
+                        color: self.userColor,
+                        lineWidth: self.lineWidth,
                         canvasWidth: canvas.clientWidth,
                         canvasHeight: canvas.clientHeight,
                         mirrored: mirrored
@@ -212,7 +218,6 @@ OT.Annotations = function(options) {
     /** Signal Handling **/
 
     if (this.session) {
-        var self = this;
         this.session.on({
             'signal:otAnnotation_pen': function (event) {
                 if (event.from.connectionId !== self.session.connection.connectionId) {
@@ -271,7 +276,6 @@ OT.Annotations = function(options) {
 
     var updateTimeout;
     var sendUpdate = function (update) {
-        var self = this;
         if (self.session) {
             batchUpdates.push(update);
             if (!updateTimeout) {
@@ -432,13 +436,6 @@ OT.Annotations.Toolbar = function(options) {
         self.options = options;
         self.render();
 
-        // Handle the open element and event.
-        if (options.open) {
-            options.open.addEventListener(options.openEvent, function (ev) {
-                self.open();
-            });
-        }
-
         // Click on colors
         self.elm.addEventListener("click", function (ev) {
             var col = ev.target.getAttribute("data-col");
@@ -490,8 +487,9 @@ OT.Annotations.Toolbar = function(options) {
                     var colorGroup = document.getElementById('OT-Annotation-Colors');
                     colorGroup.style.backgroundColor = color;
 
-                    canvases.forEach(function () {
-                        canvases.color = color; // TODO canvas.userColor?
+                    console.log(canvases);
+                    canvases.forEach(function (canvas) {
+                        canvas.changeColor(color);
                     });
                 });
 
@@ -500,8 +498,8 @@ OT.Annotations.Toolbar = function(options) {
                 button.style.marginRight = '10px';
                 button.style.transform = 'translateY(20%)'; // TODO Need a better way to center this vertically
                 button.style.borderRadius = '50%';
-                button.style.backgroundColor = this.colors[2]; // FIXME Should be the first color in the list
-                button.style.width = this.iconWidth; // TODO This should be based on the icon size
+                button.style.backgroundColor = this.colors[0];
+                button.style.width = this.iconWidth;
                 button.style.height = this.iconHeight;
             } else {
                 button.style.background = 'url("' + item.icon + '") no-repeat';
@@ -527,12 +525,39 @@ OT.Annotations.Toolbar = function(options) {
         document.getElementById('OT-Annotation-Colors').onclick = function() {
             pk.open();
         };
+
+        document.getElementById('OT-Annotation-Clear').onclick = function() {
+            canvases.forEach(function (canvas) {
+                console.log('Clearing canvas');
+                canvas.clear();
+            });
+        };
     }
 
-    var add = function(canvas) {
+    this.addCanvas = function(canvas) {
+        console.log("Adding canvas " + canvas);
         var self = this;
         canvas.link(session);
         canvas.colors(self.colors);
         canvases.push(canvas);
+    };
+
+    this.removeCanvas = function(connectionId) {
+        canvases.forEach(function (annotationView) {
+            var canvas = annotationView.canvas();
+            console.log(canvas);
+            if (annotationView.canvasSession.connection.connectionId === connectionId) {
+                // FIXME Make sure sub-menus are removed, too - ensure they are added back in the right order (sub-menu currently shows up on top in second run)
+                canvas.parentNode.removeChild(canvas);
+            }
+        });
+
+        canvases = canvases.filter(function (annotationView) {
+            return annotationView.canvasSession.connection.connectionId !== connectionId;
+        });
+    };
+
+    this.remove = function() {
+        panel.parentNode.removeChild(panel);
     };
 };
