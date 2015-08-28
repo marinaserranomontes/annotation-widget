@@ -9,17 +9,14 @@
 <script src="../opentok-annotations.js" type="text/javascript" charset="utf-8"></script>
 <link rel="stylesheet" href="../opentok-annotations.css" type="text/css" media="screen" charset="utf-8">
 
-<!--<script src="opentok-whiteboard.js" type="text/javascript" charset="utf-8"></script>-->
-<!--<link rel="stylesheet" href="opentok-whiteboard.css" type="text/css" media="screen" charset="utf-8">-->
-
 <script type="text/javascript" charset="utf-8">
 
     // *** Fill the following variables using your own Project info from the Dashboard  ***
     // ***                  (https://dashboard.tokbox.com/projects)                     ***
 
     var apiKey = '44631542';    // Replace with your own API key.
-    var sessionId = '1_MX40NDYzMTU0Mn5-MTQzODE4MzY0MjA4NH51OHRXQkdTU3hxc3hCeXRyY2ZzejJqZ1R-fg'; // Replace with your generated Session ID.
-    var token = 'T1==cGFydG5lcl9pZD00NDYzMTU0MiZzaWc9NTIyYjhkZDExNDIwZTNiMmM2NDdiMjgwZGQ0NzRhZGE3MDE3NDE2ODpyb2xlPXB1Ymxpc2hlciZzZXNzaW9uX2lkPTFfTVg0ME5EWXpNVFUwTW41LU1UUXpPREU0TXpZME1qQTROSDUxT0hSWFFrZFRVM2h4YzNoQ2VYUnlZMlp6ZWpKcVoxUi1mZyZjcmVhdGVfdGltZT0xNDM4MTgzNjQ4Jm5vbmNlPTAuMjE0NTkwMDk3NTAzNjQmZXhwaXJlX3RpbWU9MTQ0MDc3MTk2MSZjb25uZWN0aW9uX2RhdGE9';     // Replace with your generated Token (use Project Tools or from a server-side library)
+    var sessionId = ''; // Replace with your generated Session ID.
+    var token = '';     // Replace with your generated Token (use Project Tools or from a server-side library)
 
     var session;
     var publisher;
@@ -33,11 +30,35 @@
 
     session = TB.initSession(sessionId);	// Initialize session
 
+    var palette = [
+        "#1abc9c",
+        "#2ecc71",
+        "#3498db",
+        "#9b59b6",
+        "#34495e",
+        "#16a085",
+        "#27ae60",
+        "#2980b9",
+        "#8e44ad",
+        "#2c3e50",
+        "#f1c40f",
+        "#e67e22",
+        "#e74c3c",
+        "#ecf0f1",
+        "#95a5a6",
+        "#f39c12",
+        "#d35400",
+        "#c0392b",
+        "#bdc3c7",
+        "#7f8c8d"
+    ];
+
     window.onload = function(e) {
         // Initialize a toolbar for controlling annotation canvases
         toolbar = OT.Annotations.Toolbar({
             session: session,
-            container: document.getElementById('toolbar')
+            container: document.getElementById('toolbar'),
+            colors: palette
         });
     };
 

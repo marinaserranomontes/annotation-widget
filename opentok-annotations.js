@@ -16,7 +16,7 @@
 
 OT.Annotations = function(options) {
     options || (options = {});
-    console.log(options);
+//    console.log(options);
 
     this.parent = options.container;
     // canvasSession differs from the session - this allows us to grab publisher.connection.connectionId
@@ -291,13 +291,16 @@ OT.Annotations = function(options) {
 
 OT.Annotations.Toolbar = function(options) {
     options || (options = {});
-    console.log(options);
+//    console.log(options);
 
     this.session = options.session;
     this.parent = options.container;
+    // TODO Allow 'style' objects to be passed in for buttons, menu toolbar, etc?
     this.backgroundColor = options.backgroundColor || 'rgba(0, 0, 0, 0.7)';
     this.buttonWidth = options.buttonWidth || '40px';
     this.buttonHeight = options.buttonHeight || '40px';
+    this.iconWidth = options.iconWidth || '30px';
+    this.iconHeight = options.iconHeight || '30px';
     this.items = options.items || [
         {
             title: 'Pen',
@@ -346,15 +349,110 @@ OT.Annotations.Toolbar = function(options) {
         }
     ];
     this.colors = options.colors || [
-        {'background-color': '#000000'},  // Black
-        {'background-color': '#0000FF'},  // Blue
-        {'background-color': '#FF0000'},  // Red
-        {'background-color': '#00FF00'},  // Green
-        {'background-color': '#FF8C00'},  // Orange
-        {'background-color': '#FFD700'},  // Yellow
-        {'background-color': '#4B0082'},  // Purple
-        {'background-color': '#800000'}   // Brown
+        '#000000',  // Black
+        '#0000FF',  // Blue
+        '#FF0000',  // Red
+        '#00FF00',  // Green
+        '#FF8C00',  // Orange
+        '#FFD700',  // Yellow
+        '#4B0082',  // Purple
+        '#800000'   // Brown
     ];
+
+    var canvases = [];
+
+    /**
+     * Creates a sub-menu with a color picker.
+     *
+     * @param {String|Element} parent The parent div container for the color picker sub-menu.
+     * @param {Array} colors The array of colors to add to the palette.
+     * @param {Object} options options An object containing the following fields:
+     *
+     *  - `openEvent` (String): The open event (default: `"click"`).
+     *  - `style` (Object): Some style options:
+     *    - `display` (String): The display value when the picker is opened (default: `"block"`).
+     *  - `template` (String): The color item template. The `{color}` snippet will be replaced
+     *    with the color value (default: `"<div data-col=\"{color}\" style=\"background-color: {color}\"></div>"`).
+     *  - `autoclose` (Boolean): If `false`, the color picker will not be hided by default (default: `true`).
+     *
+     * @constructor
+     */
+    var ColorPicker = function(parent, colors, options) {
+        var self = this;
+
+        this.getElm = function (el) {
+            if (typeof el === "string") {
+                return document.querySelector(el);
+            }
+            return el;
+        };
+
+        this.render = function () {
+            var self = this,
+                html = "";
+
+            self.colors.forEach(function (c) {
+                html += self.options.template.replace(/\{color\}/g, c);
+            });
+
+            self.elm.innerHTML = html;
+        };
+
+        this.close = function () {
+            this.elm.style.display = "none";
+        };
+
+        this.open = function () {
+            this.elm.style.display = this.options.style.display;
+        };
+
+        this.colorChosen = function (cb) {
+            this.cbs.push(cb);
+        };
+
+         this.set = function (c, p) {
+            var self = this;
+            self.color = c;
+            if (p === false) {
+                return;
+            }
+            self.cbs.forEach(function (cb) {
+                cb.call(self, c);
+            });
+        };
+
+        options = options || {};
+        options.openEvent = options.openEvent || "click";
+        options.style = Object(options.style);
+        options.style.display = options.style.display || "block";
+        options.template = options.template || "<div data-col=\"{color}\" style=\"background-color: {color}\"></div>";
+        self.elm = self.getElm(parent);
+        self.cbs = [];
+        self.colors = colors;
+        self.options = options;
+        self.render();
+
+        // Handle the open element and event.
+        if (options.open) {
+            options.open.addEventListener(options.openEvent, function (ev) {
+                self.open();
+            });
+        }
+
+        // Click on colors
+        self.elm.addEventListener("click", function (ev) {
+            var col = ev.target.getAttribute("data-col");
+            if (!col) {
+                return;
+            }
+            self.set(col);
+            self.close();
+        });
+
+        if (options.autoclose !== false) {
+            self.close();
+        }
+    };
 
     if (this.parent) {
         var panel = document.createElement("div");
@@ -371,20 +469,50 @@ OT.Annotations.Toolbar = function(options) {
         var toolbarItems = [];
 
         console.log(this.items);
+
         for (var i = 0, total = this.items.length; i < total; i++) {
             var item = this.items[i];
 
             var button = document.createElement("input");
             button.setAttribute('type', 'button');
             button.setAttribute('id', 'OT-Annotation-' + item.title.replace(" ", "-"));
-            button.style.background = 'url("' + item.icon + '") no-repeat';
-            button.style.top = '50%';
-            button.style.transform = 'translateY(25%)';
-            button.style.backgroundSize = '30px 30px';
+
+            if (item.title === 'Colors') {
+                var colorPicker = document.createElement("div");
+                colorPicker.setAttribute('class', 'color-picker');
+                colorPicker.style.backgroundColor = this.backgroundColor;
+                this.parent.appendChild(colorPicker);
+
+                var pk = new ColorPicker(".color-picker", this.colors, null);
+
+                pk.colorChosen(function (color) {
+//                    console.log('Picked color: ' + color);
+                    var colorGroup = document.getElementById('OT-Annotation-Colors');
+                    colorGroup.style.backgroundColor = color;
+
+                    canvases.forEach(function () {
+                        canvases.color = color; // TODO canvas.userColor?
+                    });
+                });
+
+                button.setAttribute('class', 'OT_color');
+                button.style.marginLeft = '10px';
+                button.style.marginRight = '10px';
+                button.style.transform = 'translateY(20%)'; // TODO Need a better way to center this vertically
+                button.style.borderRadius = '50%';
+                button.style.backgroundColor = this.colors[2]; // FIXME Should be the first color in the list
+                button.style.width = this.iconWidth; // TODO This should be based on the icon size
+                button.style.height = this.iconHeight;
+            } else {
+                button.style.background = 'url("' + item.icon + '") no-repeat';
+                button.style.transform = 'translateY(25%)';
+                button.style.backgroundSize = this.iconWidth + ' ' + this.iconHeight;
+                button.style.width = this.buttonWidth;
+                button.style.height = this.buttonHeight;
+            }
+
             button.style.border = 'none';
             button.style.cursor = 'pointer';
-            button.style.width = this.buttonWidth;
-            button.style.height = this.buttonHeight;
 
             if (item.items) {
                 // TODO We have a group - build a submenu
@@ -394,14 +522,17 @@ OT.Annotations.Toolbar = function(options) {
         }
 
         panel.innerHTML = toolbarItems.join('');
-    }
 
-    var canvases = [];
+        // TODO Attach remaining click listeners
+        document.getElementById('OT-Annotation-Colors').onclick = function() {
+            pk.open();
+        };
+    }
 
     var add = function(canvas) {
         var self = this;
         canvas.link(session);
         canvas.colors(self.colors);
         canvases.push(canvas);
-    }
+    };
 };
