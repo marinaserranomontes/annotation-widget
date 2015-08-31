@@ -5,7 +5,6 @@ import android.graphics.Path;
 
 class AnnotationPath {
     String connectionId;
-    String canvasId;
     Paint paint;
     Path path;
 

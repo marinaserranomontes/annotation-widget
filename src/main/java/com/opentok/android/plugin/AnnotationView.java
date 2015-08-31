@@ -41,7 +41,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     // TODO Merge these lists so that they can be used for history (undo)
 	private List<AnnotationPath> mPaths;
 	private List<AnnotationText> mLabels;
-	private Context context;
 	private float mX, mY;
 	private float mLastX, mLastY;
 	private float mStartX, mStartY;
@@ -148,7 +147,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
 	public AnnotationView(Context c, AttributeSet attrs) {
 		super(c, attrs);
-		context = c;
 
 		mPaths = new ArrayList<AnnotationPath>();
 		mLabels = new ArrayList<AnnotationText>();
@@ -357,35 +355,51 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 float offsetX = 0;
                                 float offsetY = 0;
 
-                                Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
-
                                 // Handle scale
                                 float scale = 1;
+
+                                float aspectRatio = this.width / this.height;
+                                float canvasRatio = width / height;
 
                                 /**
                                  * This assumes that if the width is the greater value, video frames
                                  * can be scaled so that they have equal widths, which can be used to
                                  * find the offset in the y axis. Therefore, the offset on the x axis
-                                 * will be 0.
+                                 * will be 0. If the height is the greater value, the offset on the y
+                                 * axis will be 0.
                                  */
-                                if (this.width > this.height) {
+                                if (aspectRatio > canvasRatio) {
                                     scale = this.width / width;
-                                    offsetY = (this.height/2) - (scale*height/2);
+
+                                    if (this.height > scale * height) {
+                                        offsetY = (this.height / 2) - (scale * height / 2);
+                                    } else {
+                                        offsetY = (scale * height / 2) - (this.height / 2);
+                                    }
                                 } else {
                                     scale = this.height / height;
-                                    offsetX = (this.width/2) - (scale*width/2);
+
+                                    if (this.width > scale * width) {
+                                        offsetX = (this.width / 2) - (scale * width / 2);
+                                    } else {
+                                        offsetX = (scale * width / 2) - (this.width / 2);
+                                    }
                                 }
 
+                                Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
                                 Log.i("CanvasOffset", "Scale: " + scale);
 
                                 // FIXME If possible, the scale should also scale the line width (use a min width value?)
 
                                 // INFO Since the offset is calculated on the "scaled" frame, we need to scale it back
-                                float fromX = scale *  (((Number) json.get("fromX")).floatValue() + offsetX);
-                                float fromY = scale * (((Number) json.get("fromY")).floatValue() + offsetY);
+                                float fromX = scale * ((Number) json.get("fromX")).floatValue() + offsetX;
+                                float fromY = scale * ((Number) json.get("fromY")).floatValue() + offsetY;
 
-                                float toX = scale * (((Number) json.get("toX")).floatValue() + offsetX);
-                                float toY = scale * (((Number) json.get("toY")).floatValue() + offsetY);
+                                float toX = scale * ((Number) json.get("toX")).floatValue() + offsetX;
+                                float toY = scale * ((Number) json.get("toY")).floatValue() + offsetY;
+
+                                Log.i("CanvasOffset", "From: " + fromX + ", " + fromY);
+                                Log.i("CanvasOffset", "To: " + toX + ", " + toY);
 
                                 if (mSignalMirrored) {
                                     fromX = this.width - fromX;
