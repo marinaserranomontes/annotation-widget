@@ -178,6 +178,9 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                 Log.i("Canvas Signal", "Subscriber: " + canvascid);
 
+                while (mSubscriber.getSession() == null) { /* Wait */ }
+                mycid = mSubscriber.getSession().getConnection().getConnectionId();
+
                 // TODO Make sure this also gets called onSizeChanged
                 if (mSubscriber.getRenderer() instanceof AnnotationVideoRenderer) {
                     mMirrored = ((AnnotationVideoRenderer) mSubscriber.getRenderer()).isMirrored();
@@ -186,8 +189,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 // Force a dummy signal so that we can grab the current user's cid
                 Log.i("AnnotationTest", "Getting connection ID");
                 sendUpdate("otAnnotationConnect", "");
-
-                while (mycid == null) { /* Wait */ }
 
                 // Initialize a default path
                 Log.i("AnnotationTest", "Got connection ID!");
@@ -218,6 +219,9 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 canvascid = mPublisher.getStream().getConnection().getConnectionId();
 
                 Log.i("Canvas Signal", "Publisher: " + canvascid);
+
+                while (mPublisher.getSession() == null) { /* Wait */ }
+                mycid = mPublisher.getSession().getConnection().getConnectionId();
 
 //                // TODO Make sure this also gets called onSizeChanged
                 if (mPublisher.getRenderer() instanceof AnnotationVideoRenderer) {
@@ -371,19 +375,13 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 if (aspectRatio > canvasRatio) {
                                     scale = this.width / width;
 
-                                    if (this.height > scale * height) {
-                                        offsetY = (this.height / 2) - (scale * height / 2);
-                                    } else {
-                                        offsetY = (scale * height / 2) - (this.height / 2);
-                                    }
+                                    Log.i("CanvasOffset", "New Height: " + scale * height);
+                                    offsetY = (this.height / 2) - (scale * height / 2);
                                 } else {
                                     scale = this.height / height;
 
-                                    if (this.width > scale * width) {
-                                        offsetX = (this.width / 2) - (scale * width / 2);
-                                    } else {
-                                        offsetX = (scale * width / 2) - (this.width / 2);
-                                    }
+                                    Log.i("CanvasOffset", "New Width: " + scale * width);
+                                    offsetX = (this.width / 2) - (scale * width / 2);
                                 }
 
                                 Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
@@ -391,12 +389,12 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                                 // FIXME If possible, the scale should also scale the line width (use a min width value?)
 
-                                // INFO Since the offset is calculated on the "scaled" frame, we need to scale it back
-                                float fromX = scale * ((Number) json.get("fromX")).floatValue() + offsetX;
-                                float fromY = scale * ((Number) json.get("fromY")).floatValue() + offsetY;
+                                // INFO The offsets are already scaled
+                                float fromX = (scale * ((Number) json.get("fromX")).floatValue()) + offsetX;
+                                float fromY = (scale * ((Number) json.get("fromY")).floatValue()) + offsetY;
 
-                                float toX = scale * ((Number) json.get("toX")).floatValue() + offsetX;
-                                float toY = scale * ((Number) json.get("toY")).floatValue() + offsetY;
+                                float toX = (scale * ((Number) json.get("toX")).floatValue()) + offsetX;
+                                float toY = (scale * ((Number) json.get("toY")).floatValue()) + offsetY;
 
                                 Log.i("CanvasOffset", "From: " + fromX + ", " + fromY);
                                 Log.i("CanvasOffset", "To: " + toX + ", " + toY);
@@ -407,6 +405,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 }
 
                                 if (mMirrored) {
+                                    Log.i("CanvasOffset", "Feed is mirrored");
                                     // Revert (Double negative)
                                     fromX = this.width - fromX;
                                     toX = this.width - toX;
@@ -660,18 +659,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-        // INFO This won't work because the canvas would need to be flipped back and forth (messing up the annotations)
-        // INFO We need to manually handle it for each individual point
-//        if (mSignalMirrored) {
-//            canvas.scale(-1, 1, width / 2, height / 2);
-//
-//            if (mMirrored) {
-//                // Revert back (double negative)
-//                canvas.scale(-1, 1, width / 2, height / 2);
-//            }
-//        }
-
-		// draw the mPath with the mPaint on the canvas when onDraw
         for (AnnotationPath drawing : mPaths) {
             canvas.drawPath(drawing.path, drawing.paint);
         }
