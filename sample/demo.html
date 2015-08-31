@@ -15,13 +15,13 @@
     // ***                  (https://dashboard.tokbox.com/projects)                     ***
 
     var apiKey = '44631542';    // Replace with your own API key.
-    var sessionId = ''; // Replace with your generated Session ID.
-    var token = '';     // Replace with your generated Token (use Project Tools or from a server-side library)
+    var sessionId = '2_MX40NDYzMTU0Mn5-MTQ0MDc4MzAwNDEwOH5NVUdUWjJOWlRpMEkycjFXRXJESFJ0TWJ-UH4'; // Replace with your generated Session ID.
+    var token = 'T1==cGFydG5lcl9pZD00NDYzMTU0MiZzaWc9YTUwOGUzNjJlNWVmZjBiZTU5OGMwNDI0Njc2ZGQ5YjEwMWNmYTRjNjpyb2xlPXB1Ymxpc2hlciZzZXNzaW9uX2lkPTJfTVg0ME5EWXpNVFUwTW41LU1UUTBNRGM0TXpBd05ERXdPSDVOVlVkVVdqSk9XbFJwTUVreWNqRlhSWEpFU0ZKMFRXSi1VSDQmY3JlYXRlX3RpbWU9MTQ0MDc4MzAyMSZub25jZT0wLjIyMzc0MjQ1MzA2NTk5NTUmZXhwaXJlX3RpbWU9MTQ0MzM3NDk3OCZjb25uZWN0aW9uX2RhdGE9';     // Replace with your generated Token (use Project Tools or from a server-side library)
 
+    var toolbar;
     var session;
     var publisher;
     var subscribers = {};
-    var toolbar;
 
     // Un-comment either of the following to set automatic logging and exception handling.
     // See the exceptionHandler() method below.
@@ -68,10 +68,18 @@
 
     function connect() {
         session.connect(apiKey, token);
+
+        // Initialize a toolbar for controlling annotation canvases
+        toolbar = new OT.Annotations.Toolbar({
+            session: session,
+            container: document.getElementById('toolbar'),
+            colors: palette
+        });
     }
 
     function disconnect() {
-        // TODO Handle removing the annotation toolbar and all canvases
+        // TODO Handle removing all canvases
+        toolbar.remove();
 
         session.disconnect();
         hide('disconnectLink');
@@ -89,21 +97,15 @@
             publisherDiv.setAttribute('id', 'opentok_publisher');
             parentDiv.appendChild(publisherDiv);
             publisher = OT.initPublisher(publisherDiv.id, publisherProperties);
+            publisher.publishAudio(false);
             session.publish(publisher, function (error) {
                 if (error) {
                     console.log('The publisher failed to connect.');
                 }
             });
 
-            // Initialize a toolbar for controlling annotation canvases
-            toolbar = new OT.Annotations.Toolbar({
-                session: session,
-                container: document.getElementById('toolbar'),
-                colors: palette
-            });
-
             var canvas = new OT.Annotations({
-                session:  publisher.session,
+                feed:  publisher,
                 container: parentDiv
             });
             toolbar.addCanvas(canvas);
@@ -114,9 +116,8 @@
     }
 
     function stopPublishing() {
-        // Clean up toolbar and canvas elements
-        toolbar.removeCanvas(publisher.session.connection.connectionId);
-        toolbar.remove();
+        // Clean up canvas elements
+        toolbar.removeCanvas(publisher.stream.connection.connectionId);
 
         if (publisher) {
             session.unpublish(publisher);
@@ -209,7 +210,17 @@
         var subscriberDiv = document.createElement('div'); // Create a div for the subscriber to replace
         subscriberDiv.setAttribute('id', stream.streamId); // Give the replacement div the id of the stream as its id.
         document.getElementById('subscribers').appendChild(subscriberDiv);
-        subscribers[stream.streamId] = session.subscribe(stream, subscriberDiv.id);
+        var subscriber = session.subscribe(stream, subscriberDiv.id);
+        subscribers[stream.streamId] = subscriber;
+
+        console.log("Stream ID: " + stream.connection.connectionId + ", Subscriber ID: " + subscriber.stream.connection.connectionId
+            + ", Session ID: " + session.connection.connectionId);
+
+        var canvas = new OT.Annotations({
+            feed:  subscriber,
+            container: subscriberDiv
+        });
+        toolbar.addCanvas(canvas);
     }
 
     function show(id) {
@@ -247,7 +258,7 @@
            style="display:none"/>
 </div>
 <div id="myCamera" class="publisherContainer"></div>
-<div id="subscribers"></div>
 <div id="toolbar" style="height: 50px"></div>
+<div id="subscribers" style="top: 75%"></div>
 </body>
 </html>

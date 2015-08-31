@@ -19,8 +19,7 @@ OT.Annotations = function(options) {
 //    console.log(options);
 
     this.parent = options.container;
-    // canvasSession differs from the session - this allows us to grab publisher.connection.connectionId
-    this.canvasSession = options.session;
+    this.canvasElm = options.feed;
 
     if (this.parent) {
         var canvas = document.createElement("canvas");
@@ -136,6 +135,9 @@ OT.Annotations = function(options) {
 
         console.log(self.userColor);
 
+        // TODO Is there a way to tell in js if the video stream is mirrored or not?
+        mirrored = false;//self.canvasElm.isMirrored();
+
         switch (event.type) {
             case 'mousedown':
             case 'touchstart':
@@ -147,16 +149,16 @@ OT.Annotations = function(options) {
             case 'touchmove':
                 if (client.dragging) {
                     var update = {
-                        id: session.connection.connectionId,
-                        fromId: self.session ? self.session.connection.connectionId : '',
+                        id: self.canvasElm.stream.connection.connectionId,
+                        fromId: self.session.connection.connectionId,
                         fromX: client.lastX,
                         fromY: client.lastY,
                         toX: x,
                         toY: y,
                         color: self.userColor,
                         lineWidth: self.lineWidth,
-                        canvasWidth: canvas.clientWidth,
-                        canvasHeight: canvas.clientHeight,
+                        canvasWidth: canvas.width,
+                        canvasHeight: canvas.height,
                         mirrored: mirrored
                     };
                     draw(update);
@@ -197,9 +199,73 @@ OT.Annotations = function(options) {
         drawHistory.push(update);
     };
 
+    var drawIncoming = function (update) {
+        if (!ctx) {
+            ctx = canvas.getContext("2d");
+            ctx.lineCap = "round";
+            ctx.fillStyle = "solid";
+        }
+
+        var width = update.canvasWidth;
+        var height = update.canvasHeight;
+
+        var scale = 1;
+
+        /**
+         * This assumes that if the width is the greater value, video frames
+         * can be scaled so that they have equal widths, which can be used to
+         * find the offset in the y axis. Therefore, the offset on the x axis
+         * will be 0.
+         */
+        if (canvas.width > canvas.height) {
+            scale = canvas.width / width;
+        } else {
+            scale = canvas.height / height;
+        }
+
+        // The offset is meant to center-align the canvases
+        var offsetX = (canvas.width / 2) - (scale * width / 2);
+        var offsetY = (canvas.height / 2) - (scale * height / 2);
+
+        console.log("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
+        console.log("CanvasOffset", "Scale: " + scale);
+
+        ctx.strokeStyle = update.color;
+        // FIXME If possible, the scale should also scale the line width (use a min width value?)
+        ctx.lineWidth = update.lineWidth;
+        ctx.beginPath();
+
+        // INFO Since the offset is calculated on the "scaled" frame, we need to scale it back
+        var fromX = scale *  update.fromX + offsetX;
+        var fromY = scale * update.fromY + offsetY;
+
+        var toX = scale * update.toX + offsetX;
+        var toY = scale * update.toY + offsetY;
+
+        // Check if the incoming signal was mirrored
+        if (update.mirrored) {
+            fromX = this.width - fromX;
+            toX = this.width - toX;
+        }
+
+        // Check to see if the active video feed is also mirrored (double negative)
+        if (mirrored) {
+            // Revert (Double negative)
+            fromX = this.width - fromX;
+            toX = this.width - toX;
+        }
+
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.stroke();
+        ctx.closePath();
+
+        drawHistory.push(update);
+    };
+
     var drawUpdates = function (updates) {
         updates.forEach(function (update) {
-            draw(update);
+            drawIncoming(update);
         });
     };
 
@@ -216,19 +282,18 @@ OT.Annotations = function(options) {
     };
 
     /** Signal Handling **/
-
-    if (this.session) {
-        this.session.on({
+    if (self.canvasElm.session) {
+        self.canvasElm.session.on({
             'signal:otAnnotation_pen': function (event) {
                 if (event.from.connectionId !== self.session.connection.connectionId) {
                     drawUpdates(JSON.parse(event.data));
-                    scope.$emit('otWhiteboardUpdate');
+//                    scope.$emit('otWhiteboardUpdate');
                 }
             },
             'signal:otAnnotation_text': function (event) {
                 if (event.from.connectionId !== self.session.connection.connectionId) {
                     drawText(JSON.parse(event.data));
-                    scope.$emit('otWhiteboardUpdate');
+//                    scope.$emit('otWhiteboardUpdate');
                 }
             },
             'signal:otWhiteboard_history': function (event) {
@@ -237,17 +302,16 @@ OT.Annotations = function(options) {
                 if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
                     drawHistoryReceivedFrom = event.from.connectionId;
                     drawUpdates(JSON.parse(event.data));
-                    scope.$emit('otWhiteboardUpdate');
+//                    scope.$emit('otWhiteboardUpdate');
                 }
             },
             'signal:otAnnotation_clear': function (event) {
-                if (event.from.connectionId !== OTSession.session.connection.connectionId) {
+                if (event.from.connectionId !== self.session.connection.connectionId) {
                     clearCanvas();
                 }
             },
             connectionCreated: function (event) {
-                if (drawHistory.length > 0 && event.connection.connectionId !==
-                    self.session.connection.connectionId) {
+                if (drawHistory.length > 0 && event.connection.connectionId !== self.session.connection.connectionId) {
                     batchSignal('otWhiteboard_history', drawHistory, event.connection);
                 }
             }
@@ -280,7 +344,7 @@ OT.Annotations = function(options) {
             batchUpdates.push(update);
             if (!updateTimeout) {
                 updateTimeout = setTimeout(function () {
-                    batchSignal('otAnnotation_update', batchUpdates);
+                    batchSignal('otAnnotation_pen', batchUpdates);
                     batchUpdates = [];
                     updateTimeout = null;
                 }, 100);
@@ -438,11 +502,11 @@ OT.Annotations.Toolbar = function(options) {
 
         // Click on colors
         self.elm.addEventListener("click", function (ev) {
-            var col = ev.target.getAttribute("data-col");
-            if (!col) {
+            var color = ev.target.getAttribute("data-col");
+            if (!color) {
                 return;
             }
-            self.set(col);
+            self.set(color);
             self.close();
         });
 
@@ -483,7 +547,6 @@ OT.Annotations.Toolbar = function(options) {
                 var pk = new ColorPicker(".color-picker", this.colors, null);
 
                 pk.colorChosen(function (color) {
-//                    console.log('Picked color: ' + color);
                     var colorGroup = document.getElementById('OT-Annotation-Colors');
                     colorGroup.style.backgroundColor = color;
 
@@ -546,14 +609,15 @@ OT.Annotations.Toolbar = function(options) {
         canvases.forEach(function (annotationView) {
             var canvas = annotationView.canvas();
             console.log(canvas);
-            if (annotationView.canvasSession.connection.connectionId === connectionId) {
+            // TODO Should this be canvasStream.stream.connectionId??
+            if (annotationView.canvasElm.stream.connection.connectionId === connectionId) {
                 // FIXME Make sure sub-menus are removed, too - ensure they are added back in the right order (sub-menu currently shows up on top in second run)
                 canvas.parentNode.removeChild(canvas);
             }
         });
 
         canvases = canvases.filter(function (annotationView) {
-            return annotationView.canvasSession.connection.connectionId !== connectionId;
+            return annotationView.canvasElm.stream.connection.connectionId !== connectionId;
         });
     };
 
