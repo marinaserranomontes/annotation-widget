@@ -42,41 +42,6 @@ OT.Annotations = function(options) {
         drawHistoryReceivedFrom,
         client = {dragging: false};
 
-// OT.Annotations.Shape
-
-    var star = [
-        [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
-        [0.5 + 0.25 * Math.cos(126 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(126 * (Math.PI / 180))],
-        [0.5 + 0.5 * Math.cos(162 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(162 * (Math.PI / 180))],
-        [0.5 + 0.25 * Math.cos(198 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(198 * (Math.PI / 180))],
-        [0.5 + 0.5 * Math.cos(234 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(234 * (Math.PI / 180))],
-        [0.5 + 0.25 * Math.cos(270 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(270 * (Math.PI / 180))],
-        [0.5 + 0.5 * Math.cos(306 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(306 * (Math.PI / 180))],
-        [0.5 + 0.25 * Math.cos(342 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(342 * (Math.PI / 180))],
-        [0.5 + 0.5 * Math.cos(18 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(18 * (Math.PI / 180))],
-        [0.5 + 0.25 * Math.cos(54 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(54 * (Math.PI / 180))],
-        [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))]
-    ];
-
-    var arrow = [
-        [0, 1],
-        [3, 1],
-        [3, 0],
-        [5, 2],
-        [3, 4],
-        [3, 3],
-        [0, 3],
-        [0, 1] // Reconnect point
-    ];
-
-    var rect = [
-        [0, 0],
-        [1, 0],
-        [1, 1],
-        [0, 1],
-        [0, 0] // Reconnect point
-    ];
-
     // INFO Mirrored canvases contain the OT_mirrored class
     mirrored = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_mirrored' + ' ') > -1;
 
@@ -138,39 +103,122 @@ OT.Annotations = function(options) {
 
         console.log(self.userColor);
 
-        switch (event.type) {
-            case 'mousedown':
-            case 'touchstart':
-                client.dragging = true;
-                client.lastX = x;
-                client.lastY = y;
-                break;
-            case 'mousemove':
-            case 'touchmove':
-                if (client.dragging) {
-                    var update = {
-                        id: self.videoFeed.stream.connection.connectionId,
-                        fromId: self.session.connection.connectionId,
-                        fromX: client.lastX,
-                        fromY: client.lastY,
-                        toX: x,
-                        toY: y,
-                        color: self.userColor,
-                        lineWidth: self.lineWidth,
-                        canvasWidth: canvas.width,
-                        canvasHeight: canvas.height,
-                        mirrored: mirrored
-                    };
-                    draw(update);
+        var update;
+
+        if (self.selectedItem.title === 'Pen') {
+            switch (event.type) {
+                case 'mousedown':
+                case 'touchstart':
+                    client.dragging = true;
                     client.lastX = x;
                     client.lastY = y;
-                    sendUpdate(update);
+                    break;
+                case 'mousemove':
+                case 'touchmove':
+                    if (client.dragging) {
+                        update = {
+                            id: self.videoFeed.stream.connection.connectionId,
+                            fromId: self.session.connection.connectionId,
+                            fromX: client.lastX,
+                            fromY: client.lastY,
+                            toX: x,
+                            toY: y,
+                            color: self.userColor,
+                            lineWidth: self.lineWidth,
+                            canvasWidth: canvas.width,
+                            canvasHeight: canvas.height,
+                            mirrored: mirrored
+                        };
+                        draw(update);
+                        client.lastX = x;
+                        client.lastY = y;
+                        sendUpdate(update);
+                    }
+                    break;
+                case 'mouseup':
+                case 'touchend':
+                case 'mouseout':
+                    client.dragging = false;
+            }
+        } else if (self.selectedItem.title === 'Capture') {
+            // TODO Allow a video feed to be clicked to take a screenshot
+        } else {
+            console.log(self.selectedItem);
+            // We have a shape or custom object
+            if (self.selectedItem && self.selectedItem.points) {
+                client.mX = x;
+                client.mY = y;
+
+                console.log("Drawing shape from points...");
+
+                switch (event.type) {
+                    case 'mousedown':
+                    case 'touchstart':
+                        client.isDrawing = true;
+                        client.dragging = true;
+                        client.startX = x;
+                        client.startY = y;
+                        break;
+                    case 'mousemove':
+                    case 'touchmove':
+                        if (client.dragging) {
+                            update = {
+                                color: self.userColor,
+                                lineWidth: self.lineWidth
+                                // INFO The points for scaling will get added when drawing is complete
+                            };
+
+                            // TODO Color value above is not getting set when switching colors
+                            draw(update);
+                        }
+                        break;
+                    case 'mouseup':
+                    case 'touchend':
+                        client.isDrawing = false;
+
+                        var points = self.selectedItem.points;
+
+                        var scale = scaleForPoints(points);
+
+                        for (var i = 0; i < points.length; i++) {
+                            // Scale the points according to the difference between the start and end points
+                            var pointX = client.startX + (scale.x * points[i][0]);
+                            var pointY = client.startY + (scale.y * points[i][1]);
+
+                            console.log(pointX, pointY);
+
+                            if (i === 0) {
+                                client.lastX = pointX;
+                                client.lastY = pointY;
+                            }
+
+                            update = {
+                                id: self.videoFeed.stream.connection.connectionId,
+                                fromId: self.session.connection.connectionId,
+                                fromX: client.lastX,
+                                fromY: client.lastY,
+                                toX: pointX,
+                                toY: pointY,
+                                color: self.userColor,
+                                lineWidth: self.lineWidth,
+                                canvasWidth: canvas.width,
+                                canvasHeight: canvas.height,
+                                mirrored: mirrored
+                            };
+
+                            drawHistory.push(update);
+
+                            sendUpdate(update);
+
+                            client.lastX = pointX;
+                            client.lastY = pointY;
+                        }
+
+                        draw(null);
+
+                        client.dragging = false;
                 }
-                break;
-            case 'mouseup':
-            case 'touchend':
-            case 'mouseout':
-                client.dragging = false;
+            }
         }
     });
 
@@ -188,15 +236,103 @@ OT.Annotations = function(options) {
             ctx.fillStyle = "solid";
         }
 
-        ctx.strokeStyle = update.color;
-        ctx.lineWidth = update.lineWidth;
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (update) {
+            ctx.strokeStyle = update.color;
+            ctx.lineWidth = update.lineWidth;
+        }
+
+        // Repopulate the canvas with items from drawHistory
+        drawHistory.forEach(function (history) {
+            ctx.strokeStyle = history.color;
+            ctx.lineWidth = history.lineWidth;
+
+            ctx.beginPath();
+            ctx.moveTo(history.fromX, history.fromY);
+            ctx.lineTo(history.toX, history.toY);
+            ctx.stroke();
+            ctx.closePath();
+        });
+
+        if (self.selectedItem && self.selectedItem.title === 'Pen') {
+            if (update) {
+                ctx.beginPath();
+                ctx.moveTo(update.fromX, update.fromY);
+                ctx.lineTo(update.toX, update.toY);
+                ctx.stroke();
+                ctx.closePath();
+
+                drawHistory.push(update);
+            }
+        } else {
+            if (client.isDrawing) {
+                if (self.selectedItem && self.selectedItem.points) {
+                    drawPoints(ctx, self.selectedItem.points);
+                }
+            }
+        }
+    };
+
+    var drawPoints = function (ctx, points) {
+        console.log("Drawing points...");
+        var scale = scaleForPoints(points);
+
         ctx.beginPath();
-        ctx.moveTo(update.fromX, update.fromY);
-        ctx.lineTo(update.toX, update.toY);
+
+        if (points.length == 2) {
+            // We have a line
+            ctx.moveTo(client.startX, client.startY);
+            ctx.lineTo(client.mX, client.mY);
+        } else {
+            for (var i = 0; i < points.length; i++) {
+                // Scale the points according to the difference between the start and end points
+                var pointX = client.startX + (scale.x * points[i][0]);
+                var pointY = client.startY + (scale.y * points[i][1]);
+
+                if (i == 0) {
+                    ctx.moveTo(pointX, pointY);
+                } else {
+                    ctx.lineTo(pointX, pointY);
+                }
+            }
+        }
+
         ctx.stroke();
         ctx.closePath();
+    };
 
-        drawHistory.push(update);
+    var scaleForPoints = function (points) {
+        // mX and mY refer to the end point of the enclosing rectangle (touch up)
+        var minX = Number.MAX_VALUE;
+        var minY = Number.MAX_VALUE;
+        var maxX = 0;
+        var maxY = 0;
+        for (var i = 0; i < points.length; i++) {
+            if (points[i][0] < minX) {
+                minX = points[i][0];
+            } else if (points[i][0] > maxX) {
+                maxX = points[i][0];
+            }
+
+            if (points[i][1] < minY) {
+                minY = points[i][1];
+            } else if (points[i][1] > maxY) {
+                maxY = points[i][1];
+            }
+        }
+        var dx = Math.abs(maxX - minX);
+        var dy = Math.abs(maxY - minY);
+
+        console.log("AnnotationView", "Delta: " + dx + ", " + dy);
+
+        var scaleX = (client.mX - client.startX) / dx;
+        var scaleY = (client.mY - client.startY) / dy;
+
+        console.log("AnnotationView", "Scale: " + scaleX + ", " + scaleY);
+
+        return {x: scaleX, y: scaleY};
     };
 
     var drawIncoming = function (update) {
@@ -387,7 +523,11 @@ OT.Annotations.Toolbar = function(options) {
         },
         {
             title: 'Line',
-            icon: '../img/line.png'
+            icon: '../img/line.png',
+            points: [
+                [0, 0],
+                [0, 1]
+            ]
         },
         {
             title: 'Shapes',
@@ -395,15 +535,43 @@ OT.Annotations.Toolbar = function(options) {
             items: [
                 {
                     title: 'Arrow',
-                    icon: '../img/arrow.png'
+                    icon: '../img/arrow.png',
+                    points: [
+                        [0, 1],
+                        [3, 1],
+                        [3, 0],
+                        [5, 2],
+                        [3, 4],
+                        [3, 3],
+                        [0, 3],
+                        [0, 1] // Reconnect point
+                    ]
                 },
                 {
                     title: 'Rectangle',
-                    icon: '../img/rectangle.png'
+                    icon: '../img/rectangle.png',
+                    points: [
+                        [0, 0],
+                        [1, 0],
+                        [1, 1],
+                        [0, 1],
+                        [0, 0] // Reconnect point
+                    ]
                 },
                 {
                     title: 'Oval',
-                    icon: '../img/oval.png'
+                    icon: '../img/oval.png',
+                    points: [
+                        [0, 0.5],
+                        [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
+                        [0.5, 0],
+                        [0.5 + 0.5 * Math.cos(7 * Math.PI / 4), 0.5 + 0.5 * Math.sin(7 * Math.PI / 4)],
+                        [1, 0.5],
+                        [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(Math.PI / 4)],
+                        [0.5, 1],
+                        [0.5 + 0.5 * Math.cos(3 * Math.PI / 4), 0.5 + 0.5 * Math.sin(3 * Math.PI / 4)],
+                        [0, 0.5]
+                    ]
                 }
             ]
         },
@@ -589,7 +757,7 @@ OT.Annotations.Toolbar = function(options) {
             button.style.border = 'none';
             button.style.cursor = 'pointer';
 
-            if (item.items && Array.isArray(item.items)) {
+            if (item.items) {
                 // Indicate that we have a group
                 button.setAttribute('data-type', 'group');
 
@@ -603,26 +771,28 @@ OT.Annotations.Toolbar = function(options) {
                 subPanel.style.display = 'none';
                 this.parent.appendChild(subPanel);
 
-                var submenuItems = [];
+                if (Array.isArray(item.items)) {
+                    var submenuItems = [];
 
-                item.items.forEach(function (subItem) {
-                    var itemButton = document.createElement("input");
-                    itemButton.setAttribute('type', 'button');
-                    itemButton.setAttribute('data-col', subItem.title);
-                    // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
-                    itemButton.setAttribute('id', 'OT-Annotation-' + subItem.title.replace(" ", "-"));
-                    itemButton.style.background = 'url("' + subItem.icon + '") no-repeat';
-                    itemButton.style.transform = 'translateY(25%)';
-                    itemButton.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
-                    itemButton.style.width = self.buttonWidth;
-                    itemButton.style.height = self.buttonHeight;
-                    itemButton.style.border = 'none';
-                    itemButton.style.cursor = 'pointer';
+                    item.items.forEach(function (subItem) {
+                        var itemButton = document.createElement("input");
+                        itemButton.setAttribute('type', 'button');
+                        itemButton.setAttribute('data-col', subItem.title);
+                        // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
+                        itemButton.setAttribute('id', 'OT-Annotation-' + subItem.title.replace(" ", "-"));
+                        itemButton.style.background = 'url("' + subItem.icon + '") no-repeat';
+                        itemButton.style.transform = 'translateY(25%)';
+                        itemButton.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                        itemButton.style.width = self.buttonWidth;
+                        itemButton.style.height = self.buttonHeight;
+                        itemButton.style.border = 'none';
+                        itemButton.style.cursor = 'pointer';
 
-                    submenuItems.push(itemButton.outerHTML);
-                });
+                        submenuItems.push(itemButton.outerHTML);
+                    });
 
-                subPanel.innerHTML = submenuItems.join('');
+                    subPanel.innerHTML = submenuItems.join('');
+                }
             }
 
             toolbarItems.push(button.outerHTML);
@@ -638,9 +808,16 @@ OT.Annotations.Toolbar = function(options) {
             // Close the submenu if we are clicking on an item and not a group button
             if (!group) {
                 self.items.forEach(function (item) {
-                    if (item.title === itemName) {
+                    if (item.title !== 'Clear' && item.title === itemName) {
                         self.selectedItem = item;
                         console.log(self.selectedItem);
+
+                        self.attachDefaultAction(item);
+
+                        canvases.forEach(function (canvas) {
+                            canvas.selectedItem = self.selectedItem;
+                        });
+
                         return false;
                     }
                 });
@@ -666,9 +843,16 @@ OT.Annotations.Toolbar = function(options) {
 
             if (!group) {
                 self.selectedGroup.items.forEach(function (item) {
-                    if (item.title === itemName) {
+                    if (item.title !== 'Clear' && item.title === itemName) {
                         self.selectedItem = item;
                         console.log(self.selectedItem);
+
+                        self.attachDefaultAction(item);
+
+                        canvases.forEach(function (canvas) {
+                            canvas.selectedItem = self.selectedItem;
+                        });
+
                         return false;
                     }
                 });
@@ -701,6 +885,49 @@ OT.Annotations.Toolbar = function(options) {
             });
         };
     }
+
+    this.attachDefaultAction = function (item) {
+        if (!item.points) {
+            // Attach default actions
+            if (item.title === 'Line') {
+                self.selectedItem.points = [
+                    [0, 0],
+                    [0, 1]
+                ]
+            } else if (item.title === 'Arrow') {
+                self.selectedItem.points = [
+                    [0, 1],
+                    [3, 1],
+                    [3, 0],
+                    [5, 2],
+                    [3, 4],
+                    [3, 3],
+                    [0, 3],
+                    [0, 1] // Reconnect point
+                ]
+            } else if (item.title === 'Rectangle') {
+                self.selectedItem.points = [
+                    [0, 0],
+                    [1, 0],
+                    [1, 1],
+                    [0, 1],
+                    [0, 0] // Reconnect point
+                ]
+            } else if (item.title === 'Oval') {
+                self.selectedItem.points = [
+                    [0, 0.5],
+                    [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
+                    [0.5, 0],
+                    [0.5 + 0.5 * Math.cos(7 * Math.PI / 4), 0.5 + 0.5 * Math.sin(7 * Math.PI / 4)],
+                    [1, 0.5],
+                    [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(Math.PI / 4)],
+                    [0.5, 1],
+                    [0.5 + 0.5 * Math.cos(3 * Math.PI / 4), 0.5 + 0.5 * Math.sin(3 * Math.PI / 4)],
+                    [0, 0.5]
+                ]
+            }
+        }
+    };
 
     this.itemClicked = function(cb) {
         this.cbs.push(cb);
