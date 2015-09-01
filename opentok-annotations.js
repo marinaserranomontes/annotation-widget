@@ -366,6 +366,8 @@ OT.Annotations = function(options) {
 //--------------------------------------
 
 OT.Annotations.Toolbar = function(options) {
+    var self = this;
+
     options || (options = {});
 //    console.log(options);
 
@@ -435,6 +437,7 @@ OT.Annotations.Toolbar = function(options) {
         '#800000'   // Brown
     ];
 
+    this.cbs = [];
     var canvases = [];
 
     /**
@@ -449,7 +452,7 @@ OT.Annotations.Toolbar = function(options) {
      *    - `display` (String): The display value when the picker is opened (default: `"block"`).
      *  - `template` (String): The color item template. The `{color}` snippet will be replaced
      *    with the color value (default: `"<div data-col=\"{color}\" style=\"background-color: {color}\"></div>"`).
-     *  - `autoclose` (Boolean): If `false`, the color picker will not be hided by default (default: `true`).
+     *  - `autoclose` (Boolean): If `false`, the color picker will not be hidden by default (default: `true`).
      *
      * @constructor
      */
@@ -486,7 +489,7 @@ OT.Annotations.Toolbar = function(options) {
             this.cbs.push(cb);
         };
 
-         this.set = function (c, p) {
+        this.set = function (c, p) {
             var self = this;
             self.color = c;
             if (p === false) {
@@ -536,6 +539,7 @@ OT.Annotations.Toolbar = function(options) {
         this.parent.zIndex = 1000;
 
         var toolbarItems = [];
+        var subPanel = document.createElement("div");
 
         console.log(this.items);
 
@@ -544,6 +548,7 @@ OT.Annotations.Toolbar = function(options) {
 
             var button = document.createElement("input");
             button.setAttribute('type', 'button');
+            // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
             button.setAttribute('id', 'OT-Annotation-' + item.title.replace(" ", "-"));
 
             if (item.title === 'Colors') {
@@ -580,11 +585,44 @@ OT.Annotations.Toolbar = function(options) {
                 button.style.height = this.buttonHeight;
             }
 
+            button.setAttribute('data-col', item.title);
             button.style.border = 'none';
             button.style.cursor = 'pointer';
 
-            if (item.items) {
+            if (item.items && Array.isArray(item.items)) {
+                // Indicate that we have a group
+                button.setAttribute('data-type', 'group');
+
+                console.log(item.items);
                 // TODO We have a group - build a submenu
+                subPanel.setAttribute('class', 'OT_subpanel');
+                subPanel.style.backgroundColor = this.backgroundColor;
+                subPanel.style.width = '100%';
+                subPanel.style.height = '100%';
+                subPanel.style.paddingLeft = '15px';
+                subPanel.style.display = 'none';
+                this.parent.appendChild(subPanel);
+
+                var submenuItems = [];
+
+                item.items.forEach(function (subItem) {
+                    var itemButton = document.createElement("input");
+                    itemButton.setAttribute('type', 'button');
+                    itemButton.setAttribute('data-col', subItem.title);
+                    // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
+                    itemButton.setAttribute('id', 'OT-Annotation-' + subItem.title.replace(" ", "-"));
+                    itemButton.style.background = 'url("' + subItem.icon + '") no-repeat';
+                    itemButton.style.transform = 'translateY(25%)';
+                    itemButton.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                    itemButton.style.width = self.buttonWidth;
+                    itemButton.style.height = self.buttonHeight;
+                    itemButton.style.border = 'none';
+                    itemButton.style.cursor = 'pointer';
+
+                    submenuItems.push(itemButton.outerHTML);
+                });
+
+                subPanel.innerHTML = submenuItems.join('');
             }
 
             toolbarItems.push(button.outerHTML);
@@ -592,8 +630,67 @@ OT.Annotations.Toolbar = function(options) {
 
         panel.innerHTML = toolbarItems.join('');
 
+        panel.onclick = function(ev) {
+            var group = ev.target.getAttribute("data-type") === 'group';
+            var itemName = ev.target.getAttribute("data-col");
+            var id = ev.target.getAttribute("id");
+
+            // Close the submenu if we are clicking on an item and not a group button
+            if (!group) {
+                self.items.forEach(function (item) {
+                    if (item.title === itemName) {
+                        self.selectedItem = item;
+                        console.log(self.selectedItem);
+                        return false;
+                    }
+                });
+                subPanel.style.display = 'none';
+            } else {
+                self.items.forEach(function (item) {
+                    if (item.title === itemName) {
+                        self.selectedGroup = item;
+                    }
+                });
+            }
+
+            self.cbs.forEach(function (cb) {
+                cb.call(self, id);
+            });
+        };
+
+        subPanel.onclick = function(ev) {
+            var group = ev.target.getAttribute("data-type") === 'group';
+            var itemName = ev.target.getAttribute("data-col");
+            var id = ev.target.getAttribute("id");
+            subPanel.style.display = 'none';
+
+            if (!group) {
+                self.selectedGroup.items.forEach(function (item) {
+                    if (item.title === itemName) {
+                        self.selectedItem = item;
+                        console.log(self.selectedItem);
+                        return false;
+                    }
+                });
+            }
+
+            self.cbs.forEach(function (cb) {
+                cb.call(self, id);
+            });
+        };
+
         // TODO Attach remaining click listeners
+        document.getElementById('OT-Annotation-Shapes').onclick = function() {
+            if (subPanel) {
+                subPanel.style.display = 'block';
+            }
+            pk.close();
+        };
+
         document.getElementById('OT-Annotation-Colors').onclick = function() {
+            if (subPanel) {
+                subPanel.style.display = 'none';
+            }
             pk.open();
         };
 
@@ -604,6 +701,10 @@ OT.Annotations.Toolbar = function(options) {
             });
         };
     }
+
+    this.itemClicked = function(cb) {
+        this.cbs.push(cb);
+    };
 
     this.addCanvas = function(canvas) {
         console.log("Adding canvas " + canvas);
