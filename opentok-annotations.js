@@ -178,27 +178,14 @@ OT.Annotations = function(options) {
 
                         var points = self.selectedItem.points;
 
-                        var scale = scaleForPoints(points);
-
-                        for (var i = 0; i < points.length; i++) {
-                            // Scale the points according to the difference between the start and end points
-                            var pointX = client.startX + (scale.x * points[i][0]);
-                            var pointY = client.startY + (scale.y * points[i][1]);
-
-                            console.log(pointX, pointY);
-
-                            if (i === 0) {
-                                client.lastX = pointX;
-                                client.lastY = pointY;
-                            }
-
+                        if (points.length == 2) {
                             update = {
                                 id: self.videoFeed.stream.connection.connectionId,
                                 fromId: self.session.connection.connectionId,
-                                fromX: client.lastX,
-                                fromY: client.lastY,
-                                toX: pointX,
-                                toY: pointY,
+                                fromX: client.startX,
+                                fromY: client.startY,
+                                toX: client.mX,
+                                toY: client.mY,
                                 color: self.userColor,
                                 lineWidth: self.lineWidth,
                                 canvasWidth: canvas.width,
@@ -209,12 +196,45 @@ OT.Annotations = function(options) {
                             drawHistory.push(update);
 
                             sendUpdate(update);
+                        } else {
+                            var scale = scaleForPoints(points);
 
-                            client.lastX = pointX;
-                            client.lastY = pointY;
+                            for (var i = 0; i < points.length; i++) {
+                                // Scale the points according to the difference between the start and end points
+                                var pointX = client.startX + (scale.x * points[i][0]);
+                                var pointY = client.startY + (scale.y * points[i][1]);
+
+                                console.log(pointX, pointY);
+
+                                if (i === 0) {
+                                    client.lastX = pointX;
+                                    client.lastY = pointY;
+                                }
+
+                                update = {
+                                    id: self.videoFeed.stream.connection.connectionId,
+                                    fromId: self.session.connection.connectionId,
+                                    fromX: client.lastX,
+                                    fromY: client.lastY,
+                                    toX: pointX,
+                                    toY: pointY,
+                                    color: self.userColor,
+                                    lineWidth: self.lineWidth,
+                                    canvasWidth: canvas.width,
+                                    canvasHeight: canvas.height,
+                                    mirrored: mirrored
+                                };
+
+                                drawHistory.push(update);
+
+                                sendUpdate(update);
+
+                                client.lastX = pointX;
+                                client.lastY = pointY;
+                            }
+
+                            draw(null);
                         }
-
-                        draw(null);
 
                         client.dragging = false;
                 }
@@ -563,7 +583,7 @@ OT.Annotations.Toolbar = function(options) {
                     icon: '../img/oval.png',
                     points: [
                         [0, 0.5],
-                        [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
+                        [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
                         [0.5, 0],
                         [0.5 + 0.5 * Math.cos(7 * Math.PI / 4), 0.5 + 0.5 * Math.sin(7 * Math.PI / 4)],
                         [1, 0.5],
@@ -916,7 +936,7 @@ OT.Annotations.Toolbar = function(options) {
             } else if (item.title === 'Oval') {
                 self.selectedItem.points = [
                     [0, 0.5],
-                    [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
+                    [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
                     [0.5, 0],
                     [0.5 + 0.5 * Math.cos(7 * Math.PI / 4), 0.5 + 0.5 * Math.sin(7 * Math.PI / 4)],
                     [1, 0.5],
@@ -947,7 +967,6 @@ OT.Annotations.Toolbar = function(options) {
             console.log(canvas);
             // TODO Should this be canvasStream.stream.connectionId??
             if (annotationView.videoFeed.stream.connection.connectionId === connectionId) {
-                // FIXME Make sure sub-menus are removed, too - ensure they are added back in the right order (sub-menu currently shows up on top in second run)
                 canvas.parentNode.removeChild(canvas);
             }
         });
@@ -959,5 +978,12 @@ OT.Annotations.Toolbar = function(options) {
 
     this.remove = function() {
         panel.parentNode.removeChild(panel);
+
+        canvases.forEach(function (annotationView) {
+            var canvas = annotationView.canvas();
+            canvas.parentNode.removeChild(canvas);
+        });
+
+        canvases = [];
     };
 };
