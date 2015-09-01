@@ -19,7 +19,7 @@ OT.Annotations = function(options) {
 //    console.log(options);
 
     this.parent = options.container;
-    this.canvasElm = options.feed;
+    this.videoFeed = options.feed;
 
     if (this.parent) {
         var canvas = document.createElement("canvas");
@@ -76,6 +76,9 @@ OT.Annotations = function(options) {
         [0, 1],
         [0, 0] // Reconnect point
     ];
+
+    // INFO Mirrored canvases contain the OT_mirrored class
+    mirrored = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_mirrored' + ' ') > -1;
 
     this.canvas = function() {
         return canvas;
@@ -135,9 +138,6 @@ OT.Annotations = function(options) {
 
         console.log(self.userColor);
 
-        // TODO Is there a way to tell in js if the video stream is mirrored or not?
-        mirrored = false;//self.canvasElm.isMirrored();
-
         switch (event.type) {
             case 'mousedown':
             case 'touchstart':
@@ -149,7 +149,7 @@ OT.Annotations = function(options) {
             case 'touchmove':
                 if (client.dragging) {
                     var update = {
-                        id: self.canvasElm.stream.connection.connectionId,
+                        id: self.videoFeed.stream.connection.connectionId,
                         fromId: self.session.connection.connectionId,
                         fromX: client.lastX,
                         fromY: client.lastY,
@@ -211,21 +211,29 @@ OT.Annotations = function(options) {
 
         var scale = 1;
 
+        var canvasRatio = canvas.width / canvas.height;
+        var aspectRatio = width / height;
+
+        console.log("CanvasOffset", "Aspects: " + canvasRatio + ", " + aspectRatio);
+
+        // The offset is meant to center-align the canvases
+        var offsetX = 0;
+        var offsetY = 0;
+
         /**
          * This assumes that if the width is the greater value, video frames
          * can be scaled so that they have equal widths, which can be used to
          * find the offset in the y axis. Therefore, the offset on the x axis
-         * will be 0.
+         * will be 0. If the height is the greater value, the offset on the y
+         * axis will be 0.
          */
-        if (canvas.width > canvas.height) {
+        if (canvasRatio > aspectRatio && canvasRatio < 0) {
             scale = canvas.width / width;
+            offsetY = (canvas.height / 2) - (scale * height / 2);
         } else {
             scale = canvas.height / height;
+            offsetX = (canvas.width / 2) - (scale * width / 2);
         }
-
-        // The offset is meant to center-align the canvases
-        var offsetX = (canvas.width / 2) - (scale * width / 2);
-        var offsetY = (canvas.height / 2) - (scale * height / 2);
 
         console.log("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
         console.log("CanvasOffset", "Scale: " + scale);
@@ -282,8 +290,8 @@ OT.Annotations = function(options) {
     };
 
     /** Signal Handling **/
-    if (self.canvasElm.session) {
-        self.canvasElm.session.on({
+    if (self.videoFeed.session) {
+        self.videoFeed.session.on({
             'signal:otAnnotation_pen': function (event) {
                 if (event.from.connectionId !== self.session.connection.connectionId) {
                     drawUpdates(JSON.parse(event.data));
@@ -610,14 +618,14 @@ OT.Annotations.Toolbar = function(options) {
             var canvas = annotationView.canvas();
             console.log(canvas);
             // TODO Should this be canvasStream.stream.connectionId??
-            if (annotationView.canvasElm.stream.connection.connectionId === connectionId) {
+            if (annotationView.videoFeed.stream.connection.connectionId === connectionId) {
                 // FIXME Make sure sub-menus are removed, too - ensure they are added back in the right order (sub-menu currently shows up on top in second run)
                 canvas.parentNode.removeChild(canvas);
             }
         });
 
         canvases = canvases.filter(function (annotationView) {
-            return annotationView.canvasElm.stream.connection.connectionId !== connectionId;
+            return annotationView.videoFeed.stream.connection.connectionId !== connectionId;
         });
     };
 
