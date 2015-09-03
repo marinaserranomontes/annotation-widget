@@ -212,11 +212,6 @@
         hide('connectLink');
     }
 
-    // FIXME This belongs in the annotation js file
-    function captureScreenshot() {
-        publisher.getImageData();
-    }
-
     function streamCreatedHandler(event) {
         // Subscribe to the newly created streams
         for (var i = 0; i < event.streams.length; i++) {

@@ -65,6 +65,42 @@ OT.Annotations = function(options) {
         this.lineWidth = size;
     };
 
+    this.selectItem = function (item) {
+        self.selectedItem = item;
+        console.log("Selected: " + item.title)
+        if (item.title === 'Capture') {
+            self.overlay = document.createElement("div");
+            self.overlay.style.width = this.parent.clientWidth + 'px';
+            self.overlay.style.height = this.parent.clientHeight + 'px';
+            self.overlay.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+            self.overlay.style.cursor = 'pointer';
+            self.overlay.style.opacity = 0;
+
+            self.parent.appendChild(self.overlay);
+
+            self.overlay.onmouseover = function () {
+                self.overlay.style.opacity = 1;
+            };
+
+            self.overlay.onmouseout = function () {
+                self.overlay.style.opacity = 0;
+            };
+
+            self.overlay.onclick = function () {
+                console.log("Clicked feed: " + self.videoFeed.stream.connection.connectionId);
+
+                self.captureScreenshot();
+
+                // TODO Provide callback with the screenshot obj
+            };
+        } else {
+            if (self.overlay) {
+                self.parent.removeChild(self.overlay);
+                self.overlay = null;
+            }
+        }
+    };
+
     this.colors = function (colors) {
         this.colors = colors;
         this.changeColor(colors[0]);
@@ -77,6 +113,46 @@ OT.Annotations = function(options) {
                 type: 'otAnnotation_clear'
             });
         }
+    };
+
+    this.captureScreenshot = function() {
+        var canvasCopy = canvas;
+
+        var ctx = canvasCopy.getContext('2d');
+
+        // FIXME Need a way to know if the video is being scaled to fit or fill
+        var width = self.videoFeed.element.clientWidth;
+        var height = self.videoFeed.element.clientHeight;
+        var scale = 1;
+
+        if (width > height) {
+            scale = width / height;
+            height = height * scale;
+        } else {
+            scale = height / width;
+            width = width * scale;
+        }
+
+        // Combine the two
+        var image = new Image();
+        image.onload = function() {
+            //if (mirrored) {
+                //ctx.scale(-1, 1);
+            //}
+            ctx.drawImage(image, 0, 0, width, height);
+        };
+        image.src = 'data:image/png;base64,' + self.videoFeed.getImgData();
+
+        var canvasImg = new Image();
+        canvasImg.onload = function() {
+            ctx.drawImage(canvasImg, 0, 0);
+        };
+        canvasImg.src = canvas.toDataURL();
+
+        // TODO Allow the user to choose the image type? (jpg, png)
+        console.log(canvasCopy.toDataURL());
+
+        // TODO Clear and destroy the canvas copy
     };
 
     /** Canvas Handling **/
@@ -97,6 +173,9 @@ OT.Annotations = function(options) {
                 event.changedTouches[0].pageY - canvas.offsetTop,
             x = offsetX * scaleX,
             y = offsetY * scaleY;
+
+        console.log("Video size: " + self.videoFeed.videoWidth(), self.videoFeed.videoHeight());
+        console.log("Canvas size: " + canvas.width, canvas.height);
 
 //        console.log("Offset X: " + offsetX + ", Offset Y: " + offsetY);
 //        console.log("x: " + x + ", y: " + y);
@@ -125,6 +204,8 @@ OT.Annotations = function(options) {
                             toY: y,
                             color: self.userColor,
                             lineWidth: self.lineWidth,
+                            videoWidth: self.videoFeed.videoWidth(),
+                            videoHeight: self.videoFeed.videoHeight(),
                             canvasWidth: canvas.width,
                             canvasHeight: canvas.height,
                             mirrored: mirrored
@@ -188,6 +269,8 @@ OT.Annotations = function(options) {
                                 toY: client.mY,
                                 color: self.userColor,
                                 lineWidth: self.lineWidth,
+                                videoWidth: self.videoFeed.videoWidth(),
+                                videoHeight: self.videoFeed.videoHeight(),
                                 canvasWidth: canvas.width,
                                 canvasHeight: canvas.height,
                                 mirrored: mirrored
@@ -220,6 +303,8 @@ OT.Annotations = function(options) {
                                     toY: pointY,
                                     color: self.userColor,
                                     lineWidth: self.lineWidth,
+                                    videoWidth: self.videoFeed.videoWidth(),
+                                    videoHeight: self.videoFeed.videoHeight(),
                                     canvasWidth: canvas.width,
                                     canvasHeight: canvas.height,
                                     mirrored: mirrored
@@ -362,19 +447,60 @@ OT.Annotations = function(options) {
             ctx.fillStyle = "solid";
         }
 
-        var width = update.canvasWidth;
-        var height = update.canvasHeight;
+        var iCanvas = {
+            width: update.canvasWidth,
+            height: update.canvasHeight
+        };
+
+        var iVideo = {
+            width: update.videoWidth,
+            height: update.videoHeight
+        };
+
+        var video = {
+            width: self.videoFeed.videoWidth(),
+            height: self.videoFeed.videoHeight()
+        };
 
         var scale = 1;
 
         var canvasRatio = canvas.width / canvas.height;
-        var aspectRatio = width / height;
+        var videoRatio = video.width / video.height;
+        var iCanvasRatio = iCanvas.width / iCanvas.height;
+        var iVideoRatio = iVideo.width / iVideo.height;
 
-        console.log("CanvasOffset", "Aspects: " + canvasRatio + ", " + aspectRatio);
+        console.log("CanvasOffset", "Canvas Aspects: " + canvasRatio + ", " + iCanvasRatio);
+        console.log("CanvasOffset", "Video Aspects: " + videoRatio + ", " + iVideoRatio);
 
         // The offset is meant to center-align the canvases
         var offsetX = 0;
         var offsetY = 0;
+
+        // First, calculate the offset on the incoming video
+        if (iCanvasRatio > iVideoRatio && iCanvasRatio < 0) {
+            scale = iCanvas.width / iVideo.width;
+            offsetY = (iCanvas.height / 2) - (scale * iVideo.height / 2);
+        } else {
+            scale = iCanvas.height / iVideo.height;
+            offsetX = (iCanvas.width / 2) - (scale * iVideo.width / 2);
+        }
+
+        console.log("CanvasOffset1", "Offset: " + offsetX + ", " + offsetY);
+        console.log("CanvasOffset1", "Scale: " + scale);
+
+        // Then, calculate the offset on the current video
+        if (canvasRatio > videoRatio && canvasRatio < 0) {
+            scale = canvas.width / video.width;
+            offsetY += (canvas.height / 2) - (scale * video.height / 2);
+        } else {
+            scale = canvas.height / video.height;
+            offsetX += (canvas.width / 2) - (scale * video.width / 2);
+        }
+
+        console.log("CanvasOffset2", "Offset: " + offsetX + ", " + offsetY);
+        console.log("CanvasOffset2", "Scale: " + scale);
+
+        // Last, calculate the total offset based on the scale of the current and incoming canvases
 
         /**
          * This assumes that if the width is the greater value, video frames
@@ -383,16 +509,16 @@ OT.Annotations = function(options) {
          * will be 0. If the height is the greater value, the offset on the y
          * axis will be 0.
          */
-        if (canvasRatio > aspectRatio && canvasRatio < 0) {
-            scale = canvas.width / width;
-            offsetY = (canvas.height / 2) - (scale * height / 2);
+        if (canvasRatio > iCanvasRatio && canvasRatio < 0) {
+            scale = canvas.width / iCanvas.width;
+            offsetY += (canvas.height / 2) - (scale * iCanvas.height / 2);
         } else {
-            scale = canvas.height / height;
-            offsetX = (canvas.width / 2) - (scale * width / 2);
+            scale = canvas.height / iCanvas.height;
+            offsetX += (canvas.width / 2) - (scale * iCanvas.width / 2);
         }
 
-        console.log("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
-        console.log("CanvasOffset", "Scale: " + scale);
+        console.log("CanvasOffset3", "Offset: " + offsetX + ", " + offsetY);
+        console.log("CanvasOffset3", "Scale: " + scale);
 
         ctx.strokeStyle = update.color;
         // FIXME If possible, the scale should also scale the line width (use a min width value?)
@@ -835,7 +961,7 @@ OT.Annotations.Toolbar = function(options) {
                         self.attachDefaultAction(item);
 
                         canvases.forEach(function (canvas) {
-                            canvas.selectedItem = self.selectedItem;
+                            canvas.selectItem(self.selectedItem);
                         });
 
                         return false;
@@ -870,7 +996,7 @@ OT.Annotations.Toolbar = function(options) {
                         self.attachDefaultAction(item);
 
                         canvases.forEach(function (canvas) {
-                            canvas.selectedItem = self.selectedItem;
+                            canvas.selectItem(self.selectedItem);
                         });
 
                         return false;
