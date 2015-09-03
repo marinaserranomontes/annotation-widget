@@ -865,6 +865,10 @@ OT.Annotations.Toolbar = function(options) {
             // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
             button.setAttribute('id', 'OT-Annotation-' + item.title.replace(" ", "-"));
 
+            button.style.position = 'relative';
+            button.style.top = "50%";
+            button.style.transform = 'translateY(-50%)';
+
             if (item.title === 'Colors') {
                 var colorPicker = document.createElement("div");
                 colorPicker.setAttribute('class', 'color-picker');
@@ -886,60 +890,55 @@ OT.Annotations.Toolbar = function(options) {
                 button.setAttribute('class', 'OT_color');
                 button.style.marginLeft = '10px';
                 button.style.marginRight = '10px';
-                button.style.transform = 'translateY(20%)'; // TODO Need a better way to center this vertically
                 button.style.borderRadius = '50%';
                 button.style.backgroundColor = this.colors[0];
                 button.style.width = this.iconWidth;
                 button.style.height = this.iconHeight;
+                button.style.paddingTop = this.buttonHeight.replace('px', '') - this.iconHeight.replace('px', '') + 'px';
             } else {
                 button.style.background = 'url("' + item.icon + '") no-repeat';
-                button.style.transform = 'translateY(25%)';
                 button.style.backgroundSize = this.iconWidth + ' ' + this.iconHeight;
+                button.style.backgroundPosition = 'center';
                 button.style.width = this.buttonWidth;
                 button.style.height = this.buttonHeight;
+            }
+
+            // If we have an object as item.items, it was never set by the user
+            if (item.title === 'Line Width' && !Array.isArray(item.items)) {
+                console.log("Adding line width items");
+                // Add defaults
+                item.items = [
+                    {
+                        title: 'Line Width 6',
+                        size: 6
+                    },
+                    {
+                        title: 'Line Width 8',
+                        size: 8
+                    },
+                    {
+                        title: 'Line Width 10',
+                        size: 10
+                    },
+                    {
+                        title: 'Line Width 12',
+                        size: 12
+                    },
+                    {
+                        title: 'Line Width 14',
+                        size: 14
+                    }
+                ];
+            }
+
+            if (item.items) {
+                // Indicate that we have a group
+                button.setAttribute('data-type', 'group');
             }
 
             button.setAttribute('data-col', item.title);
             button.style.border = 'none';
             button.style.cursor = 'pointer';
-
-            if (item.items) {
-                // Indicate that we have a group
-                button.setAttribute('data-type', 'group');
-
-                console.log(item.items);
-                // TODO We have a group - build a submenu
-                subPanel.setAttribute('class', 'OT_subpanel');
-                subPanel.style.backgroundColor = this.backgroundColor;
-                subPanel.style.width = '100%';
-                subPanel.style.height = '100%';
-                subPanel.style.paddingLeft = '15px';
-                subPanel.style.display = 'none';
-                this.parent.appendChild(subPanel);
-
-                if (Array.isArray(item.items)) {
-                    var submenuItems = [];
-
-                    item.items.forEach(function (subItem) {
-                        var itemButton = document.createElement("input");
-                        itemButton.setAttribute('type', 'button');
-                        itemButton.setAttribute('data-col', subItem.title);
-                        // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
-                        itemButton.setAttribute('id', 'OT-Annotation-' + subItem.title.replace(" ", "-"));
-                        itemButton.style.background = 'url("' + subItem.icon + '") no-repeat';
-                        itemButton.style.transform = 'translateY(25%)';
-                        itemButton.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
-                        itemButton.style.width = self.buttonWidth;
-                        itemButton.style.height = self.buttonHeight;
-                        itemButton.style.border = 'none';
-                        itemButton.style.cursor = 'pointer';
-
-                        submenuItems.push(itemButton.outerHTML);
-                    });
-
-                    subPanel.innerHTML = submenuItems.join('');
-                }
-            }
 
             toolbarItems.push(button.outerHTML);
         }
@@ -972,6 +971,90 @@ OT.Annotations.Toolbar = function(options) {
                 self.items.forEach(function (item) {
                     if (item.title === itemName) {
                         self.selectedGroup = item;
+
+                        console.log(item.items);
+                        if (item.items) {
+                            console.log(item.items);
+                            // TODO We have a group - build a submenu
+                            subPanel.setAttribute('class', 'OT_subpanel');
+                            subPanel.style.backgroundColor = self.backgroundColor;
+                            subPanel.style.width = '100%';
+                            subPanel.style.height = '100%';
+                            subPanel.style.paddingLeft = '15px';
+                            subPanel.style.display = 'none';
+                            self.parent.appendChild(subPanel);
+
+                            if (Array.isArray(item.items)) {
+                                var submenuItems = [];
+
+                                if (item.title === 'Line Width') {
+                                    // We want to dynamically create icons for the list of possible line widths
+                                    item.items.forEach(function (subItem) {
+                                        // INFO Using a div here - not input to create an inner div representing the line width - better option?
+                                        var itemButton = document.createElement("div");
+                                        itemButton.setAttribute('data-col', subItem.title);
+                                        // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
+                                        itemButton.setAttribute('id', 'OT-Annotation-' + subItem.title.replace(" ", "-"));
+                                        itemButton.style.position = 'relative';
+                                        itemButton.style.top = "50%";
+                                        itemButton.style.transform = 'translateY(-50%)';
+                                        itemButton.style.float = 'left';
+                                        itemButton.style.width = self.buttonWidth;
+                                        itemButton.style.height = self.buttonHeight;
+                                        itemButton.style.border = 'none';
+                                        itemButton.style.cursor = 'pointer';
+
+                                        var lineIcon = document.createElement("div");
+                                        lineIcon.style.backgroundColor = '#FFFFFF'; // TODO Allow devs to change this?
+                                        lineIcon.style.width = '80%';
+                                        lineIcon.style.height = subItem.size + 'px';
+                                        lineIcon.style.position = 'relative';
+                                        lineIcon.style.left = "50%";
+                                        lineIcon.style.top = "50%";
+                                        lineIcon.style.transform = 'translateX(-50%) translateY(-50%)';
+
+                                        itemButton.appendChild(lineIcon);
+
+                                        submenuItems.push(itemButton.outerHTML);
+                                    });
+                                } else {
+                                    item.items.forEach(function (subItem) {
+                                        var itemButton = document.createElement("input");
+                                        itemButton.setAttribute('type', 'button');
+                                        itemButton.setAttribute('data-col', subItem.title);
+                                        // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
+                                        itemButton.setAttribute('id', 'OT-Annotation-' + subItem.title.replace(" ", "-"));
+                                        itemButton.style.background = 'url("' + subItem.icon + '") no-repeat';
+                                        itemButton.style.position = 'relative';
+                                        itemButton.style.top = "50%";
+                                        itemButton.style.transform = 'translateY(-50%)';
+                                        itemButton.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                                        itemButton.style.backgroundPosition = 'center';
+                                        itemButton.style.width = self.buttonWidth;
+                                        itemButton.style.height = self.buttonHeight;
+                                        itemButton.style.border = 'none';
+                                        itemButton.style.cursor = 'pointer';
+
+                                        submenuItems.push(itemButton.outerHTML);
+                                    });
+                                }
+
+                                subPanel.innerHTML = submenuItems.join('');
+                                console.log(subPanel.innerHTML);
+                            }
+                        }
+
+                        if (id === 'OT-Annotation-Shapes' || id === 'OT-Annotation-Line-Width') {
+                            if (subPanel) {
+                                subPanel.style.display = 'block';
+                            }
+                            pk.close();
+                        } else if (id === 'OT-Annotation-Colors') {
+                            if (subPanel) {
+                                subPanel.style.display = 'none';
+                            }
+                            pk.open();
+                        }
                     }
                 });
             }
@@ -1007,21 +1090,6 @@ OT.Annotations.Toolbar = function(options) {
             self.cbs.forEach(function (cb) {
                 cb.call(self, id);
             });
-        };
-
-        // TODO Attach remaining click listeners
-        document.getElementById('OT-Annotation-Shapes').onclick = function() {
-            if (subPanel) {
-                subPanel.style.display = 'block';
-            }
-            pk.close();
-        };
-
-        document.getElementById('OT-Annotation-Colors').onclick = function() {
-            if (subPanel) {
-                subPanel.style.display = 'none';
-            }
-            pk.open();
         };
 
         document.getElementById('OT-Annotation-Clear').onclick = function() {
