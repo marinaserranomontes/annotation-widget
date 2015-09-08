@@ -76,10 +76,9 @@
             colors: palette,
             items: [
                 {
-                    // TODO Add id in addition to
                     title: 'Pen',
-                    icon: '../img/freehand.png', // FIXME All of these need to be relative to where the script is located or a full url
-                    selectedIcon: '../img/freehand.png' // TODO Create an icon for selected states
+                    icon: '../img/freehand.png',
+                    selectedIcon: '../img/freehand.png'
                 },
                 {
                     title: 'Line',
@@ -116,7 +115,7 @@
                                 [0.5 + 0.5 * Math.cos(18 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(18 * (Math.PI / 180))],
                                 [0.5 + 0.25 * Math.cos(54 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(54 * (Math.PI / 180))],
                                 [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))]
-                            ]  // TODO Make the points available some place else
+                            ]
                         }
                     ]
                 },
@@ -224,6 +223,8 @@
     function streamDestroyedHandler(event) {
         // This signals that a stream was destroyed. Any Subscribers will automatically be removed.
         // This default behaviour can be prevented using event.preventDefault()
+
+        // FIXME toolbar.removeCanvas(id) should be called here to clean up the view
     }
 
     function sessionDisconnectedHandler(event) {

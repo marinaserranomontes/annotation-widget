@@ -54,10 +54,10 @@ OT.Annotations = function(options) {
     };
 
     this.changeColor = function (color) {
-        console.log(color);
-        this.userColor = color;
-        if (!this.lineWidth) {
-            this.lineWidth = 2;
+        console.log("Changing color:" + color);
+        self.userColor = color;
+        if (!self.lineWidth) {
+            self.lineWidth = 2; // TODO Default to first option in list of line widths
         }
     };
 
@@ -66,9 +66,9 @@ OT.Annotations = function(options) {
     };
 
     this.selectItem = function (item) {
-        self.selectedItem = item;
-        console.log("Selected: " + item.title)
         if (item.title === 'Capture') {
+            self.selectedItem = item;
+
             self.overlay = document.createElement("div");
             self.overlay.style.width = this.parent.clientWidth + 'px';
             self.overlay.style.height = this.parent.clientHeight + 'px';
@@ -93,7 +93,13 @@ OT.Annotations = function(options) {
 
                 // TODO Provide callback with the screenshot obj
             };
+        } else if (item.title.indexOf('Line Width') !== -1) {
+            if (item.size) {
+                self.changeLineWidth(item.size);
+            }
         } else {
+            self.selectedItem = item;
+
             if (self.overlay) {
                 self.parent.removeChild(self.overlay);
                 self.overlay = null;
@@ -221,8 +227,6 @@ OT.Annotations = function(options) {
                 case 'mouseout':
                     client.dragging = false;
             }
-        } else if (self.selectedItem.title === 'Capture') {
-            // TODO Allow a video feed to be clicked to take a screenshot
         } else {
             console.log(self.selectedItem);
             // We have a shape or custom object
@@ -249,7 +253,6 @@ OT.Annotations = function(options) {
                                 // INFO The points for scaling will get added when drawing is complete
                             };
 
-                            // TODO Color value above is not getting set when switching colors
                             draw(update);
                         }
                         break;
@@ -344,11 +347,6 @@ OT.Annotations = function(options) {
         // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (update) {
-            ctx.strokeStyle = update.color;
-            ctx.lineWidth = update.lineWidth;
-        }
-
         // Repopulate the canvas with items from drawHistory
         drawHistory.forEach(function (history) {
             ctx.strokeStyle = history.color;
@@ -363,6 +361,8 @@ OT.Annotations = function(options) {
 
         if (self.selectedItem && self.selectedItem.title === 'Pen') {
             if (update) {
+                ctx.strokeStyle = update.color;
+                ctx.lineWidth = update.lineWidth;
                 ctx.beginPath();
                 ctx.moveTo(update.fromX, update.fromY);
                 ctx.lineTo(update.toX, update.toY);
@@ -373,6 +373,10 @@ OT.Annotations = function(options) {
             }
         } else {
             if (client.isDrawing) {
+                if (update) {
+                    ctx.strokeStyle = update.color;
+                    ctx.lineWidth = update.lineWidth;
+                }
                 if (self.selectedItem && self.selectedItem.points) {
                     drawPoints(ctx, self.selectedItem.points);
                 }
@@ -441,12 +445,7 @@ OT.Annotations = function(options) {
     };
 
     var drawIncoming = function (update) {
-        if (!ctx) {
-            ctx = canvas.getContext("2d");
-            ctx.lineCap = "round";
-            ctx.fillStyle = "solid";
-        }
-
+        console.log(update);
         var iCanvas = {
             width: update.canvasWidth,
             height: update.canvasHeight
@@ -469,9 +468,6 @@ OT.Annotations = function(options) {
         var iCanvasRatio = iCanvas.width / iCanvas.height;
         var iVideoRatio = iVideo.width / iVideo.height;
 
-        console.log("CanvasOffset", "Canvas Aspects: " + canvasRatio + ", " + iCanvasRatio);
-        console.log("CanvasOffset", "Video Aspects: " + videoRatio + ", " + iVideoRatio);
-
         // The offset is meant to center-align the canvases
         var offsetX = 0;
         var offsetY = 0;
@@ -485,9 +481,6 @@ OT.Annotations = function(options) {
             offsetX = (iCanvas.width / 2) - (scale * iVideo.width / 2);
         }
 
-        console.log("CanvasOffset1", "Offset: " + offsetX + ", " + offsetY);
-        console.log("CanvasOffset1", "Scale: " + scale);
-
         // Then, calculate the offset on the current video
         if (canvasRatio > videoRatio && canvasRatio < 0) {
             scale = canvas.width / video.width;
@@ -496,9 +489,6 @@ OT.Annotations = function(options) {
             scale = canvas.height / video.height;
             offsetX += (canvas.width / 2) - (scale * video.width / 2);
         }
-
-        console.log("CanvasOffset2", "Offset: " + offsetX + ", " + offsetY);
-        console.log("CanvasOffset2", "Scale: " + scale);
 
         // Last, calculate the total offset based on the scale of the current and incoming canvases
 
@@ -517,45 +507,37 @@ OT.Annotations = function(options) {
             offsetX += (canvas.width / 2) - (scale * iCanvas.width / 2);
         }
 
-        console.log("CanvasOffset3", "Offset: " + offsetX + ", " + offsetY);
-        console.log("CanvasOffset3", "Scale: " + scale);
-
-        ctx.strokeStyle = update.color;
-        // FIXME If possible, the scale should also scale the line width (use a min width value?)
-        ctx.lineWidth = update.lineWidth;
-        ctx.beginPath();
-
         // INFO Since the offset is calculated on the "scaled" frame, we need to scale it back
-        var fromX = scale *  update.fromX + offsetX;
-        var fromY = scale * update.fromY + offsetY;
+        update.fromX = scale *  update.fromX + offsetX;
+        update.fromY = scale * update.fromY + offsetY;
 
-        var toX = scale * update.toX + offsetX;
-        var toY = scale * update.toY + offsetY;
+        update.toX = scale * update.toX + offsetX;
+        update.toY = scale * update.toY + offsetY;
 
         // Check if the incoming signal was mirrored
         if (update.mirrored) {
-            fromX = this.width - fromX;
-            toX = this.width - toX;
+            update.fromX = canvas.width - update.fromX;
+            update.toX = canvas.width - update.toX;
         }
 
         // Check to see if the active video feed is also mirrored (double negative)
         if (mirrored) {
             // Revert (Double negative)
-            fromX = this.width - fromX;
-            toX = this.width - toX;
+            update.fromX = canvas.width - update.fromX;
+            update.toX = canvas.width - update.toX;
         }
 
-        ctx.moveTo(fromX, fromY);
-        ctx.lineTo(toX, toY);
-        ctx.stroke();
-        ctx.closePath();
-
+        console.log(update);
         drawHistory.push(update);
+
+        draw(update);
     };
 
     var drawUpdates = function (updates) {
         updates.forEach(function (update) {
-            drawIncoming(update);
+            if (update.id === self.videoFeed.stream.connection.connectionId) {
+                drawIncoming(update);
+            }
         });
     };
 
@@ -577,13 +559,11 @@ OT.Annotations = function(options) {
             'signal:otAnnotation_pen': function (event) {
                 if (event.from.connectionId !== self.session.connection.connectionId) {
                     drawUpdates(JSON.parse(event.data));
-//                    scope.$emit('otWhiteboardUpdate');
                 }
             },
             'signal:otAnnotation_text': function (event) {
                 if (event.from.connectionId !== self.session.connection.connectionId) {
                     drawText(JSON.parse(event.data));
-//                    scope.$emit('otWhiteboardUpdate');
                 }
             },
             'signal:otWhiteboard_history': function (event) {
@@ -592,7 +572,6 @@ OT.Annotations = function(options) {
                 if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
                     drawHistoryReceivedFrom = event.from.connectionId;
                     drawUpdates(JSON.parse(event.data));
-//                    scope.$emit('otWhiteboardUpdate');
                 }
             },
             'signal:otAnnotation_clear': function (event) {
@@ -909,6 +888,14 @@ OT.Annotations.Toolbar = function(options) {
                 // Add defaults
                 item.items = [
                     {
+                        title: 'Line Width 2',
+                        size: 2
+                    },
+                    {
+                        title: 'Line Width 4',
+                        size: 4
+                    },
+                    {
                         title: 'Line Width 6',
                         size: 6
                     },
@@ -975,7 +962,6 @@ OT.Annotations.Toolbar = function(options) {
                         console.log(item.items);
                         if (item.items) {
                             console.log(item.items);
-                            // TODO We have a group - build a submenu
                             subPanel.setAttribute('class', 'OT_subpanel');
                             subPanel.style.backgroundColor = self.backgroundColor;
                             subPanel.style.width = '100%';
@@ -1005,13 +991,16 @@ OT.Annotations.Toolbar = function(options) {
                                         itemButton.style.cursor = 'pointer';
 
                                         var lineIcon = document.createElement("div");
-                                        lineIcon.style.backgroundColor = '#FFFFFF'; // TODO Allow devs to change this?
+                                        // TODO Allow devs to change this?
+                                        lineIcon.style.backgroundColor = '#FFFFFF';
                                         lineIcon.style.width = '80%';
                                         lineIcon.style.height = subItem.size + 'px';
                                         lineIcon.style.position = 'relative';
                                         lineIcon.style.left = "50%";
                                         lineIcon.style.top = "50%";
                                         lineIcon.style.transform = 'translateX(-50%) translateY(-50%)';
+                                        // Prevents div icon from catching events so they can be passed to the parent
+                                        lineIcon.style.pointerEvents = 'none';
 
                                         itemButton.appendChild(lineIcon);
 
@@ -1040,7 +1029,6 @@ OT.Annotations.Toolbar = function(options) {
                                 }
 
                                 subPanel.innerHTML = submenuItems.join('');
-                                console.log(subPanel.innerHTML);
                             }
                         }
 
@@ -1155,11 +1143,10 @@ OT.Annotations.Toolbar = function(options) {
         canvases.push(canvas);
     };
 
+    // FIXME For video feeds that are terminated by the subscriber, the parentNode is removed, but not the canvas
     this.removeCanvas = function(connectionId) {
         canvases.forEach(function (annotationView) {
             var canvas = annotationView.canvas();
-            console.log(canvas);
-            // TODO Should this be canvasStream.stream.connectionId??
             if (annotationView.videoFeed.stream.connection.connectionId === connectionId) {
                 canvas.parentNode.removeChild(canvas);
             }
