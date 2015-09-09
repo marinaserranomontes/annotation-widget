@@ -5,9 +5,6 @@
  *  @Copyright (c) 2015 TokBox, Inc
  **/
 
-// https://facadejs.com/
-// https://github.com/facadejs/Facade.js
-
 // loggingURL: 'http://hlg.tokbox.com/prod' -- Use this for logging??
 
 //--------------------------------------
@@ -16,7 +13,6 @@
 
 OT.Annotations = function(options) {
     options || (options = {});
-//    console.log(options);
 
     this.parent = options.container;
     this.videoFeed = options.feed;
@@ -37,13 +33,16 @@ OT.Annotations = function(options) {
         colors,
         lineWidth,
         mirrored,
+        scaledToFill,
         batchUpdates = [],
         drawHistory = [],
         drawHistoryReceivedFrom,
         client = {dragging: false};
 
-    // INFO Mirrored canvases contain the OT_mirrored class
+    // INFO Mirrored feeds contain the OT_mirrored class
+    // FIXME Looks like there may be a bug here - all divs seem to have this class
     mirrored = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_mirrored' + ' ') > -1;
+    scaledToFill = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_fit-mode-cover' + ' ') > -1;
 
     this.canvas = function() {
         return canvas;
@@ -54,7 +53,6 @@ OT.Annotations = function(options) {
     };
 
     this.changeColor = function (color) {
-        console.log("Changing color:" + color);
         self.userColor = color;
         if (!self.lineWidth) {
             self.lineWidth = 2; // TODO Default to first option in list of line widths
@@ -121,50 +119,70 @@ OT.Annotations = function(options) {
         }
     };
 
+    // TODO Allow the user to choose the image type? (jpg, png)
     this.captureScreenshot = function() {
-        var canvasCopy = canvas;
+        var canvasCopy = document.createElement('canvas');
+        canvasCopy.width = canvas.width;
+        canvasCopy.height = canvas.height;
 
-        var ctx = canvasCopy.getContext('2d');
+        var width = self.videoFeed.videoWidth();
+        var height = self.videoFeed.videoHeight();
 
-        // FIXME Need a way to know if the video is being scaled to fit or fill
-        var width = self.videoFeed.element.clientWidth;
-        var height = self.videoFeed.element.clientHeight;
         var scale = 1;
 
         if (width > height) {
-            scale = width / height;
+            scale = canvas.width / width;
+            width = canvas.width;
             height = height * scale;
         } else {
-            scale = height / width;
+            scale = canvas.height / height;
+            height = canvas.height;
             width = width * scale;
+        }
+
+        var offsetX = 0;
+        var offsetY = 0;
+
+        if (scaledToFill) {
+            // If stretched to fill, we need an offset to center the image
+            offsetX = (canvas.width - width) / 2;
+            offsetY = (canvas.height - height) / 2;
         }
 
         // Combine the two
         var image = new Image();
         image.onload = function() {
-            //if (mirrored) {
-                //ctx.scale(-1, 1);
-            //}
-            ctx.drawImage(image, 0, 0, width, height);
+            var ctxCopy = canvasCopy.getContext('2d');
+            if (mirrored) {
+                ctxCopy.translate(width, 0);
+                ctxCopy.scale(-1, 1);
+            }
+            ctxCopy.drawImage(image, offsetX, offsetY, width, height);
+
+            // We want to make sure we draw the annotations the same way, so we need to flip back
+            if (mirrored) {
+                ctxCopy.translate(width, 0);
+                ctxCopy.scale(-1, 1);
+            }
+            ctxCopy.drawImage(canvas, 0, 0);
+
+            // FIXME Remove this (testing only)
+//            var win = window.open(canvasCopy.toDataURL(), '_blank');
+//            win.focus();
+
+            // TODO Send image through callback
+            // canvasCopy.toDataURL()
+
+            // Clear and destroy the canvas copy
+            canvasCopy = null;
         };
         image.src = 'data:image/png;base64,' + self.videoFeed.getImgData();
 
-        var canvasImg = new Image();
-        canvasImg.onload = function() {
-            ctx.drawImage(canvasImg, 0, 0);
-        };
-        canvasImg.src = canvas.toDataURL();
-
-        // TODO Allow the user to choose the image type? (jpg, png)
-        console.log(canvasCopy.toDataURL());
-
-        // TODO Clear and destroy the canvas copy
     };
 
     /** Canvas Handling **/
 
     addEventListeners(canvas, 'mousedown mousemove mouseup mouseout touchstart touchmove touchend', function (event) {
-//        console.log(event);
         if (event.type === 'mousemove' && !client.dragging) {
             // Ignore mouse move Events if we're not dragging
             return;
@@ -180,13 +198,11 @@ OT.Annotations = function(options) {
             x = offsetX * scaleX,
             y = offsetY * scaleY;
 
-        console.log("Video size: " + self.videoFeed.videoWidth(), self.videoFeed.videoHeight());
-        console.log("Canvas size: " + canvas.width, canvas.height);
+//        console.log("Video size: " + self.videoFeed.videoWidth(), self.videoFeed.videoHeight());
+//        console.log("Canvas size: " + canvas.width, canvas.height);
 
 //        console.log("Offset X: " + offsetX + ", Offset Y: " + offsetY);
 //        console.log("x: " + x + ", y: " + y);
-
-        console.log(self.userColor);
 
         var update;
 
@@ -228,13 +244,10 @@ OT.Annotations = function(options) {
                     client.dragging = false;
             }
         } else {
-            console.log(self.selectedItem);
             // We have a shape or custom object
             if (self.selectedItem && self.selectedItem.points) {
                 client.mX = x;
                 client.mY = y;
-
-                console.log("Drawing shape from points...");
 
                 switch (event.type) {
                     case 'mousedown':
@@ -289,8 +302,6 @@ OT.Annotations = function(options) {
                                 // Scale the points according to the difference between the start and end points
                                 var pointX = client.startX + (scale.x * points[i][0]);
                                 var pointY = client.startY + (scale.y * points[i][1]);
-
-                                console.log(pointX, pointY);
 
                                 if (i === 0) {
                                     client.lastX = pointX;
@@ -385,7 +396,6 @@ OT.Annotations = function(options) {
     };
 
     var drawPoints = function (ctx, points) {
-        console.log("Drawing points...");
         var scale = scaleForPoints(points);
 
         ctx.beginPath();
@@ -434,18 +444,13 @@ OT.Annotations = function(options) {
         var dx = Math.abs(maxX - minX);
         var dy = Math.abs(maxY - minY);
 
-        console.log("AnnotationView", "Delta: " + dx + ", " + dy);
-
         var scaleX = (client.mX - client.startX) / dx;
         var scaleY = (client.mY - client.startY) / dy;
-
-        console.log("AnnotationView", "Scale: " + scaleX + ", " + scaleY);
 
         return {x: scaleX, y: scaleY};
     };
 
     var drawIncoming = function (update) {
-        console.log(update);
         var iCanvas = {
             width: update.canvasWidth,
             height: update.canvasHeight
@@ -630,7 +635,6 @@ OT.Annotations.Toolbar = function(options) {
     var self = this;
 
     options || (options = {});
-//    console.log(options);
 
     this.session = options.session;
     this.parent = options.container;
@@ -834,8 +838,6 @@ OT.Annotations.Toolbar = function(options) {
         var toolbarItems = [];
         var subPanel = document.createElement("div");
 
-        console.log(this.items);
-
         for (var i = 0, total = this.items.length; i < total; i++) {
             var item = this.items[i];
 
@@ -860,7 +862,6 @@ OT.Annotations.Toolbar = function(options) {
                     var colorGroup = document.getElementById('OT-Annotation-Colors');
                     colorGroup.style.backgroundColor = color;
 
-                    console.log(canvases);
                     canvases.forEach(function (canvas) {
                         canvas.changeColor(color);
                     });
@@ -884,7 +885,6 @@ OT.Annotations.Toolbar = function(options) {
 
             // If we have an object as item.items, it was never set by the user
             if (item.title === 'Line Width' && !Array.isArray(item.items)) {
-                console.log("Adding line width items");
                 // Add defaults
                 item.items = [
                     {
@@ -942,7 +942,6 @@ OT.Annotations.Toolbar = function(options) {
                 self.items.forEach(function (item) {
                     if (item.title !== 'Clear' && item.title === itemName) {
                         self.selectedItem = item;
-                        console.log(self.selectedItem);
 
                         self.attachDefaultAction(item);
 
@@ -959,9 +958,7 @@ OT.Annotations.Toolbar = function(options) {
                     if (item.title === itemName) {
                         self.selectedGroup = item;
 
-                        console.log(item.items);
                         if (item.items) {
-                            console.log(item.items);
                             subPanel.setAttribute('class', 'OT_subpanel');
                             subPanel.style.backgroundColor = self.backgroundColor;
                             subPanel.style.width = '100%';
@@ -1062,7 +1059,6 @@ OT.Annotations.Toolbar = function(options) {
                 self.selectedGroup.items.forEach(function (item) {
                     if (item.title !== 'Clear' && item.title === itemName) {
                         self.selectedItem = item;
-                        console.log(self.selectedItem);
 
                         self.attachDefaultAction(item);
 
@@ -1082,7 +1078,6 @@ OT.Annotations.Toolbar = function(options) {
 
         document.getElementById('OT-Annotation-Clear').onclick = function() {
             canvases.forEach(function (canvas) {
-                console.log('Clearing canvas');
                 canvas.clear();
             });
         };
@@ -1136,7 +1131,6 @@ OT.Annotations.Toolbar = function(options) {
     };
 
     this.addCanvas = function(canvas) {
-        console.log("Adding canvas " + canvas);
         var self = this;
         canvas.link(session);
         canvas.colors(self.colors);
