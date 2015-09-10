@@ -48,10 +48,19 @@ OT.Annotations = function(options) {
         return canvas;
     };
 
+    /**
+     * Links an OpenTok session to the annotation canvas. Typically, this is automatically linked
+     * when using {@link Toolbar#addCanvas}.
+     * @param session The OpenTok session.
+     */
     this.link = function(session) {
         this.session = session;
     };
 
+    /**
+     * Changes the active annotation color for the canvas.
+     * @param color The hex string representation of the color (#rrggbb).
+     */
     this.changeColor = function (color) {
         self.userColor = color;
         if (!self.lineWidth) {
@@ -59,10 +68,19 @@ OT.Annotations = function(options) {
         }
     };
 
+    /**
+     * Changes the line/stroke width of the active annotation for the canvas.
+     * @param size The size in pixels.
+     */
     this.changeLineWidth = function (size) {
         this.lineWidth = size;
     };
 
+    /**
+     * Sets the selected menu item from the toolbar. This is typically handled
+     * automatically by the toolbar, but can be used to programmatically select an item.
+     * @param item The menu item to set as selected.
+     */
     this.selectItem = function (item) {
         if (item.title === 'Capture') {
             self.selectedItem = item;
@@ -105,13 +123,21 @@ OT.Annotations = function(options) {
         }
     };
 
+    /**
+     *
+     * @param colors
+     */
     this.colors = function (colors) {
         this.colors = colors;
         this.changeColor(colors[0]);
     };
 
+    /**
+     * Clears the canvas for the active user. Only annotations added by the active OpenTok user will
+     * be removed, leaving the history of all other annotations.
+     */
     this.clear = function () {
-        clearCanvas();
+        clearCanvas(false, self.session.connection.connectionId);
         if (session) {
             session.signal({
                 type: 'otAnnotation_clear'
@@ -119,7 +145,10 @@ OT.Annotations = function(options) {
         }
     };
 
-    // TODO Allow the user to choose the image type? (jpg, png)
+    // TODO Allow the user to choose the image type? (jpg, png) Also allow size?
+    /**
+     * Captures a screenshot of the annotations displayed on top of the active video feed.
+     */
     this.captureScreenshot = function() {
         var canvasCopy = document.createElement('canvas');
         canvasCopy.width = canvas.width;
@@ -182,6 +211,13 @@ OT.Annotations = function(options) {
 
     /** Canvas Handling **/
 
+    function addEventListeners(el, s, fn) {
+        var evts = s.split(' ');
+        for (var i = 0, iLen = evts.length; i < iLen; i++) {
+            el.addEventListener(evts[i], fn, true);
+        }
+    }
+
     addEventListeners(canvas, 'mousedown mousemove mouseup mouseout touchstart touchmove touchend', function (event) {
         if (event.type === 'mousemove' && !client.dragging) {
             // Ignore mouse move Events if we're not dragging
@@ -189,14 +225,14 @@ OT.Annotations = function(options) {
         }
         event.preventDefault();
 
-        var scaleX = canvas.width / self.parent.clientWidth,
-            scaleY = canvas.height / self.parent.clientHeight,
-            offsetX = event.offsetX || event.pageX - canvas.offsetLeft ||
-                event.changedTouches[0].pageX - canvas.offsetLeft,
-            offsetY = event.offsetY || event.pageY - canvas.offsetTop ||
-                event.changedTouches[0].pageY - canvas.offsetTop,
-            x = offsetX * scaleX,
-            y = offsetY * scaleY;
+        var scaleX = canvas.width / self.parent.clientWidth;
+        var scaleY = canvas.height / self.parent.clientHeight;
+        var offsetX = event.offsetX || event.pageX - canvas.offsetLeft ||
+                event.changedTouches[0].pageX - canvas.offsetLeft;
+        var offsetY = event.offsetY || event.pageY - canvas.offsetTop ||
+                event.changedTouches[0].pageY - canvas.offsetTop;
+        var x = offsetX * scaleX;
+        var y = offsetY * scaleY;
 
 //        console.log("Video size: " + self.videoFeed.videoWidth(), self.videoFeed.videoHeight());
 //        console.log("Canvas size: " + canvas.width, canvas.height);
@@ -340,13 +376,6 @@ OT.Annotations = function(options) {
             }
         }
     });
-
-    function addEventListeners(el, s, fn) {
-        var evts = s.split(' ');
-        for (var i = 0, iLen = evts.length; i < iLen; i++) {
-            el.addEventListener(evts[i], fn, true);
-        }
-    }
 
     var draw = function (update) {
         if (!ctx) {
@@ -512,8 +541,7 @@ OT.Annotations = function(options) {
             offsetX += (canvas.width / 2) - (scale * iCanvas.width / 2);
         }
 
-        // INFO Since the offset is calculated on the "scaled" frame, we need to scale it back
-        update.fromX = scale *  update.fromX + offsetX;
+        update.fromX = scale * update.fromX + offsetX;
         update.fromY = scale * update.fromY + offsetY;
 
         update.toX = scale * update.toX + offsetX;
@@ -546,16 +574,24 @@ OT.Annotations = function(options) {
         });
     };
 
-    var clearCanvas = function () {
-        ctx.save();
+    var clearCanvas = function (incoming, cid) {
+        console.log("cid: " + cid);
+        // Remove all elements from history that were drawn by the sender
+        drawHistory = drawHistory.filter(function (history) {
+            console.log(history.fromId);
+            return history.fromId !== cid;
+        });
 
-        // Use the identity matrix while clearing the canvas
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientWidth);
+        if (!incoming) {
+            if (session) {
+                session.signal({
+                    type: 'otAnnotation_clear'
+                });
+            }
+        }
 
-        // Restore the transform
-        ctx.restore();
-        drawHistory = [];
+        // Refresh the canvas
+        draw();
     };
 
     /** Signal Handling **/
@@ -581,7 +617,8 @@ OT.Annotations = function(options) {
             },
             'signal:otAnnotation_clear': function (event) {
                 if (event.from.connectionId !== self.session.connection.connectionId) {
-                    clearCanvas();
+                    // Only clear elements drawn by the sender's (from) Id
+                    clearCanvas(true, event.from.connectionId);
                 }
             },
             connectionCreated: function (event) {
@@ -943,7 +980,7 @@ OT.Annotations.Toolbar = function(options) {
                     if (item.title !== 'Clear' && item.title === itemName) {
                         self.selectedItem = item;
 
-                        self.attachDefaultAction(item);
+                        attachDefaultAction(item);
 
                         canvases.forEach(function (canvas) {
                             canvas.selectItem(self.selectedItem);
@@ -1060,7 +1097,7 @@ OT.Annotations.Toolbar = function(options) {
                     if (item.title !== 'Clear' && item.title === itemName) {
                         self.selectedItem = item;
 
-                        self.attachDefaultAction(item);
+                        attachDefaultAction(item);
 
                         canvases.forEach(function (canvas) {
                             canvas.selectItem(self.selectedItem);
@@ -1083,7 +1120,7 @@ OT.Annotations.Toolbar = function(options) {
         };
     }
 
-    this.attachDefaultAction = function (item) {
+    var attachDefaultAction = function (item) {
         if (!item.points) {
             // Attach default actions
             if (item.title === 'Line') {
@@ -1126,10 +1163,18 @@ OT.Annotations.Toolbar = function(options) {
         }
     };
 
+    /**
+     * Callback function for toolbar menu item click events.
+     * @param cb The callback function used to handle the click event.
+     */
     this.itemClicked = function(cb) {
         this.cbs.push(cb);
     };
 
+    /**
+     * Links an annotation canvas to the toolbar so that menu actions can be handled on it.
+     * @param canvas The annotation canvas to be linked to the toolbar.
+     */
     this.addCanvas = function(canvas) {
         var self = this;
         canvas.link(session);
@@ -1137,12 +1182,19 @@ OT.Annotations.Toolbar = function(options) {
         canvases.push(canvas);
     };
 
-    // FIXME For video feeds that are terminated by the subscriber, the parentNode is removed, but not the canvas
+    // FIXME For video feeds that are terminated by the subscriber, the parentNode is removed, but not the reference to the canvas
+    /**
+     * Removes the annotation canvas with the specified connectionId from its parent container and
+     * unlinks it from the toolbar.
+     * @param connectionId The stream's connection ID for the video feed whose canvas should be removed.
+     */
     this.removeCanvas = function(connectionId) {
         canvases.forEach(function (annotationView) {
             var canvas = annotationView.canvas();
             if (annotationView.videoFeed.stream.connection.connectionId === connectionId) {
-                canvas.parentNode.removeChild(canvas);
+                if (canvas.parentNode) {
+                    canvas.parentNode.removeChild(canvas);
+                }
             }
         });
 
@@ -1151,12 +1203,17 @@ OT.Annotations.Toolbar = function(options) {
         });
     };
 
+    /**
+     * Removes the toolbar and all associated annotation canvases from their parent containers.
+     */
     this.remove = function() {
         panel.parentNode.removeChild(panel);
 
         canvases.forEach(function (annotationView) {
             var canvas = annotationView.canvas();
-            canvas.parentNode.removeChild(canvas);
+            if (canvas.parentNode) {
+                canvas.parentNode.removeChild(canvas);
+            }
         });
 
         canvases = [];
