@@ -86,28 +86,26 @@ OT.Annotations = function(options) {
             self.selectedItem = item;
 
             self.overlay = document.createElement("div");
-            self.overlay.style.width = this.parent.clientWidth + 'px';
-            self.overlay.style.height = this.parent.clientHeight + 'px';
-            self.overlay.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+            self.overlay.style.position = 'absolute';
+            self.overlay.style.width = self.parent.clientWidth + 'px';
+            self.overlay.style.height = self.parent.clientHeight + 'px';
+            self.overlay.style.background = 'rgba(0,0,0,0.4) url("../img/camera.png") no-repeat center';
+            self.overlay.style.backgroundSize = "50px 50px";
             self.overlay.style.cursor = 'pointer';
             self.overlay.style.opacity = 0;
 
             self.parent.appendChild(self.overlay);
 
-            self.overlay.onmouseover = function () {
+            self.parent.onmouseover = function () {
                 self.overlay.style.opacity = 1;
             };
 
-            self.overlay.onmouseout = function () {
+            self.parent.onmouseout = function () {
                 self.overlay.style.opacity = 0;
             };
 
             self.overlay.onclick = function () {
-                console.log("Clicked feed: " + self.videoFeed.stream.connection.connectionId);
-
                 self.captureScreenshot();
-
-                // TODO Provide callback with the screenshot obj
             };
         } else if (item.title.indexOf('Line Width') !== -1) {
             if (item.size) {
@@ -124,8 +122,8 @@ OT.Annotations = function(options) {
     };
 
     /**
-     *
-     * @param colors
+     * Sets the color palette for the color picker
+     * @param colors The array of hex color strings (#rrggbb).
      */
     this.colors = function (colors) {
         this.colors = colors;
