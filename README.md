@@ -54,33 +54,33 @@ toolbar = new OT.Annotations.Toolbar({
     ...
     items: [
         {
-            id: 'ot_pen',
+            id: 'OT_pen',
             title: 'Pen',
             icon: '../img/freehand.png',
             selectedIcon: '../img/freehand.png'
         },
         {
-            id: 'ot_line',
+            id: 'OT_line',
             title: 'Line',
             icon: '../img/line.png'
         },
         {
-            id: 'ot_shapes',
+            id: 'OT_shapes',
             title: 'Shapes',
             icon: '../img/shapes.png',
             items: [
                 {
-                    id: 'ot_arrow',
+                    id: 'OT_arrow',
                     title: 'Arrow',
                     icon: '../img/arrow.png'
                 },
                 {
-                    id: 'ot_rect',
+                    id: 'OT_rect',
                     title: 'Rectangle',
                     icon: '../img/rectangle.png'
                 },
                 {
-                    id: 'ot_oval',
+                    id: 'OT_oval',
                     title: 'Oval',
                     icon: '../img/oval.png'
                 },
@@ -106,23 +106,23 @@ toolbar = new OT.Annotations.Toolbar({
             ]
         },
         {
-            id: 'ot_colors',
+            id: 'OT_colors',
             title: 'Colors',
             items: { /* Built dynamically */ }
         },
         {
-            id: 'ot_line_width',
+            id: 'OT_line_width',
             title: 'Line Width',
             icon: '../img/line_width.png',
             items: { /* Built dynamically */ }
         },
         {
-            id: 'ot_clear',
+            id: 'OT_clear',
             title: 'Clear',
             icon: '../img/clear.png'
         },
         {
-            id: 'ot_capture',
+            id: 'OT_capture',
             title: 'Capture',
             icon: '../img/camera.png'
         }
@@ -137,16 +137,16 @@ If no custom items are added to the toolbar initializer, these will be automatic
 
 | id            | Action        |
 | ------------- | ------------- |
-| ot_pen | Freehand/Pen tool |
-| ot_line | Line tool |
-| ot_shapes | Shapes group/submenu |
-| ot_arrow | Arrow tool |
-| ot_rect | Rectangle tool |
-| ot_oval | Oval tool |
-| ot_colors | Color picker submenu |
-| ot_line_width | Line width picker submenu |
-| ot_clear | Clears active user annotations |
-| ot_capture | Tap a video frame to capture a screenshot |
+| OT_pen | Freehand/Pen tool |
+| OT_line | Line tool |
+| OT_shapes | Shapes group/submenu |
+| OT_arrow | Arrow tool |
+| OT_rect | Rectangle tool |
+| OT_oval | Oval tool |
+| OT_colors | Color picker submenu |
+| OT_line_width | Line width picker submenu |
+| OT_clear | Clears active user annotations |
+| OT_capture | Tap a video frame to capture a screenshot |
 
 #### Adding a custom color palette
 
