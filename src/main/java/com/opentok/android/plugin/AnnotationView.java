@@ -23,8 +23,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 // TODO Determine if this class should be allowed to be extended
 public class AnnotationView extends View implements AnnotationToolbar.SignalListener, AnnotationToolbar.ActionListener {
@@ -326,7 +328,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         Log.i("Canvas Signal", cid);
         if (!cid.equals(mycid)) { // Ensure that we only handle signals from other users on the current canvas
             if (type.contains("otAnnotation")) {
-                // TODO Do initial parse up here? Iterate below where required?
                 if (type.equalsIgnoreCase(Mode.Pen.toString())) {
                     Log.i(TAG, data);
                     // Build object from JSON array
@@ -348,73 +349,113 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()), cid);
                                 changeStrokeWidth(((Number) json.get("lineWidth")).floatValue(), cid);
 
-                                // Adjust values with offset
-                                float width = ((Number) json.get("canvasWidth")).floatValue();
-                                float height = ((Number) json.get("canvasHeight")).floatValue();
+                                AnnotationVideoRenderer renderer = null;
+
+                                if (mPublisher != null) {
+                                    renderer = ((AnnotationVideoRenderer) mPublisher.getRenderer());
+                                } else if (mSubscriber != null) {
+                                    renderer = ((AnnotationVideoRenderer) mSubscriber.getRenderer());
+                                }
 
                                 Log.i("CanvasOffset", "Size: " + width + ", " + height);
                                 Log.i("CanvasOffset", "CanvasSize: " + this.width + ", " + this.height);
 
-                                // The offset is meant to center the canvases
-                                float offsetX = 0;
-                                float offsetY = 0;
+                                if (renderer != null) {
+                                    // The offset is meant to center the canvases
+                                    float offsetX = 0;
+                                    float offsetY = 0;
 
-                                // Handle scale
-                                float scale = 1;
+                                    // Handle scale
+                                    float scale = 1;
 
-                                float aspectRatio = this.width / this.height;
-                                float canvasRatio = width / height;
+                                    Map<String, Float> canvas = new HashMap<>();
+                                    canvas.put("width", (float) this.width);
+                                    canvas.put("height", (float) this.height);
 
-                                /**
-                                 * This assumes that if the width is the greater value, video frames
-                                 * can be scaled so that they have equal widths, which can be used to
-                                 * find the offset in the y axis. Therefore, the offset on the x axis
-                                 * will be 0. If the height is the greater value, the offset on the y
-                                 * axis will be 0.
-                                 */
-                                if (aspectRatio > canvasRatio) {
-                                    scale = this.width / width;
+                                    Map<String, Float> video = new HashMap<>();
+                                    video.put("width", (float) renderer.getVideoWidth());
+                                    video.put("height", (float) renderer.getVideoHeight());
 
-                                    Log.i("CanvasOffset", "New Height: " + scale * height);
-                                    offsetY = (this.height / 2) - (scale * height / 2);
-                                } else {
-                                    scale = this.height / height;
+                                    Map<String, Float> iCanvas = new HashMap<>();
+                                    iCanvas.put("width", ((Number) json.get("canvasWidth")).floatValue());
+                                    iCanvas.put("height", ((Number) json.get("canvasHeight")).floatValue());
 
-                                    Log.i("CanvasOffset", "New Width: " + scale * width);
-                                    offsetX = (this.width / 2) - (scale * width / 2);
+                                    Map<String, Float> iVideo = new HashMap<>();
+                                    iVideo.put("width", ((Number) json.get("videoWidth")).floatValue());
+                                    iVideo.put("height", ((Number) json.get("videoHeight")).floatValue());
+
+                                    float canvasRatio = canvas.get("width") / canvas.get("height");
+                                    float videoRatio = video.get("width") / video.get("height");
+                                    float iCanvasRatio = iCanvas.get("width") / iCanvas.get("height");
+                                    float iVideoRatio = iVideo.get("width") / iVideo.get("height");
+
+                                    // First, calculate the offset on the incoming video
+                                    if (iCanvasRatio > iVideoRatio && iCanvasRatio < 0) {
+                                        scale = iCanvas.get("width") / iVideo.get("width");
+                                        offsetY = (iCanvas.get("height") / 2) - (scale * iVideo.get("height") / 2);
+                                    } else {
+                                        scale = iCanvas.get("height") / iVideo.get("height");
+                                        offsetX = (iCanvas.get("width") / 2) - (scale * iVideo.get("width") / 2);
+                                    }
+
+                                    // Then, calculate the offset on the current video
+                                    if (canvasRatio > videoRatio && canvasRatio < 0) {
+                                        scale = canvas.get("width") / video.get("width");
+                                        offsetY += (canvas.get("height") / 2) - (scale * video.get("height") / 2);
+                                    } else {
+                                        scale = canvas.get("height") / video.get("height");
+                                        offsetX += (canvas.get("width") / 2) - (scale * video.get("width") / 2);
+                                    }
+
+                                    // Last, calculate the total offset based on the scale of the current and incoming canvases
+
+                                    /**
+                                     * This assumes that if the width is the greater value, video frames
+                                     * can be scaled so that they have equal widths, which can be used to
+                                     * find the offset in the y axis. Therefore, the offset on the x axis
+                                     * will be 0. If the height is the greater value, the offset on the y
+                                     * axis will be 0.
+                                     */
+                                    if (canvasRatio > iCanvasRatio && canvasRatio < 0) {
+                                        scale = canvas.get("width") / iCanvas.get("width");
+                                        offsetY += (canvas.get("height") / 2) - (scale * iCanvas.get("height") / 2);
+                                    } else {
+                                        scale = canvas.get("height") / iCanvas.get("height");
+                                        offsetX += (canvas.get("width") / 2) - (scale * iCanvas.get("width") / 2);
+                                    }
+
+                                    Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
+                                    Log.i("CanvasOffset", "Scale: " + scale);
+
+                                    // FIXME If possible, the scale should also scale the line width (use a min width value?)
+
+                                    // INFO The offsets are already scaled
+                                    float fromX = (scale * ((Number) json.get("fromX")).floatValue()) + offsetX;
+                                    float fromY = (scale * ((Number) json.get("fromY")).floatValue()) + offsetY;
+
+                                    float toX = (scale * ((Number) json.get("toX")).floatValue()) + offsetX;
+                                    float toY = (scale * ((Number) json.get("toY")).floatValue()) + offsetY;
+
+                                    Log.i("CanvasOffset", "From: " + fromX + ", " + fromY);
+                                    Log.i("CanvasOffset", "To: " + toX + ", " + toY);
+
+                                    if (mSignalMirrored) {
+                                        fromX = this.width - fromX;
+                                        toX = this.width - toX;
+                                    }
+
+                                    if (mMirrored) {
+                                        Log.i("CanvasOffset", "Feed is mirrored");
+                                        // Revert (Double negative)
+                                        fromX = this.width - fromX;
+                                        toX = this.width - toX;
+                                    }
+
+                                    startTouch(fromX, fromY);
+                                    moveTouch(toX, toY, true);
+                                    upTouch();
+                                    invalidate(); // Need this to finalize the drawing on the screen
                                 }
-
-                                Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
-                                Log.i("CanvasOffset", "Scale: " + scale);
-
-                                // FIXME If possible, the scale should also scale the line width (use a min width value?)
-
-                                // INFO The offsets are already scaled
-                                float fromX = (scale * ((Number) json.get("fromX")).floatValue()) + offsetX;
-                                float fromY = (scale * ((Number) json.get("fromY")).floatValue()) + offsetY;
-
-                                float toX = (scale * ((Number) json.get("toX")).floatValue()) + offsetX;
-                                float toY = (scale * ((Number) json.get("toY")).floatValue()) + offsetY;
-
-                                Log.i("CanvasOffset", "From: " + fromX + ", " + fromY);
-                                Log.i("CanvasOffset", "To: " + toX + ", " + toY);
-
-                                if (mSignalMirrored) {
-                                    fromX = this.width - fromX;
-                                    toX = this.width - toX;
-                                }
-
-                                if (mMirrored) {
-                                    Log.i("CanvasOffset", "Feed is mirrored");
-                                    // Revert (Double negative)
-                                    fromX = this.width - fromX;
-                                    toX = this.width - toX;
-                                }
-
-                                startTouch(fromX, fromY);
-                                moveTouch(toX, toY, true);
-                                upTouch();
-                                invalidate(); // Need this to finalize the drawing on the screen
                             }
                         }
                     } catch (ParseException e) {
@@ -434,21 +475,36 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
         boolean mirrored = false;
 
+        int videoWidth = 0;
+        int videoHeight = 0;
+
+        AnnotationVideoRenderer renderer = null;
+
         if (mPublisher != null) {
-            mirrored = ((AnnotationVideoRenderer) mPublisher.getRenderer()).isMirrored();
+            renderer = ((AnnotationVideoRenderer) mPublisher.getRenderer());
         } else if (mSubscriber != null) {
-            mirrored = ((AnnotationVideoRenderer) mSubscriber.getRenderer()).isMirrored();
+            renderer = ((AnnotationVideoRenderer) mSubscriber.getRenderer());
+        }
+
+        if (renderer != null) {
+            mirrored = renderer.isMirrored();
+            videoWidth = renderer.getVideoWidth();
+            videoHeight = renderer.getVideoHeight();
+        } else {
+            // FIXME Throw exception?
         }
 
         // TODO Include a unique ID for the path?
         jsonObject.put("id", canvascid);
-        jsonObject.put("fromid", mycid);
+        jsonObject.put("fromId", mycid);
         jsonObject.put("fromX", mLastX);
         jsonObject.put("fromY", mLastY);
         jsonObject.put("toX", x);
         jsonObject.put("toY", y);
         jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
         jsonObject.put("lineWidth", userStrokeWidth);
+        jsonObject.put("videoWidth", videoWidth);
+        jsonObject.put("videoHeight", videoHeight);
         jsonObject.put("canvasWidth", this.width);
         jsonObject.put("canvasHeight", this.height);
         jsonObject.put("mirrored", mirrored);
@@ -521,7 +577,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 //
 //            // TODO Include a unique ID for the path? - this way it can be removed using history
 //            jsonObject.put("id", canvascid);
-//            jsonObject.put("fromid", mycid);
+//            jsonObject.put("fromId", mycid);
 //            jsonObject.put("x", x);
 //            jsonObject.put("y", y);
 //            jsonObject.put("text", "This is a test");

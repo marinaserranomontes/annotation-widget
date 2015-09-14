@@ -6,6 +6,7 @@ import android.opengl.GLES20;
 import android.opengl.GLException;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Log;
 import android.view.View;
 
 import com.opentok.android.BaseVideoRenderer;
@@ -264,7 +265,9 @@ public class AnnotationVideoRenderer extends BaseVideoRenderer {
                 float scaleX = 1.0f, scaleY = 1.0f;
                 float ratio = (float) mCurrentFrame.getWidth()
                         / mCurrentFrame.getHeight();
+//                Log.i("RenderFrame", "Frame size: " + mCurrentFrame.getWidth() + ", " + mCurrentFrame.getHeight());
                 float vratio = (float) mViewportWidth / mViewportHeight;
+//                Log.i("RenderFrame", "Viewport size" + mViewportWidth + ", " + mViewportHeight);
 
                 if (mVideoFitEnabled) {
                     if (ratio > vratio) {
@@ -352,6 +355,18 @@ public class AnnotationVideoRenderer extends BaseVideoRenderer {
 
     public boolean isMirrored() {
         return mRenderer.mCurrentFrame != null && mRenderer.mCurrentFrame.isMirroredX();
+    }
+
+    public boolean isVideoFitEnabled() {
+        return mRenderer.mVideoFitEnabled;
+    }
+
+    public int getVideoWidth() {
+        return mRenderer.mCurrentFrame.getWidth();
+    }
+
+    public int getVideoHeight() {
+        return mRenderer.mCurrentFrame.getHeight();
     }
 
     public Bitmap captureScreenshot() {

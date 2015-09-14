@@ -332,8 +332,6 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
                         }
 
                         hideSubmenu();
-
-                        // TODO Update the main button image to match sub menu item?
                     }
                 });
 
