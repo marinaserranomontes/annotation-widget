@@ -76,31 +76,38 @@
             colors: palette,
             items: [
                 {
+                    id: 'OT_pen',
                     title: 'Pen',
                     icon: '../img/freehand.png',
                     selectedIcon: '../img/freehand.png'
                 },
                 {
+                    id: 'OT_line',
                     title: 'Line',
                     icon: '../img/line.png'
                 },
                 {
+                    id: 'OT_shapes',
                     title: 'Shapes',
                     icon: '../img/shapes.png',
                     items: [
                         {
+                            id: 'OT_arrow',
                             title: 'Arrow',
                             icon: '../img/arrow.png'
                         },
                         {
+                            id: 'OT_rect',
                             title: 'Rectangle',
                             icon: '../img/rectangle.png'
                         },
                         {
+                            id: 'OT_oval',
                             title: 'Oval',
                             icon: '../img/oval.png'
                         },
                         {
+                            id: 'OT_star',
                             title: 'Star',
                             icon: '../img/star.png',
                             points: [
@@ -120,20 +127,24 @@
                     ]
                 },
                 {
+                    id: 'OT_colors',
                     title: 'Colors',
                     icon: '',
                     items: { /* Built dynamically */ }
                 },
                 {
+                    id: 'OT_line_width',
                     title: 'Line Width',
                     icon: '../img/line_width.png',
                     items: { /* Built dynamically */ }
                 },
                 {
+                    id: 'OT_clear',
                     title: 'Clear',
                     icon: '../img/clear.png'
                 },
                 {
+                    id: 'OT_capture',
                     title: 'Capture',
                     icon: '../img/camera.png'
                 }
@@ -178,6 +189,12 @@
                 container: parentDiv
             });
             toolbar.addCanvas(canvas);
+
+            // Callback for screen capture event
+            canvas.onScreenCapture(function (dataUrl) {
+                var win = window.open(dataUrl, '_blank');
+                win.focus();
+            });
 
             show('unpublishLink');
             hide('publishLink');
@@ -287,6 +304,12 @@
             container: subscriberDiv
         });
         toolbar.addCanvas(canvas);
+
+        // Callback for screen capture event
+        canvas.onScreenCapture(function (dataUrl) {
+            var win = window.open(dataUrl, '_blank');
+            win.focus();
+        });
     }
 
     function show(id) {
@@ -325,6 +348,6 @@
 </div>
 <div id="myCamera" class="publisherContainer"></div>
 <div id="toolbar" style="height: 50px"></div>
-<div id="subscribers" style="top: 75%"></div>
+<div id="subscribers" style="position: absolute; top: 75%"></div>
 </body>
 </html>

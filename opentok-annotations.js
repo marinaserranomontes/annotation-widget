@@ -30,6 +30,7 @@ OT.Annotations = function(options) {
 
     var self = this,
         ctx,
+        cbs = [],
         colors,
         lineWidth,
         mirrored,
@@ -82,7 +83,7 @@ OT.Annotations = function(options) {
      * @param item The menu item to set as selected.
      */
     this.selectItem = function (item) {
-        if (item.title === 'Capture') {
+        if (item.id === 'OT_capture') {
             self.selectedItem = item;
 
             self.overlay = document.createElement("div");
@@ -107,7 +108,7 @@ OT.Annotations = function(options) {
             self.overlay.onclick = function () {
                 self.captureScreenshot();
             };
-        } else if (item.title.indexOf('Line Width') !== -1) {
+        } else if (item.id.indexOf('OT_line_width') !== -1) {
             if (item.size) {
                 self.changeLineWidth(item.size);
             }
@@ -176,7 +177,7 @@ OT.Annotations = function(options) {
             offsetY = (canvas.height - height) / 2;
         }
 
-        // Combine the two
+        // Combine the video and annotation images
         var image = new Image();
         image.onload = function() {
             var ctxCopy = canvasCopy.getContext('2d');
@@ -193,18 +194,19 @@ OT.Annotations = function(options) {
             }
             ctxCopy.drawImage(canvas, 0, 0);
 
-            // FIXME Remove this (testing only)
-//            var win = window.open(canvasCopy.toDataURL(), '_blank');
-//            win.focus();
-
-            // TODO Send image through callback
-            // canvasCopy.toDataURL()
+            cbs.forEach(function (cb) {
+                cb.call(self, canvasCopy.toDataURL());
+            });
 
             // Clear and destroy the canvas copy
             canvasCopy = null;
         };
         image.src = 'data:image/png;base64,' + self.videoFeed.getImgData();
 
+    };
+
+    this.onScreenCapture = function(cb) {
+        cbs.push(cb);
     };
 
     /** Canvas Handling **/
@@ -240,7 +242,7 @@ OT.Annotations = function(options) {
 
         var update;
 
-        if (self.selectedItem.title === 'Pen') {
+        if (self.selectedItem.id === 'OT_pen') {
             switch (event.type) {
                 case 'mousedown':
                 case 'touchstart':
@@ -681,11 +683,13 @@ OT.Annotations.Toolbar = function(options) {
     this.iconHeight = options.iconHeight || '30px';
     this.items = options.items || [
         {
+            id: 'OT_pen',
             title: 'Pen',
-            icon: '../img/freehand.png', // FIXME All of these need to be relative to where the script is located or a full url
+            icon: '../img/freehand.png',
             selectedIcon: '../img/freehand.png' // TODO Create an icon for selected states
         },
         {
+            id: 'OT_line',
             title: 'Line',
             icon: '../img/line.png',
             points: [
@@ -694,10 +698,12 @@ OT.Annotations.Toolbar = function(options) {
             ]
         },
         {
+            id: 'OT_shapes',
             title: 'Shapes',
             icon: '../img/shapes.png',
             items: [
                 {
+                    id: 'OT_arrow',
                     title: 'Arrow',
                     icon: '../img/arrow.png',
                     points: [
@@ -712,6 +718,7 @@ OT.Annotations.Toolbar = function(options) {
                     ]
                 },
                 {
+                    id: 'OT_rect',
                     title: 'Rectangle',
                     icon: '../img/rectangle.png',
                     points: [
@@ -723,6 +730,7 @@ OT.Annotations.Toolbar = function(options) {
                     ]
                 },
                 {
+                    id: 'OT_oval',
                     title: 'Oval',
                     icon: '../img/oval.png',
                     points: [
@@ -740,20 +748,24 @@ OT.Annotations.Toolbar = function(options) {
             ]
         },
         {
+            id: 'OT_colors',
             title: 'Colors',
             icon: '',
             items: { /* Built dynamically */ }
         },
         {
+            id: 'OT_line_width',
             title: 'Line Width',
             icon: '../img/line_width.png',
             items: { /* Built dynamically */ }
         },
         {
+            id: 'OT_clear',
             title: 'Clear',
             icon: '../img/clear.png'
         },
         {
+            id: 'OT_capture',
             title: 'Capture',
             icon: '../img/camera.png'
         }
@@ -860,7 +872,7 @@ OT.Annotations.Toolbar = function(options) {
 
     if (this.parent) {
         var panel = document.createElement("div");
-        panel.setAttribute('id', 'opentok_toolbar');
+        panel.setAttribute('id', 'OT_toolbar');
         panel.setAttribute('class', 'OT_panel');
         panel.style.width = '100%';
         panel.style.height = '100%';
@@ -878,14 +890,13 @@ OT.Annotations.Toolbar = function(options) {
 
             var button = document.createElement("input");
             button.setAttribute('type', 'button');
-            // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
-            button.setAttribute('id', 'OT-Annotation-' + item.title.replace(" ", "-"));
+            button.setAttribute('id', item.id);
 
             button.style.position = 'relative';
             button.style.top = "50%";
             button.style.transform = 'translateY(-50%)';
 
-            if (item.title === 'Colors') {
+            if (item.id === 'OT_colors') {
                 var colorPicker = document.createElement("div");
                 colorPicker.setAttribute('class', 'color-picker');
                 colorPicker.style.backgroundColor = this.backgroundColor;
@@ -894,7 +905,7 @@ OT.Annotations.Toolbar = function(options) {
                 var pk = new ColorPicker(".color-picker", this.colors, null);
 
                 pk.colorChosen(function (color) {
-                    var colorGroup = document.getElementById('OT-Annotation-Colors');
+                    var colorGroup = document.getElementById('OT_colors');
                     colorGroup.style.backgroundColor = color;
 
                     canvases.forEach(function (canvas) {
@@ -923,30 +934,37 @@ OT.Annotations.Toolbar = function(options) {
                 // Add defaults
                 item.items = [
                     {
+                        id: 'OT_line_width_2',
                         title: 'Line Width 2',
                         size: 2
                     },
                     {
+                        id: 'OT_line_width_4',
                         title: 'Line Width 4',
                         size: 4
                     },
                     {
+                        id: 'OT_line_width_6',
                         title: 'Line Width 6',
                         size: 6
                     },
                     {
+                        id: 'OT_line_width_8',
                         title: 'Line Width 8',
                         size: 8
                     },
                     {
+                        id: 'OT_line_width_10',
                         title: 'Line Width 10',
                         size: 10
                     },
                     {
+                        id: 'OT_line_width_12',
                         title: 'Line Width 12',
                         size: 12
                     },
                     {
+                        id: 'OT_line_width_14',
                         title: 'Line Width 14',
                         size: 14
                     }
@@ -1005,14 +1023,13 @@ OT.Annotations.Toolbar = function(options) {
                             if (Array.isArray(item.items)) {
                                 var submenuItems = [];
 
-                                if (item.title === 'Line Width') {
+                                if (item.id === 'OT_line_width') {
                                     // We want to dynamically create icons for the list of possible line widths
                                     item.items.forEach(function (subItem) {
                                         // INFO Using a div here - not input to create an inner div representing the line width - better option?
                                         var itemButton = document.createElement("div");
                                         itemButton.setAttribute('data-col', subItem.title);
-                                        // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
-                                        itemButton.setAttribute('id', 'OT-Annotation-' + subItem.title.replace(" ", "-"));
+                                        itemButton.setAttribute('id', subItem.id);
                                         itemButton.style.position = 'relative';
                                         itemButton.style.top = "50%";
                                         itemButton.style.transform = 'translateY(-50%)';
@@ -1043,8 +1060,7 @@ OT.Annotations.Toolbar = function(options) {
                                         var itemButton = document.createElement("input");
                                         itemButton.setAttribute('type', 'button');
                                         itemButton.setAttribute('data-col', subItem.title);
-                                        // TODO Only use this style id for internal actions? Let devs use their own, unmodified ids
-                                        itemButton.setAttribute('id', 'OT-Annotation-' + subItem.title.replace(" ", "-"));
+                                        itemButton.setAttribute('id', subItem.id);
                                         itemButton.style.background = 'url("' + subItem.icon + '") no-repeat';
                                         itemButton.style.position = 'relative';
                                         itemButton.style.top = "50%";
@@ -1064,12 +1080,12 @@ OT.Annotations.Toolbar = function(options) {
                             }
                         }
 
-                        if (id === 'OT-Annotation-Shapes' || id === 'OT-Annotation-Line-Width') {
+                        if (id === 'OT_shapes' || id === 'OT_line_width') {
                             if (subPanel) {
                                 subPanel.style.display = 'block';
                             }
                             pk.close();
-                        } else if (id === 'OT-Annotation-Colors') {
+                        } else if (id === 'OT_colors') {
                             if (subPanel) {
                                 subPanel.style.display = 'none';
                             }
@@ -1092,7 +1108,7 @@ OT.Annotations.Toolbar = function(options) {
 
             if (!group) {
                 self.selectedGroup.items.forEach(function (item) {
-                    if (item.title !== 'Clear' && item.title === itemName) {
+                    if (item.id !== 'OT_clear' && item.id === id) {
                         self.selectedItem = item;
 
                         attachDefaultAction(item);
@@ -1111,7 +1127,7 @@ OT.Annotations.Toolbar = function(options) {
             });
         };
 
-        document.getElementById('OT-Annotation-Clear').onclick = function() {
+        document.getElementById('OT_clear').onclick = function() {
             canvases.forEach(function (canvas) {
                 canvas.clear();
             });
@@ -1121,12 +1137,12 @@ OT.Annotations.Toolbar = function(options) {
     var attachDefaultAction = function (item) {
         if (!item.points) {
             // Attach default actions
-            if (item.title === 'Line') {
+            if (item.id === 'OT_line') {
                 self.selectedItem.points = [
                     [0, 0],
                     [0, 1]
                 ]
-            } else if (item.title === 'Arrow') {
+            } else if (item.id === 'OT_arrow') {
                 self.selectedItem.points = [
                     [0, 1],
                     [3, 1],
@@ -1137,7 +1153,7 @@ OT.Annotations.Toolbar = function(options) {
                     [0, 3],
                     [0, 1] // Reconnect point
                 ]
-            } else if (item.title === 'Rectangle') {
+            } else if (item.id === 'OT_rect') {
                 self.selectedItem.points = [
                     [0, 0],
                     [1, 0],
@@ -1145,7 +1161,7 @@ OT.Annotations.Toolbar = function(options) {
                     [0, 1],
                     [0, 0] // Reconnect point
                 ]
-            } else if (item.title === 'Oval') {
+            } else if (item.id === 'OT_oval') {
                 self.selectedItem.points = [
                     [0, 0.5],
                     [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
@@ -1180,7 +1196,6 @@ OT.Annotations.Toolbar = function(options) {
         canvases.push(canvas);
     };
 
-    // FIXME For video feeds that are terminated by the subscriber, the parentNode is removed, but not the reference to the canvas
     /**
      * Removes the annotation canvas with the specified connectionId from its parent container and
      * unlinks it from the toolbar.
