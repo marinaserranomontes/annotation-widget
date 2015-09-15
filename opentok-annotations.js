@@ -5,8 +5,6 @@
  *  @Copyright (c) 2015 TokBox, Inc
  **/
 
-// loggingURL: 'http://hlg.tokbox.com/prod' -- Use this for logging??
-
 //--------------------------------------
 //  OPENTOK ANNOTATION CANVAS/VIEW
 //--------------------------------------
@@ -149,6 +147,16 @@ OT.Annotations = function(options) {
      * Captures a screenshot of the annotations displayed on top of the active video feed.
      */
     this.captureScreenshot = function() {
+
+        OT.Annotations.Analytics.logEvent({
+            action: 'Capture',
+            variation: '',
+            payload: '',
+            sessionId: self.session.sessionId,
+            partnerId: '',
+            connectionId: self.session.connection.connectionId
+        });
+
         var canvasCopy = document.createElement('canvas');
         canvasCopy.width = canvas.width;
         canvasCopy.height = canvas.height;
@@ -243,6 +251,16 @@ OT.Annotations = function(options) {
         var update;
 
         if (self.selectedItem.id === 'OT_pen') {
+
+            OT.Annotations.Analytics.logEvent({
+                action: 'Pen',
+                variation: 'Draw',
+                payload: '',
+                sessionId: self.session.sessionId,
+                partnerId: '',
+                connectionId: self.session.connection.connectionId
+            });
+
             switch (event.type) {
                 case 'mousedown':
                 case 'touchstart':
@@ -280,6 +298,15 @@ OT.Annotations = function(options) {
                     client.dragging = false;
             }
         } else {
+            OT.Annotations.Analytics.logEvent({
+                action: 'Shape',
+                variation: 'Draw',
+                payload: '',
+                sessionId: self.session.sessionId,
+                partnerId: '',
+                connectionId: self.session.connection.connectionId
+            });
+
             // We have a shape or custom object
             if (self.selectedItem && self.selectedItem.points) {
                 client.mX = x;
@@ -1230,5 +1257,49 @@ OT.Annotations.Toolbar = function(options) {
         });
 
         canvases = [];
+    };
+};
+
+//--------------------------------------
+//  ANALYTICS
+//--------------------------------------
+
+OT.Annotations.Analytics = function() {
+
+    var logging_url = 'https://hlg.tokbox.com/prod/logging/ClientEvent';
+
+    var add_to_query_string = function(qstr, key, value){
+        if (!qstr) qstr = "";
+        if (qstr.length > 0){
+            qstr += "&";
+        }
+        qstr += key + "=" + encodeURIComponent(value);
+        return qstr;
+    };
+
+    var json_to_query_string = function(json) {
+        var qstr = "";
+        json.forEach(function(key, value) {
+            qstr = add_to_query_string(qstr, key, value);
+        });
+        return qstr;
+    };
+
+    this.logEvent = function (data) {
+        var payload = data.payload || "";
+
+        // convert JS object payload to url query string
+        if (typeof(payload) === "object") {
+            payload = json_to_query_string(payload);
+        }
+
+        data.payload = payload;
+
+        var url_encoded_data = json_to_query_string(data);
+
+        var http = new XMLHttpRequest();
+        http.open("POST", logging_url, true);
+        http.setRequestHeader("Content-type", "application/json");
+        http.send(url_encoded_data);
     };
 };
