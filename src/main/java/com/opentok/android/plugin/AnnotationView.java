@@ -10,6 +10,7 @@ import android.graphics.PathMeasure;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -35,6 +36,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
     private String mycid;
     private String canvascid;
+
+    private String mSessionId;
 
 	public int width;
 	public int height;
@@ -181,6 +184,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 Log.i("Canvas Signal", "Subscriber: " + canvascid);
 
                 while (mSubscriber.getSession() == null) { /* Wait */ }
+                mSessionId = mSubscriber.getSession().getSessionId();
                 mycid = mSubscriber.getSession().getConnection().getConnectionId();
 
                 // TODO Make sure this also gets called onSizeChanged
@@ -223,6 +227,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 Log.i("Canvas Signal", "Publisher: " + canvascid);
 
                 while (mPublisher.getSession() == null) { /* Wait */ }
+                mSessionId = mPublisher.getSession().getSessionId();
                 mycid = mPublisher.getSession().getConnection().getConnectionId();
 
 //                // TODO Make sure this also gets called onSizeChanged
@@ -320,7 +325,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     @Override
     public void signalReceived(Session session, String type, String data, Connection connection) {
         Log.i("Canvas Signal", type + ": " + data);
-        // TODO Add logging to monitor session and connection info
 
         mycid = session.getConnection().getConnectionId();
         String cid = connection.getConnectionId();
@@ -535,6 +539,16 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         float y = event.getY();
 
         if (selectedResourceId == R.id.ot_item_pen) {
+            List<Pair<String, String>> data = new ArrayList<Pair<String, String>>();
+            data.add(new Pair<String, String>("action", "Pen"));
+            data.add(new Pair<String, String>("variation", "Draw"));
+            data.add(new Pair<String, String>("payload", ""));
+            data.add(new Pair<String, String>("sessionId", mSessionId));
+            data.add(new Pair<String, String>("partnerId", ""));
+            data.add(new Pair<String, String>("connectionId", mycid));
+
+            AnnotationAnalytics.logEvent(data);
+
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     createPath(false, mycid);
@@ -591,28 +605,29 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 //
 //            sendUpdate(Mode.Text.toString(), update);
 //        }
-        else if (selectedResourceId == R.id.ot_item_arrow) { // FIXME These can all be lumped into the 'else' clause (grab points from item)
-            mX = x;
-            mY = y;
+        else if (selectedResourceId == R.id.ot_item_capture) {
+            List<Pair<String, String>> data = new ArrayList<Pair<String, String>>();
+            data.add(new Pair<String, String>("action", "Capture"));
+            data.add(new Pair<String, String>("variation", ""));
+            data.add(new Pair<String, String>("payload", ""));
+            data.add(new Pair<String, String>("sessionId", mSessionId));
+            data.add(new Pair<String, String>("partnerId", ""));
+            data.add(new Pair<String, String>("connectionId", mycid));
 
-            onTouchEvent(event, AnnotationShapes.arrowPoints);
-        } else if (selectedResourceId == R.id.ot_item_rectangle) {
-            mX = x;
-            mY = y;
+            AnnotationAnalytics.logEvent(data);
 
-            onTouchEvent(event, AnnotationShapes.rectanglePoints);
-        } else if (selectedResourceId == R.id.ot_item_oval) {
-            mX = x;
-            mY = y;
-
-            onTouchEvent(event, AnnotationShapes.circlePoints);
-        } else if (selectedResourceId == R.id.ot_item_line) {
-            mX = x;
-            mY = y;
-            onTouchEvent(event, AnnotationShapes.linePoints);
-        } else if (selectedResourceId == R.id.ot_item_capture) {
             captureView();
         } else {
+            List<Pair<String, String>> data = new ArrayList<Pair<String, String>>();
+            data.add(new Pair<String, String>("action", "Shape"));
+            data.add(new Pair<String, String>("variation", "Draw"));
+            data.add(new Pair<String, String>("payload", ""));
+            data.add(new Pair<String, String>("sessionId", mSessionId));
+            data.add(new Pair<String, String>("partnerId", ""));
+            data.add(new Pair<String, String>("connectionId", mycid));
+
+            AnnotationAnalytics.logEvent(data);
+
             if (selectedItem != null && selectedItem.getPoints() != null) {
                 mX = x;
                 mY = y;
