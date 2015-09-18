@@ -95,6 +95,21 @@ public void onSignalReceived(Session session, String type, String data, Connecti
 
 Note: Make sure that your class implements `Session.SignalListener`. See the [docs]() for more details.
 
+#### Capturing frames
+
+Frames and their annotations can be captured when using the 'ot_item_capture' menu item. The `Bitmap` for
+ these captures can be handled using the following callback:
+
+```java
+mToolbar.addScreenCaptureListener(new AnnotationToolbar.ScreenCaptureListener() {
+    @Override
+    public void onScreenCapture(Bitmap screenCapture, String connectionId) {
+        Log.i(LOGTAG, "Captured screenshot for connection: " + connectionId);
+        // Handle the screen capture, i.e. save the file or create a share intent, etc.
+    }
+});
+```
+
 Customizing the toolbar
 ----------------
 
