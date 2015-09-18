@@ -8,11 +8,16 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.opentok.android.Connection;
 import com.opentok.android.Publisher;
@@ -388,30 +393,16 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                     iVideo.put("width", ((Number) json.get("videoWidth")).floatValue());
                                     iVideo.put("height", ((Number) json.get("videoHeight")).floatValue());
 
+//                                    Log.i("CanvasOffset", "Sizes ["
+//                                            + " Canvas: " + canvas.get("width") + ", " + canvas.get("height")
+//                                            + " Video: " + video.get("width") + ", " + video.get("height")
+//                                            + " iCanvas: " + iCanvas.get("width") + ", " + iCanvas.get("height")
+//                                            + " iVideo: " + iVideo.get("width") + ", " + iVideo.get("height") + " ]");
+
                                     float canvasRatio = canvas.get("width") / canvas.get("height");
                                     float videoRatio = video.get("width") / video.get("height");
                                     float iCanvasRatio = iCanvas.get("width") / iCanvas.get("height");
                                     float iVideoRatio = iVideo.get("width") / iVideo.get("height");
-
-                                    // First, calculate the offset on the incoming video
-                                    if (iCanvasRatio > iVideoRatio && iCanvasRatio < 0) {
-                                        scale = iCanvas.get("width") / iVideo.get("width");
-                                        offsetY = (iCanvas.get("height") / 2) - (scale * iVideo.get("height") / 2);
-                                    } else {
-                                        scale = iCanvas.get("height") / iVideo.get("height");
-                                        offsetX = (iCanvas.get("width") / 2) - (scale * iVideo.get("width") / 2);
-                                    }
-
-                                    // Then, calculate the offset on the current video
-                                    if (canvasRatio > videoRatio && canvasRatio < 0) {
-                                        scale = canvas.get("width") / video.get("width");
-                                        offsetY += (canvas.get("height") / 2) - (scale * video.get("height") / 2);
-                                    } else {
-                                        scale = canvas.get("height") / video.get("height");
-                                        offsetX += (canvas.get("width") / 2) - (scale * video.get("width") / 2);
-                                    }
-
-                                    // Last, calculate the total offset based on the scale of the current and incoming canvases
 
                                     /**
                                      * This assumes that if the width is the greater value, video frames
@@ -420,30 +411,33 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                      * will be 0. If the height is the greater value, the offset on the y
                                      * axis will be 0.
                                      */
-                                    if (canvasRatio > iCanvasRatio && canvasRatio < 0) {
+                                    if (canvasRatio < 0) {
                                         scale = canvas.get("width") / iCanvas.get("width");
-                                        offsetY += (canvas.get("height") / 2) - (scale * iCanvas.get("height") / 2);
                                     } else {
                                         scale = canvas.get("height") / iCanvas.get("height");
-                                        offsetX += (canvas.get("width") / 2) - (scale * iCanvas.get("width") / 2);
                                     }
 
-                                    Log.i("CanvasOffset", "Offset: " + offsetX + ", " + offsetY);
                                     Log.i("CanvasOffset", "Scale: " + scale);
 
                                     // FIXME If possible, the scale should also scale the line width (use a min width value?)
 
-                                    // INFO The offsets are already scaled
-                                    float fromX = (scale * ((Number) json.get("fromX")).floatValue()) + offsetX;
-                                    float fromY = (scale * ((Number) json.get("fromY")).floatValue()) + offsetY;
+                                    float centerX = canvas.get("width") / 2;
+                                    float centerY = canvas.get("height") / 2;
 
-                                    float toX = (scale * ((Number) json.get("toX")).floatValue()) + offsetX;
-                                    float toY = (scale * ((Number) json.get("toY")).floatValue()) + offsetY;
+                                    float iCenterX = iCanvas.get("width") / 2;
+                                    float iCenterY = iCanvas.get("height") / 2;
+
+                                    float fromX = centerX - (scale * (iCenterX - ((Number) json.get("fromX")).floatValue()));
+                                    float fromY = centerY - (scale * (iCenterY - ((Number) json.get("fromY")).floatValue()));
+
+                                    float toX = centerX - (scale * (iCenterX - ((Number) json.get("toX")).floatValue()));
+                                    float toY = centerY - (scale * (iCenterY - ((Number) json.get("toY")).floatValue()));
 
                                     Log.i("CanvasOffset", "From: " + fromX + ", " + fromY);
                                     Log.i("CanvasOffset", "To: " + toX + ", " + toY);
 
                                     if (mSignalMirrored) {
+                                        Log.i("CanvasOffset", "Signal is mirrored");
                                         fromX = this.width - fromX;
                                         toX = this.width - toX;
                                     }
@@ -850,7 +844,31 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     /** ==== View capture (screenshots) ==== **/
 
     public void captureView() {
-        // TODO Add a "flash" animation to indicate the screenshot was captured
+        // Adds a "flash" animation to indicate the screenshot was captured
+        final LinearLayout layout = new LinearLayout(getContext());
+        // INFO I'm not sure how well this will always work grabbing the first child for the params...
+        layout.setLayoutParams(((ViewGroup) AnnotationView.this.getParent()).getChildAt(0).getLayoutParams());
+        final AnimationDrawable drawable = new AnimationDrawable();
+        final Handler handler = new Handler();
+
+        drawable.addFrame(new ColorDrawable(Color.WHITE), 150);
+        drawable.addFrame(new ColorDrawable(Color.TRANSPARENT), 400);
+        drawable.setExitFadeDuration(400);
+        drawable.setOneShot(true);
+
+        layout.setBackgroundDrawable(drawable);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                drawable.start();
+
+                // Destroy the animation
+                ((ViewGroup) AnnotationView.this.getParent()).removeView(layout);
+            }
+        }, 100);
+
+        ((ViewGroup) this.getParent()).addView(layout);
+
         try {
             boolean notSupported = false;
             // Use custom renderer to get screenshot from publisher/subscriber
@@ -888,8 +906,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 // Overlay the annotations on top of the video capture and store a final bitmap
                 Bitmap screenshot = overlay(annotations, videoFrame);
 
-                // TODO Send screenshot bitmap through callback
-
+                // Pass the screenshot bitmap through callback
+                toolbar.didCaptureScreen(screenshot, canvascid);
             }
         } catch (Exception e) {
             e.printStackTrace();

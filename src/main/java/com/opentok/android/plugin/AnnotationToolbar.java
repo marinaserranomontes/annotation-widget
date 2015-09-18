@@ -3,6 +3,7 @@ package com.opentok.android.plugin;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,6 +30,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
     private int mHeight;
     private List<SignalListener> signalListeners = new ArrayList<SignalListener>();
     private List<ActionListener> actionListeners = new ArrayList<ActionListener>();
+    private List<ScreenCaptureListener> captureListeners = new ArrayList<ScreenCaptureListener>();
 
     private AnnotationMenuView menu;
 
@@ -182,6 +184,10 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         this.actionListeners.add(listener);
     }
 
+    public void addScreenCaptureListener(ScreenCaptureListener listener) {
+        this.captureListeners.add(listener);
+    }
+
     /**
      * Converts dp to real pixels, according to the screen density.
      *
@@ -219,10 +225,20 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         }
     }
 
+    void didCaptureScreen(Bitmap capture, String connId) {
+        for (ScreenCaptureListener listener : captureListeners) {
+            listener.onScreenCapture(capture, connId);
+        }
+    }
+
     public interface ActionListener {
         public void onAnnotationMenuItemSelected(AnnotationToolbarMenuItem menuItem);
         public void onAnnotationItemSelected(AnnotationToolbarItem item);
         public boolean onCreateAnnotationMenu(AnnotationMenuView menu);
+    }
+
+    public interface ScreenCaptureListener {
+        public void onScreenCapture(Bitmap screenCapture, String connectionId);
     }
 
     public interface SignalListener {

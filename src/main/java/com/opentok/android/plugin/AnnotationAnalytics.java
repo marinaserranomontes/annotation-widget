@@ -19,32 +19,32 @@ class AnnotationAnalytics {
     private static final String LOGGING_URL = "https://hlg.tokbox.com/prod/logging/ClientEvent";
 
     public static void logEvent(List<Pair<String, String>> data) {
-        try {
-            URL url = new URL(LOGGING_URL);
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-
-            OutputStream os = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-            writer.write(getQuery(data));
-            writer.flush();
-            writer.close();
-            os.close();
-
-            conn.connect();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            URL url = new URL(LOGGING_URL);
+//            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+//            conn.setReadTimeout(10000);
+//            conn.setConnectTimeout(15000);
+//            conn.setRequestMethod("POST");
+//            conn.setDoInput(true);
+//            conn.setDoOutput(true);
+//
+//            OutputStream os = conn.getOutputStream();
+//            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+//            writer.write(getQuery(data));
+//            writer.flush();
+//            writer.close();
+//            os.close();
+//
+//            conn.connect();
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        } catch (ProtocolException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private static String getQuery(List<Pair<String, String>> params) throws UnsupportedEncodingException {

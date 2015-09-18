@@ -267,7 +267,9 @@ public class AnnotationVideoRenderer extends BaseVideoRenderer {
                         / mCurrentFrame.getHeight();
 //                Log.i("RenderFrame", "Frame size: " + mCurrentFrame.getWidth() + ", " + mCurrentFrame.getHeight());
                 float vratio = (float) mViewportWidth / mViewportHeight;
-//                Log.i("RenderFrame", "Viewport size" + mViewportWidth + ", " + mViewportHeight);
+//                Log.i("RenderFrame", "Viewport size: " + mViewportWidth + ", " + mViewportHeight);
+
+//                Log.i("RenderFrame", "Fit enabled: " + mVideoFitEnabled);
 
                 if (mVideoFitEnabled) {
                     if (ratio > vratio) {
@@ -282,6 +284,8 @@ public class AnnotationVideoRenderer extends BaseVideoRenderer {
                         scaleX = ratio / vratio;
                     }
                 }
+
+//                Log.i("RenderFrame", "Scale: " + scaleX + ", " + scaleY);
 
                 Matrix.scaleM(mScaleMatrix, 0,
                         scaleX * (mCurrentFrame.isMirroredX() ? -1.0f : 1.0f),
@@ -355,6 +359,10 @@ public class AnnotationVideoRenderer extends BaseVideoRenderer {
 
     public boolean isMirrored() {
         return mRenderer.mCurrentFrame != null && mRenderer.mCurrentFrame.isMirroredX();
+    }
+
+    public void enableVideoFit(boolean enableVideoFit) {
+        mRenderer.enableVideoFit(enableVideoFit);
     }
 
     public boolean isVideoFitEnabled() {
