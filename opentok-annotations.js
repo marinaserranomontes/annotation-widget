@@ -529,30 +529,6 @@ OT.Annotations = function(options) {
         var iCanvasRatio = iCanvas.width / iCanvas.height;
         var iVideoRatio = iVideo.width / iVideo.height;
 
-        // The offset is meant to center-align the canvases
-        var offsetX = 0;
-        var offsetY = 0;
-
-        // First, calculate the offset on the incoming video
-        if (iCanvasRatio > iVideoRatio && iCanvasRatio < 0) {
-            scale = iCanvas.width / iVideo.width;
-            offsetY = (iCanvas.height / 2) - (scale * iVideo.height / 2);
-        } else {
-            scale = iCanvas.height / iVideo.height;
-            offsetX = (iCanvas.width / 2) - (scale * iVideo.width / 2);
-        }
-
-        // Then, calculate the offset on the current video
-        if (canvasRatio > videoRatio && canvasRatio < 0) {
-            scale = canvas.width / video.width;
-            offsetY += (canvas.height / 2) - (scale * video.height / 2);
-        } else {
-            scale = canvas.height / video.height;
-            offsetX += (canvas.width / 2) - (scale * video.width / 2);
-        }
-
-        // Last, calculate the total offset based on the scale of the current and incoming canvases
-
         /**
          * This assumes that if the width is the greater value, video frames
          * can be scaled so that they have equal widths, which can be used to
@@ -560,19 +536,23 @@ OT.Annotations = function(options) {
          * will be 0. If the height is the greater value, the offset on the y
          * axis will be 0.
          */
-        if (canvasRatio > iCanvasRatio && canvasRatio < 0) {
+        if (canvasRatio < 0) {
             scale = canvas.width / iCanvas.width;
-            offsetY += (canvas.height / 2) - (scale * iCanvas.height / 2);
         } else {
             scale = canvas.height / iCanvas.height;
-            offsetX += (canvas.width / 2) - (scale * iCanvas.width / 2);
         }
 
-        update.fromX = scale * update.fromX + offsetX;
-        update.fromY = scale * update.fromY + offsetY;
+        var centerX = canvas.width / 2;
+        var centerY = canvas.height / 2;
 
-        update.toX = scale * update.toX + offsetX;
-        update.toY = scale * update.toY + offsetY;
+        var iCenterX = iCanvas.width / 2;
+        var iCenterY = iCanvas.height / 2;
+
+        update.fromX = centerX - (scale * (iCenterX - update.fromX));
+        update.fromY = centerY - (scale * (iCenterY - update.fromY));
+
+        update.toX = centerX - (scale * (iCenterX - update.toX));
+        update.toY = centerY - (scale * (iCenterY - update.toY));
 
         // Check if the incoming signal was mirrored
         if (update.mirrored) {
@@ -1264,42 +1244,22 @@ OT.Annotations.Toolbar = function(options) {
 //  ANALYTICS
 //--------------------------------------
 
-OT.Annotations.Analytics = function() {
+OT.Annotations.Analytics = function() { };
 
-    var logging_url = 'https://hlg.tokbox.com/prod/logging/ClientEvent';
+OT.Annotations.Analytics.logEvent = function (data) {
+    var payload = data.payload || "";
 
-    var add_to_query_string = function(qstr, key, value){
-        if (!qstr) qstr = "";
-        if (qstr.length > 0){
-            qstr += "&";
-        }
-        qstr += key + "=" + encodeURIComponent(value);
-        return qstr;
-    };
+    // convert JS object payload to url query string
+    if (typeof(payload) === "object") {
+        payload = JSON.stringify(payload);
+    }
 
-    var json_to_query_string = function(json) {
-        var qstr = "";
-        json.forEach(function(key, value) {
-            qstr = add_to_query_string(qstr, key, value);
-        });
-        return qstr;
-    };
+    data.payload = payload;
 
-    this.logEvent = function (data) {
-        var payload = data.payload || "";
+    var url_encoded_data = JSON.stringify(data);
 
-        // convert JS object payload to url query string
-        if (typeof(payload) === "object") {
-            payload = json_to_query_string(payload);
-        }
-
-        data.payload = payload;
-
-        var url_encoded_data = json_to_query_string(data);
-
-        var http = new XMLHttpRequest();
-        http.open("POST", logging_url, true);
-        http.setRequestHeader("Content-type", "application/json");
-        http.send(url_encoded_data);
-    };
+    var http = new XMLHttpRequest();
+    http.open("POST", 'https://hlg.tokbox.com/prod/logging/ClientEvent', true);
+    http.setRequestHeader("Content-type", "application/json");
+    http.send(url_encoded_data);
 };
