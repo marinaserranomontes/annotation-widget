@@ -37,6 +37,8 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
     private List<Integer> colors = new ArrayList<Integer>();
     private List<Integer> lineWidths = new ArrayList<Integer>();
 
+    private AnnotationToolbarItem selectedItem;
+
     public AnnotationToolbar(Context context) {
         this(context, null);
     }
@@ -101,6 +103,18 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         this.colors.clear();
         for (int i = 0; i < colors.length; i++) {
             this.colors.add(colors[i]);
+        }
+    }
+
+    public AnnotationToolbarItem getSelectedItem() {
+        return this.selectedItem;
+    }
+
+    public void setSelectedItem(AnnotationToolbarItem item) {
+        this.selectedItem = item;
+
+        for (ActionListener listener : actionListeners) {
+            listener.onAnnotationItemSelected(item);
         }
     }
 
@@ -220,6 +234,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
     @Override
     public void didTapItem(AnnotationToolbarItem item) {
         hideSubmenu(); // If the submenu is visible
+        this.selectedItem = item;
         for (ActionListener listener : actionListeners) {
             listener.onAnnotationItemSelected(item);
         }
@@ -321,7 +336,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         }
 
         ViewGroup.LayoutParams p = this.getLayoutParams();
-        p.height = 2*mHeight;
+        p.height = 2 * mHeight;
         this.setLayoutParams(p);
 
         this.addView(scrollView);
@@ -397,12 +412,6 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
      * Toolbar API.
      */
     public static class LayoutParams extends Toolbar.LayoutParams {
-        static final int CUSTOM = 0;
-        static final int SYSTEM = 1;
-        static final int EXPANDED = 2;
-
-        int mViewType = CUSTOM;
-
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
@@ -423,8 +432,6 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
 
         public LayoutParams(LayoutParams source) {
             super(source);
-
-            mViewType = source.mViewType;
         }
 
         public LayoutParams(ActionBar.LayoutParams source) {

@@ -26,7 +26,6 @@ class AnnotationShapes {
             new FloatPoint(0, 0)
     };
 
-    // TODO Need to ensure this uses Path.quadTo
     static FloatPoint[] circlePoints = {
             new FloatPoint(0, 0.5f),
             new FloatPoint(0.5f + 0.5f*(float)Math.cos(5*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(5*Math.PI/4)),
@@ -36,6 +35,8 @@ class AnnotationShapes {
             new FloatPoint(0.5f + 0.5f*(float)Math.cos(Math.PI/4), 0.5f + 0.5f*(float)Math.sin(Math.PI/4)),
             new FloatPoint(0.5f, 1),
             new FloatPoint(0.5f + 0.5f*(float)Math.cos(3*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(3*Math.PI/4)),
-            new FloatPoint(0, 0.5f)
+            new FloatPoint(0, 0.5f),
+            // We need one extra to close this loop
+            new FloatPoint(0.5f + 0.5f*(float)Math.cos(5*Math.PI/4), 0.5f + 0.5f*(float)Math.sin(5*Math.PI/4))
     };
 }

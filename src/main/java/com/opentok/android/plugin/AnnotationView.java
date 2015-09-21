@@ -13,7 +13,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-// TODO Determine if this class should be allowed to be extended
 public class AnnotationView extends View implements AnnotationToolbar.SignalListener, AnnotationToolbar.ActionListener {
 
     private static final String TAG = "ot-annotations-canvas";
@@ -64,6 +62,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
      */
     private boolean isDrawing = false;
 
+    // TODO May include this as optional ability to control whether shapes can be scaled or should be "stamped" as is
     private boolean allowsSizing = false;
 
     private AnnotationToolbar toolbar;
@@ -72,17 +71,17 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     private AnnotationToolbarItem selectedItem;
 
     @Override
-    public void onAnnotationMenuItemSelected(AnnotationToolbarMenuItem menuItem) {
-//        setAction(menuItem.getAction());
-    }
+    public void onAnnotationMenuItemSelected(AnnotationToolbarMenuItem menuItem) { }
 
     @Override
     public void onAnnotationItemSelected(AnnotationToolbarItem item) {
+        // TODO Include a boolean as part of the AnnotationToolbarItem class to handle persistent selection state?
+        // TODO If the item is not persistent (they should be persistent by default), the user is responsible for handling
+        // TODO the click event and selectedItem is never updated to retain the selection
         if (item.getColor() != null) {
             int color = Color.parseColor(item.getColor());
             setAnnotationColor(color);
         } else {
-//            Log.i("MainActivityMenu", "Menu item tapped");
             // We don't have a color selection
             if (item.getItemId() == R.id.ot_item_clear) {
                 clearCanvas(false, mycid);
@@ -94,8 +93,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     throw new IllegalStateException("A publisher or subscriber must be passed into the class. " +
                             "See attachSubscriber() or attachPublisher().");
                 }
-            } else if (item.getPoints() == null && item.getTag() != null && item.getTag() instanceof Float) {
-                userStrokeWidth = (Float) item.getTag();
+            } else if (item.getTag() != null && item.getTag() instanceof Float) {
+                setAnnotationSize((Float) item.getTag());
             } else {
                 selectedItem = item;
                 selectedResourceId = item.getItemId();
@@ -105,26 +104,12 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
     @Override
     public boolean onCreateAnnotationMenu(AnnotationMenuView menu) {
-        // Default the selected item to the first in the list
-        if (menu.getChildCount() > 0) {
-            View v = menu.getChildAt(0);
-
-            // TODO If the first item is a menu group, should we keep searching until we find an item?
-            if (v instanceof AnnotationToolbarItem) {
-                AnnotationToolbarItem item = (AnnotationToolbarItem) v;
-                selectedItem = item;
-                selectedResourceId = item.getItemId();
-            }
-        }
         return false;
     }
 
-    // FIXME Should really only have update, clear, and possibly text (since text handling will be different)
     private enum Mode {
         Pen("otAnnotation_pen"),
         Clear("otAnnotation_clear"),
-        Shape("otAnnotation_shape"),
-        Line("otAnnotation_line"),
         Text("otAnnotation_text");
 
         private String type;
@@ -168,7 +153,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
     /** ==== Linkers ==== **/
 
-    // FIXME These need to test for a custom renderer - if one was already added, it should override ours (disable screenshots)
     // INFO We pass in a subscriber or publisher so that the canvas can be auto scaled to match the video frame
 
     /**
@@ -255,10 +239,15 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
      * @param toolbar The {@code AnnotationToolbar} to be attached.
      */
     public void attachToolbar(AnnotationToolbar toolbar) {
+        Log.i(TAG, "Attaching toolbar");
         this.toolbar = toolbar;
         this.toolbar.addSignalListener(this);
         this.toolbar.addActionListener(this);
         this.toolbar.bringToFront();
+
+        if (this.toolbar.getSelectedItem() != null) {
+            this.selectedItem = this.toolbar.getSelectedItem();
+        }
     }
 
     /** ==== Public Getters/Setters ==== **/
@@ -317,13 +306,13 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         return mPaths.get(mPaths.size()-1).path;
     }
 
-    void drawText(String text, int x, int y) {
-
-    }
-
-    void changeTextSize(float size) {
-        getActivePaint().setTextSize(size);
-    }
+//    void drawText(String text, int x, int y) {
+//
+//    }
+//
+//    void changeTextSize(float size) {
+//        getActivePaint().setTextSize(size);
+//    }
 
     /** ==== Signal Handling ==== **/
 
@@ -370,10 +359,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 Log.i("CanvasOffset", "CanvasSize: " + this.width + ", " + this.height);
 
                                 if (renderer != null) {
-                                    // The offset is meant to center the canvases
-                                    float offsetX = 0;
-                                    float offsetY = 0;
-
                                     // Handle scale
                                     float scale = 1;
 
@@ -533,25 +518,16 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         float y = event.getY();
 
         if (selectedResourceId == R.id.ot_item_pen) {
-            List<Pair<String, String>> data = new ArrayList<Pair<String, String>>();
-            data.add(new Pair<String, String>("action", "Pen"));
-            data.add(new Pair<String, String>("variation", "Draw"));
-            data.add(new Pair<String, String>("payload", ""));
-            data.add(new Pair<String, String>("sessionId", mSessionId));
-            data.add(new Pair<String, String>("partnerId", ""));
-            data.add(new Pair<String, String>("connectionId", mycid));
-
-            AnnotationAnalytics.logEvent(data);
-
             switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_DOWN: {
                     createPath(false, mycid);
                     startTouch(x, y);
                     mLastX = x;
                     mLastY = y;
                     invalidate();
+                }
                     break;
-                case MotionEvent.ACTION_MOVE:
+                case MotionEvent.ACTION_MOVE: {
                     moveTouch(x, y, true);
                     invalidate();
 
@@ -559,11 +535,22 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                     mLastX = x;
                     mLastY = y;
-
+                }
                     break;
-                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_UP: {
                     upTouch();
                     invalidate();
+
+                    JSONObject data = new JSONObject();
+                    data.put("action", "Pen");
+                    data.put("variation", "Draw");
+                    data.put("payload", "");
+                    data.put("sessionId", mSessionId);
+                    data.put("partnerId", "");
+                    data.put("connectionId", mycid);
+
+                    AnnotationAnalytics.logEvent(data);
+                }
                     break;
             }
         }
@@ -600,28 +587,18 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 //            sendUpdate(Mode.Text.toString(), update);
 //        }
         else if (selectedResourceId == R.id.ot_item_capture) {
-            List<Pair<String, String>> data = new ArrayList<Pair<String, String>>();
-            data.add(new Pair<String, String>("action", "Capture"));
-            data.add(new Pair<String, String>("variation", ""));
-            data.add(new Pair<String, String>("payload", ""));
-            data.add(new Pair<String, String>("sessionId", mSessionId));
-            data.add(new Pair<String, String>("partnerId", ""));
-            data.add(new Pair<String, String>("connectionId", mycid));
+            JSONObject data = new JSONObject();
+            data.put("action", "Capture");
+            data.put("variation", "");
+            data.put("payload", "");
+            data.put("sessionId", mSessionId);
+            data.put("partnerId", "");
+            data.put("connectionId", mycid);
 
             AnnotationAnalytics.logEvent(data);
 
             captureView();
         } else {
-            List<Pair<String, String>> data = new ArrayList<Pair<String, String>>();
-            data.add(new Pair<String, String>("action", "Shape"));
-            data.add(new Pair<String, String>("variation", "Draw"));
-            data.add(new Pair<String, String>("payload", ""));
-            data.add(new Pair<String, String>("sessionId", mSessionId));
-            data.add(new Pair<String, String>("partnerId", ""));
-            data.add(new Pair<String, String>("connectionId", mycid));
-
-            AnnotationAnalytics.logEvent(data);
-
             if (selectedItem != null && selectedItem.getPoints() != null) {
                 mX = x;
                 mY = y;
@@ -633,17 +610,19 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
     private void onTouchEvent(MotionEvent event, FloatPoint[] points) {
         switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_DOWN: {
                 isDrawing = true;
                 // Last x and y for shape paths is the start touch point
                 mStartX = mX;
                 mStartY = mY;
                 invalidate();
+            }
                 break;
-            case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_MOVE: {
                 invalidate();
+            }
                 break;
-            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_UP: {
                 isDrawing = false;
 
                 if (points.length == 2) {
@@ -661,13 +640,27 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                         float pointX = mStartX + (scale.x * points[i].x);
                         float pointY = mStartY + (scale.y * points[i].y);
 
-                        if (i == 0) {
-                            mLastX = pointX;
-                            mLastY = pointY;
-                            startTouch(pointX, pointY);
+                        if (selectedItem.isSmoothDrawEnabled()) {
+                            if (i == 0) {
+                                // Do nothing
+                            } else if (i == 1) {
+                                startTouch((pointX + mLastX) / 2, (pointY + mLastY) / 2);
+                            } else {
+                                // FIXME I don't like this workaround - moveTouch(pointX, pointY, true) draws line for first segment
+                                moveTouch(mLastX, mLastY, true);
+
+                                if (i == points.length-1) {
+                                    moveTouch(pointX, pointY, true);
+                                }
+                            }
                         } else {
-                            // TODO Way to know whether to use curved/smooth or not?
-                            moveTouch(pointX, pointY, false);
+                            if (i == 0) {
+                                mLastX = pointX;
+                                mLastY = pointY;
+                                startTouch(pointX, pointY);
+                            } else {
+                                moveTouch(pointX, pointY, false);
+                            }
                         }
 
                         sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(pointX, pointY));
@@ -678,6 +671,17 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 }
 
                 invalidate();
+
+                JSONObject data = new JSONObject();
+                data.put("action", "Shape");
+                data.put("variation", "Draw");
+                data.put("payload", "");
+                data.put("sessionId", mSessionId);
+                data.put("partnerId", "");
+                data.put("connectionId", mycid);
+
+                //AnnotationAnalytics.logEvent(data);
+            }
                 break;
         }
     }
@@ -703,7 +707,15 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     }
 
     private void upTouch() {
-        getActivePath().lineTo(mX, mY);
+        upTouch(false);
+    }
+
+    private void upTouch(boolean curved) {
+        if (curved) {
+            getActivePath().quadTo(mLastX, mLastY, (mX + mLastX) / 2, (mY + mLastY) / 2);
+        } else {
+            getActivePath().lineTo(mX, mY);
+        }
     }
 
     /** ==== Canvas Events ==== **/
@@ -734,12 +746,12 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
         if (isDrawing) {
             if (selectedItem != null && selectedItem.getPoints() != null) {
-                onDrawPoints(canvas, selectedItem.getPoints());
+                onDrawPoints(canvas, selectedItem.getPoints(), selectedItem.isSmoothDrawEnabled());
             }
         }
 	}
 
-    private void onDrawPoints(Canvas canvas, FloatPoint[] points) {
+    private void onDrawPoints(Canvas canvas, FloatPoint[] points, boolean curved) {
         float dx = Math.abs(mX - mLastX);
         float dy = Math.abs(mY - mLastY);
         if (dx >= TOLERANCE || dy >= TOLERANCE) {
@@ -751,16 +763,31 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 path.moveTo(mStartX, mStartY);
                 path.lineTo(mX, mY);
             } else {
+                float lastX = -1;
+                float lastY = -1;
                 for (int i = 0; i < points.length; i++) {
                     // Scale the points according to the difference between the start and end points
                     float pointX = mStartX + (scale.x * points[i].x);
                     float pointY = mStartY + (scale.y * points[i].y);
 
-                    if (i == 0) {
-                        path.moveTo(pointX, pointY);
+                    if (curved) {
+                        if (i == 0) {
+                            // Do nothing
+                        } else if (i == 1) {
+                            path.moveTo((pointX + lastX) / 2, (pointY + lastY) / 2);
+                        } else {
+                            path.quadTo(lastX, lastY, (pointX + lastX) / 2, (pointY + lastY) / 2);
+                        }
                     } else {
-                        path.lineTo(pointX, pointY);
+                        if (i == 0) {
+                            path.moveTo(pointX, pointY);
+                        } else {
+                            path.lineTo(pointX, pointY);
+                        }
                     }
+
+                    lastX = pointX;
+                    lastY = pointY;
                 }
             }
 

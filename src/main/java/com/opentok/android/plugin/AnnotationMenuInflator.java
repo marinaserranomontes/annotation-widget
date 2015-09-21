@@ -92,6 +92,7 @@ class AnnotationMenuInflator {
 //                            Log.i("AnnotationsToolbar", "Found submenu item: " + itemId);
 
                             FloatPoint[] points = null;
+                            boolean curved = false;
 
                             if (itemId == R.id.ot_item_arrow) {
                                 points = AnnotationShapes.arrowPoints;
@@ -99,10 +100,12 @@ class AnnotationMenuInflator {
                                 points = AnnotationShapes.rectanglePoints;
                             } else if (itemId == R.id.ot_item_oval) {
                                 points = AnnotationShapes.circlePoints;
+                                curved = true;
                             }
 
                             AnnotationToolbarItem item = new AnnotationToolbarItem(mContext, points, itemIcon);
                             item.setItemId(itemId);
+                            item.setSmoothDrawEnabled(curved);
                             items.add(item);
                         } else if (eventType == XmlPullParser.START_TAG && xrp.getName().equalsIgnoreCase(XML_MENU)) {
                             // TODO Handle submenu items (we only want to handle a single level of

@@ -16,6 +16,7 @@ public class AnnotationToolbarItem extends ImageButton {
 
     int imageResource;
     FloatPoint[] points;
+    boolean smoothDrawEnabled = false;
     String color;
     int mId = -1;
 
@@ -120,6 +121,14 @@ public class AnnotationToolbarItem extends ImageButton {
 
     public void setItemId(int id) {
         this.mId = id;
+    }
+
+    public void setSmoothDrawEnabled(boolean enabled) {
+        smoothDrawEnabled = enabled;
+    }
+
+    public boolean isSmoothDrawEnabled() {
+        return smoothDrawEnabled;
     }
 
     /**
