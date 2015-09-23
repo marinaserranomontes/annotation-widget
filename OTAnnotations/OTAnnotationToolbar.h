@@ -8,6 +8,16 @@
 
 #import <UIKit/UIKit.h>
 
+#ifndef IBInspectable
+    #define IBInspectable
+#endif
+
+IB_DESIGNABLE
+
 @interface OTAnnotationToolbar : UIView
+
+//@property (nonatomic) IBInspectable UIColor *backgroundColor;
+//@property (nonatomic) IBInspectable UIColor *tintColor;
+@property (nonatomic) IBOutlet UIToolbar *mainToolbar;
 
 @end

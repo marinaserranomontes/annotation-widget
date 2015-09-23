@@ -41,15 +41,15 @@ Customizing the toolbar
 
 (Coming soon)
 
-### Adding/removing menu items
+#### Adding/removing menu items
 
-### Add menu items using Interface Builder
+#### Add menu items using Interface Builder
 
 #### Defaults
 
 #### Handling custom items
 
-### Custom colors
+#### Custom colors
 
 For best results
 ----------------

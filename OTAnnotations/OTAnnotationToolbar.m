@@ -8,17 +8,36 @@
 
 #import "OTAnnotationToolbar.h"
 
-// See https://developer.apple.com/library/ios/recipes/xcode_help-IB_objects_media/Chapters/CreatingaLiveViewofaCustomObject.html
-// to allow this class to be used/modified in IB
-
-@implementation OTAnnotationToolbar
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect {
-    // Drawing code
+@implementation OTAnnotationToolbar {
+    UIView* view;
 }
-*/
+
+- (instancetype)initWithFrame:(CGRect) frame {
+    if (self = [super initWithFrame:frame]) {
+        [self initialize];
+    }
+    return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder*) coder {
+    if (self = [super initWithCoder:coder]) {
+        [self initialize];
+    }
+    return self;
+}
+
+- (void)initialize {
+    view = [[[NSBundle bundleForClass:[self class]] loadNibNamed:@"OTAnnotationToolbar" owner:self options:nil] firstObject];
+    [self addSubview: view];
+    view.frame = self.bounds;
+}
+
+- (void)drawRect:(CGRect)rect {
+    [view addSubview:_mainToolbar];
+    
+    view.backgroundColor = self.backgroundColor;
+    _mainToolbar.barTintColor = self.backgroundColor;
+    _mainToolbar.tintColor = self.tintColor;
+}
 
 @end
