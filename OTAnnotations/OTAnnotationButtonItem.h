@@ -15,5 +15,6 @@
 @interface OTAnnotationButtonItem : UIBarButtonItem
 
 @property (nonatomic) IBInspectable NSString *identifier;
+@property (nonatomic) IBOutlet UIToolbar *subToolbar;
 
 @end

@@ -10,25 +10,6 @@
                 <outlet property="mainToolbar" destination="mCM-8D-2CD" id="xr0-MQ-Bgg"/>
             </connections>
         </placeholder>
-        <view contentMode="scaleToFill" id="iN0-l3-epB">
-            <rect key="frame" x="0.0" y="0.0" width="658" height="44"/>
-            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-            <subviews>
-                <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9v3-Do-vLP">
-                    <rect key="frame" x="0.0" y="0.0" width="658" height="44"/>
-                </scrollView>
-            </subviews>
-            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <constraints>
-                <constraint firstAttribute="trailing" secondItem="9v3-Do-vLP" secondAttribute="trailing" id="4VO-E7-OIE"/>
-                <constraint firstItem="9v3-Do-vLP" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="PZG-Ib-ry0"/>
-                <constraint firstAttribute="bottom" secondItem="9v3-Do-vLP" secondAttribute="bottom" id="b2Z-GU-JWh"/>
-                <constraint firstItem="9v3-Do-vLP" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="fSt-QV-efQ"/>
-            </constraints>
-            <nil key="simulatedStatusBarMetrics"/>
-            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-            <point key="canvasLocation" x="651" y="374"/>
-        </view>
         <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="mCM-8D-2CD">
             <rect key="frame" x="0.0" y="0.0" width="658" height="44"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -47,6 +28,9 @@
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="identifier" value="ot_shapes"/>
                     </userDefinedRuntimeAttributes>
+                    <connections>
+                        <outlet property="subToolbar" destination="h2z-yU-UWu" id="CYs-vB-SzM"/>
+                    </connections>
                 </barButtonItem>
                 <barButtonItem style="plain" id="fyz-5y-XZr" customClass="OTColorButtonItem">
                     <userDefinedRuntimeAttributes>
@@ -54,9 +38,10 @@
                         <userDefinedRuntimeAttribute type="color" keyPath="color">
                             <color key="value" red="0.058306574819999998" green="0.37546482679999998" blue="0.37505510450000001" alpha="1" colorSpace="calibratedRGB"/>
                         </userDefinedRuntimeAttribute>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="showsPicker" value="YES"/>
                     </userDefinedRuntimeAttributes>
                 </barButtonItem>
-                <barButtonItem title="-" style="plain" id="Ebc-Hb-LFY" customClass="OTAnnotationButtonItem">
+                <barButtonItem image="LineWidth" style="plain" id="Ebc-Hb-LFY" customClass="OTAnnotationButtonItem">
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="identifier" value="ot_line_width"/>
                     </userDefinedRuntimeAttributes>
@@ -72,37 +57,41 @@
                     </userDefinedRuntimeAttributes>
                 </barButtonItem>
             </items>
-            <point key="canvasLocation" x="651" y="240"/>
+            <point key="canvasLocation" x="717" y="480"/>
         </toolbar>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="h2z-yU-UWu">
             <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
             <items>
-                <barButtonItem title="Item" id="07u-ph-RgU" customClass="OTAnnotationButtonItem">
+                <barButtonItem image="Arrow" id="07u-ph-RgU" customClass="OTAnnotationButtonItem">
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="identifier" value="ot_arrow"/>
                     </userDefinedRuntimeAttributes>
                 </barButtonItem>
-                <barButtonItem title="Item" id="X8l-Cr-6wO" customClass="OTAnnotationButtonItem">
+                <barButtonItem image="Rectangle" id="X8l-Cr-6wO" customClass="OTAnnotationButtonItem">
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="identifier" value="ot_rectangle"/>
                     </userDefinedRuntimeAttributes>
                 </barButtonItem>
-                <barButtonItem title="Item" id="Cn5-ft-EcA" customClass="OTAnnotationButtonItem">
+                <barButtonItem image="Oval" id="Cn5-ft-EcA" customClass="OTAnnotationButtonItem">
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="string" keyPath="identifier" value="ot_oval"/>
                     </userDefinedRuntimeAttributes>
                 </barButtonItem>
             </items>
-            <point key="canvasLocation" x="651" y="524"/>
+            <point key="canvasLocation" x="717" y="602"/>
         </toolbar>
     </objects>
     <resources>
+        <image name="Arrow" width="22" height="22"/>
         <image name="Camera" width="22" height="22"/>
         <image name="Clear" width="22" height="22"/>
         <image name="Line" width="22" height="22"/>
+        <image name="LineWidth" width="22" height="22"/>
+        <image name="Oval" width="22" height="22"/>
         <image name="Pen" width="22" height="22"/>
+        <image name="Rectangle" width="22" height="22"/>
         <image name="Shapes" width="22" height="22"/>
     </resources>
 </document>

@@ -16,4 +16,9 @@
 - (id)initWithSubscriber:(OTSubscriber *)subscriber;
 - (id)initWithPublisher:(OTPublisher *)publisher;
 
+- (void)didTapAnnotationItem:(UIBarButtonItem*)item;
+
+- (void)setColor:(UIColor *)color;
+- (void)setLineWidth:(CGFloat *)lineWidth;
+
 @end

@@ -10,6 +10,13 @@
 
 @implementation OTColorButtonItem
 
+- (instancetype)init {
+    if (self = [super init]) {
+        [self initialize];
+    }
+    return self;
+}
+
 - (instancetype)initWithBarButtonSystemItem:(UIBarButtonSystemItem)systemItem target:(id)target action:(SEL)action {
     if (self = [super initWithBarButtonSystemItem:systemItem target:target action:action]) {
         [self initialize];
@@ -49,14 +56,43 @@
     if (_color == nil) {
         _color = [UIColor redColor];
     }
-        
-    NSLog(@"Button init");
+    
+    _showsPicker = false;
+    [self updateView];
+}
+
+- (void)setColor:(UIColor *)color {
+    _color = color;
+    
+    [self updateView];
+}
+
+- (void)updateView {
     UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.frame = CGRectMake(0, 0, 30, 30);
     button.layer.backgroundColor = _color.CGColor;
     button.layer.cornerRadius = 15;
     
+    [button addTarget:self action:@selector(handleClick) forControlEvents:UIControlEventTouchUpInside];
+    
     [self setCustomView:button];
+}
+
+- (void)handleClick {
+    NSLog(@"Clicked color choice");
+    
+    if (_delegate) {
+        [_delegate didSelectItem:self];
+        
+        if (_showsPicker) {
+           [_delegate shouldShowColorPicker:true];
+        } else {
+            [_delegate didChooseColor:_color];
+        }
+    } else {
+        // Handle the action normally
+        [self.target performSelector:self.action withObject:self];
+    }
 }
 
 @end

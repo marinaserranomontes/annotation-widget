@@ -14,9 +14,22 @@
 
 IB_DESIGNABLE
 
+@class OTColorButtonItem;
+
+@protocol OTColorButtonItemDelegate <NSObject>
+
+- (void)shouldShowColorPicker:(BOOL)showPicker;
+- (void)didChooseColor:(UIColor*)color;
+- (void)didSelectItem:(OTColorButtonItem*)item;
+
+@end
+
 @interface OTColorButtonItem : UIBarButtonItem
 
 @property (nonatomic) IBInspectable NSString *identifier;
 @property (nonatomic) IBInspectable UIColor *color;
+@property (nonatomic) IBInspectable BOOL showsPicker;
+
+@property (nonatomic, weak) id<OTColorButtonItemDelegate> delegate;
 
 @end

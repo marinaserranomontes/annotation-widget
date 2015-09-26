@@ -7,12 +7,17 @@
 //
 
 #import "OTAnnotationView.h"
+#import "OTAnnotationButtonItem.h"
+#import "OTColorButtonItem.h"
+#import "OTPath.h"
 
 @implementation OTAnnotationView {
-    UIBezierPath *path;
-    NSMutableArray *paths; // TODO: Use this array to store bezier paths
-    CGPoint current;
-    CGPoint lastPoint;
+    NSMutableArray *_paths;
+    CGPoint _current;
+    CGPoint _lastPoint;
+    
+    UIColor *_color;
+    UIColor *_incomingColor;
     
     OTSubscriber *_subscriber;
     OTPublisher *_publisher;
@@ -59,40 +64,75 @@
 - (void)setupView {
     [self setMultipleTouchEnabled:NO];
     [self setBackgroundColor:[UIColor clearColor]];
-    path = [UIBezierPath bezierPath];
+    
+    _paths = [[NSMutableArray alloc] init];
+    
+    OTPath* path = [OTPath bezierPath];
+    [path setColor:_color];
     [path setLineWidth:2.0];
+    [_paths addObject:path];
+}
+
+-(UIBezierPath*)activePath {
+    return [_paths lastObject];
 }
 
 - (void)drawRect:(CGRect)rect {
-    [[UIColor blackColor] setStroke];
-    [path stroke];
+    for (OTPath* path in _paths) {
+        // TODO: Path object - OTPath? - should include color
+        [path.color setStroke];
+        [path stroke];
+    }
+}
+
+- (void)setColor:(UIColor *)color {
+    _color = color;
+    
+    // TODO: Create a new OTPath object
+    OTPath* path = [OTPath bezierPath];
+    [path setColor:color];
+    [path setLineWidth:2.0];
+    [_paths addObject:path];
 }
 
 - (void)setLineWidth:(CGFloat *)lineWidth {
+
+}
+
+- (void)clearCanvas {
+    NSLog(@"Clearing canvas");
+    // TODO: Only clear annotations drawn by the specified user (add param for ID to method signature)
+    [_paths removeAllObjects];
+    [self setNeedsDisplay];
     
+    // Initialize a new path so that we can still draw
+    OTPath* path = [OTPath bezierPath];
+    [path setColor:_color];
+    [path setLineWidth:2.0];
+    [_paths addObject:path];
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint p = [touch locationInView:self];
-    [path moveToPoint:p];
-    lastPoint = p;
+    [[self activePath] moveToPoint:p];
+    _lastPoint = p;
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint p = [touch locationInView:self];
-    [path addLineToPoint:p];
+    [[self activePath] addLineToPoint:p];
     [self setNeedsDisplay];
     
-    NSLog(@"%f, %f", lastPoint.x, lastPoint.y);
+    NSLog(@"%f, %f", _lastPoint.x, _lastPoint.y);
     NSLog(@"%f, %f", p.x, p.y);
 
     // Send the signal
     NSDictionary* jsonObject = @{
                                     @"id" : @"ios-test", //session.sessionId & session.connection.connectionId
-                                    @"fromX" : [NSNumber numberWithFloat:lastPoint.x],
-                                    @"fromY" : [NSNumber numberWithFloat:lastPoint.y],
+                                    @"fromX" : [NSNumber numberWithFloat:_lastPoint.x],
+                                    @"fromY" : [NSNumber numberWithFloat:_lastPoint.y],
                                     @"toX" : [NSNumber numberWithFloat:p.x],
                                     @"toY" : [NSNumber numberWithFloat:p.y],
                                     @"color" : @"#ff0000", // TODO: Dynamic color
@@ -110,7 +150,7 @@
     
     [self sendUpdate:update forType:@"otAnnotation_pen"];
     
-    lastPoint = p;
+    _lastPoint = p;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -133,6 +173,35 @@
     } else {
         // TODO: Throw an error - either a publisher or subscriber should have been supplied
         NSLog(@"Please provide either a subscriber or publisher.");
+    }
+}
+
+- (void)didTapAnnotationItem:(UIBarButtonItem *)sender {
+    NSLog(@"Canvas delegate click");
+    
+    // The color setter is handled in the toolbar, directly
+//    if ([sender isKindOfClass: OTColorButtonItem.self]) {
+//        // Update the annotation color
+//        OTColorButtonItem* item = (OTColorButtonItem*) sender;
+//        [self setColor:item.color];
+//    } else
+    if ([sender isKindOfClass: OTAnnotationButtonItem.self]) {
+        OTAnnotationButtonItem* item = (OTAnnotationButtonItem*) sender;
+        // TODO: Handle the click
+        
+        if ([item.identifier isEqualToString:@"ot_pen"]) {
+            
+        } else if ([item.identifier isEqualToString:@"ot_line"]) {
+            
+        } else if ([item.identifier isEqualToString:@"ot_shapes"]) {
+            
+        } else if ([item.identifier isEqualToString:@"ot_clear"]) {
+            [self clearCanvas];
+        } else if ([item.identifier isEqualToString:@"ot_capture"]) {
+            
+        }
+
+
     }
 }
 

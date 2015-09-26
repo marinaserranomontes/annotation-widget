@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "OTAnnotationView.h"
 
 #ifndef IBInspectable
     #define IBInspectable
@@ -16,8 +17,10 @@ IB_DESIGNABLE
 
 @interface OTAnnotationToolbar : UIView
 
-//@property (nonatomic) IBInspectable UIColor *backgroundColor;
-//@property (nonatomic) IBInspectable UIColor *tintColor;
+@property (nonatomic) IBInspectable UIColor *barTintColor;
+@property (nonatomic) IBInspectable UIColor *tintColor;
 @property (nonatomic) IBOutlet UIToolbar *mainToolbar;
+
+-(void)attachAnnotationView:(OTAnnotationView*)annotationView;
 
 @end
