@@ -10,6 +10,7 @@
 #import "OTAnnotationButtonItem.h"
 #import "OTColorButtonItem.h"
 #import "OTPath.h"
+#import "UIColor+HexString.h"
 
 @implementation OTAnnotationView {
     NSMutableArray *_paths;
@@ -19,8 +20,19 @@
     UIColor *_color;
     UIColor *_incomingColor;
     
+    CGFloat _lineWidth;
+    CGFloat _incomingLineWidth;
+    
     OTSubscriber *_subscriber;
     OTPublisher *_publisher;
+    
+    NSString* _sessionId;
+    NSString* _mycid;
+    NSString* _canvasId;
+    
+    CGSize _videoDimensions;
+    
+    Boolean _mirrored;
     
     /* TODO: Enum or similar
      Pen("otAnnotation_pen"),
@@ -34,6 +46,10 @@
 - (id)initWithSubscriber:(OTSubscriber *)subscriber {
     if (self = [super initWithFrame:subscriber.view.frame]) {
         _subscriber = subscriber;
+        _sessionId = subscriber.session.sessionId;
+        _mycid = subscriber.session.connection.connectionId;
+        _canvasId = subscriber.stream.connection.connectionId;
+        _videoDimensions = subscriber.stream.videoDimensions;
         [self setupView];
     }
     return self;
@@ -42,6 +58,11 @@
 - (id)initWithPublisher:(OTPublisher *)publisher {
     if (self = [super initWithFrame:publisher.view.frame]) {
         _publisher = publisher;
+        _sessionId = publisher.session.sessionId;
+        _mycid = publisher.session.connection.connectionId;
+        // FIXME: Publisher stream is nil when initialized
+        _canvasId = publisher.stream.connection.connectionId;
+        _videoDimensions = publisher.stream.videoDimensions;
         [self setupView];
     }
     return self;
@@ -67,10 +88,16 @@
     
     _paths = [[NSMutableArray alloc] init];
     
+    _lineWidth = 2.f;
+    
     OTPath* path = [OTPath bezierPath];
     [path setColor:_color];
-    [path setLineWidth:2.0];
+    [path setLineWidth:_lineWidth];
     [_paths addObject:path];
+    
+    // Ensure the canvas is always the top layer
+    [self.superview bringSubviewToFront:self];
+    self.userInteractionEnabled = true;
 }
 
 -(UIBezierPath*)activePath {
@@ -79,7 +106,6 @@
 
 - (void)drawRect:(CGRect)rect {
     for (OTPath* path in _paths) {
-        // TODO: Path object - OTPath? - should include color
         [path.color setStroke];
         [path stroke];
     }
@@ -88,19 +114,17 @@
 - (void)setColor:(UIColor *)color {
     _color = color;
     
-    // TODO: Create a new OTPath object
     OTPath* path = [OTPath bezierPath];
     [path setColor:color];
-    [path setLineWidth:2.0];
+    [path setLineWidth:_lineWidth];
     [_paths addObject:path];
 }
 
-- (void)setLineWidth:(CGFloat *)lineWidth {
-
+- (void)setLineWidth:(CGFloat)lineWidth {
+    _lineWidth = lineWidth;
 }
 
 - (void)clearCanvas {
-    NSLog(@"Clearing canvas");
     // TODO: Only clear annotations drawn by the specified user (add param for ID to method signature)
     [_paths removeAllObjects];
     [self setNeedsDisplay];
@@ -108,7 +132,7 @@
     // Initialize a new path so that we can still draw
     OTPath* path = [OTPath bezierPath];
     [path setColor:_color];
-    [path setLineWidth:2.0];
+    [path setLineWidth:_lineWidth];
     [_paths addObject:path];
 }
 
@@ -130,13 +154,19 @@
 
     // Send the signal
     NSDictionary* jsonObject = @{
-                                    @"id" : @"ios-test", //session.sessionId & session.connection.connectionId
+                                    @"id" : _canvasId == nil ? @"" : _canvasId, // FIXME: Should never be nil here
+                                    @"fromId" : _mycid,
                                     @"fromX" : [NSNumber numberWithFloat:_lastPoint.x],
                                     @"fromY" : [NSNumber numberWithFloat:_lastPoint.y],
                                     @"toX" : [NSNumber numberWithFloat:p.x],
                                     @"toY" : [NSNumber numberWithFloat:p.y],
-                                    @"color" : @"#ff0000", // TODO: Dynamic color
-                                    @"lineWidth" : [NSNumber numberWithFloat:6.f], // TODO: Dynamic line width
+                                    @"color" : [UIColor hexStringFromColor:_color],
+                                    @"lineWidth" : [NSNumber numberWithFloat:_lineWidth],
+                                    @"videoWidth" : [NSNumber numberWithFloat:_videoDimensions.width],
+                                    @"videoHeight" : [NSNumber numberWithFloat:_videoDimensions.height],
+                                    @"canvasWidth" : [NSNumber numberWithFloat:self.frame.size.width],
+                                    @"canvasHeight" : [NSNumber numberWithFloat:self.frame.size.height],
+                                    @"mirrored" : _mirrored ? @true : @false
                                 };
 
     NSArray* jsonArray = [NSArray arrayWithObjects:jsonObject, nil];
@@ -177,14 +207,8 @@
 }
 
 - (void)didTapAnnotationItem:(UIBarButtonItem *)sender {
-    NSLog(@"Canvas delegate click");
+    // INFO: The color setter is handled in the toolbar, not here
     
-    // The color setter is handled in the toolbar, directly
-//    if ([sender isKindOfClass: OTColorButtonItem.self]) {
-//        // Update the annotation color
-//        OTColorButtonItem* item = (OTColorButtonItem*) sender;
-//        [self setColor:item.color];
-//    } else
     if ([sender isKindOfClass: OTAnnotationButtonItem.self]) {
         OTAnnotationButtonItem* item = (OTAnnotationButtonItem*) sender;
         // TODO: Handle the click

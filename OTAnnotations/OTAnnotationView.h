@@ -19,6 +19,6 @@
 - (void)didTapAnnotationItem:(UIBarButtonItem*)item;
 
 - (void)setColor:(UIColor *)color;
-- (void)setLineWidth:(CGFloat *)lineWidth;
+- (void)setLineWidth:(CGFloat)lineWidth;
 
 @end

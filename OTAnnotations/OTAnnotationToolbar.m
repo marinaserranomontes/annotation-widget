@@ -9,8 +9,7 @@
 #import "OTAnnotationToolbar.h"
 #import "OTAnnotationButtonItem.h"
 #import "OTColorButtonItem.h"
-
-#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+#import "UIColor+HexString.h"
 
 @implementation OTAnnotationToolbar {
     UIView* _view;
@@ -21,6 +20,8 @@
     
     OTColorButtonItem* _colorPickerItem;
     NSMutableArray* _colors;
+    
+    UIColor* _selectedColor;
     
     CGRect _bounds;
 }
@@ -46,7 +47,7 @@
     _bounds = self.bounds;
     
     self.opaque = false;
-    super.backgroundColor = [UIColor yellowColor];
+    super.backgroundColor = [UIColor clearColor];
     
     _annotationViews = [[NSMutableArray alloc] init];
     _colors = [[NSMutableArray alloc] init];
@@ -54,14 +55,14 @@
 }
 
 - (void)initDefaultColors {
-    [_colors addObject:UIColorFromRGB(0x000000)];  // Black
-    [_colors addObject:UIColorFromRGB(0x0000FF)];  // Blue
-    [_colors addObject:UIColorFromRGB(0xFF0000)];  // Red
-    [_colors addObject:UIColorFromRGB(0x00FF00)];  // Green
-    [_colors addObject:UIColorFromRGB(0xFF8C00)];  // Orange
-    [_colors addObject:UIColorFromRGB(0xFFD700)];  // Yellow
-    [_colors addObject:UIColorFromRGB(0x4B0082)];  // Purple
-    [_colors addObject:UIColorFromRGB(0x800000)];  // Brown
+    [_colors addObject: [UIColor colorFromHex:0x000000]];  // Black
+    [_colors addObject: [UIColor colorFromHex:0x0000FF]];  // Blue
+    [_colors addObject: [UIColor colorFromHex:0xFF0000]];  // Red
+    [_colors addObject: [UIColor colorFromHex:0x00FF00]];  // Green
+    [_colors addObject: [UIColor colorFromHex:0xFF8C00]];  // Orange
+    [_colors addObject: [UIColor colorFromHex:0xFFD700]];  // Yellow
+    [_colors addObject: [UIColor colorFromHex:0x4B0082]];  // Purple
+    [_colors addObject: [UIColor colorFromHex:0x800000]];  // Brown
 }
 
 - (void)awakeFromNib {
@@ -69,6 +70,8 @@
     CGRect mainframe = _bounds;
     mainframe.size.height = 2 * _bounds.size.height;
     self.frame = mainframe;
+    
+    _selectedColor = [_colors objectAtIndex:0];
 
     for (UIBarButtonItem* item in _mainToolbar.items) {
         item.target = self;
@@ -91,7 +94,6 @@
     [self addSubview:_mainToolbar];
     [_mainToolbar sizeToFit];
     
-    _view.backgroundColor = [UIColor redColor];
     _mainToolbar.barTintColor = _barTintColor;
     _mainToolbar.tintColor = _tintColor;
 }
@@ -266,6 +268,7 @@
 
 -(void)attachAnnotationView:(OTAnnotationView*)annotationView {
     [_annotationViews addObject: annotationView];
+    [annotationView setColor:_selectedColor];
 }
 
 @end

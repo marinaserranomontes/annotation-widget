@@ -19,6 +19,8 @@
 		852D5C241BB2EBA300A564CC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 852D5C231BB2EBA300A564CC /* Images.xcassets */; settings = {ASSET_TAGS = (); }; };
 		855B24EC1BB70DAC0082791D /* OTPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EA1BB70DAC0082791D /* OTPath.h */; settings = {ASSET_TAGS = (); }; };
 		855B24ED1BB70DAC0082791D /* OTPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EB1BB70DAC0082791D /* OTPath.m */; settings = {ASSET_TAGS = (); }; };
+		855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EE1BB9B5C00082791D /* UIColor+HexString.h */; settings = {ASSET_TAGS = (); }; };
+		855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EF1BB9B5C00082791D /* UIColor+HexString.m */; settings = {ASSET_TAGS = (); }; };
 		85D394811BB2F73300D64B84 /* OTAnnotations.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C251BB2F0A000A564CC /* OTAnnotations.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		85E127131B8227BD0015B1A3 /* OTAnnotations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E127071B8227BC0015B1A3 /* OTAnnotations.framework */; };
 		85E1271A1B8227BD0015B1A3 /* OTAnnotationsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */; };
@@ -49,6 +51,8 @@
 		852D5C251BB2F0A000A564CC /* OTAnnotations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OTAnnotations.h; sourceTree = "<group>"; };
 		855B24EA1BB70DAC0082791D /* OTPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTPath.h; sourceTree = "<group>"; };
 		855B24EB1BB70DAC0082791D /* OTPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTPath.m; sourceTree = "<group>"; };
+		855B24EE1BB9B5C00082791D /* UIColor+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+HexString.h"; sourceTree = "<group>"; };
+		855B24EF1BB9B5C00082791D /* UIColor+HexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+HexString.m"; sourceTree = "<group>"; };
 		85E127071B8227BC0015B1A3 /* OTAnnotations.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OTAnnotations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		85E1270B1B8227BC0015B1A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		85E127121B8227BD0015B1A3 /* OTAnnotationsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OTAnnotationsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -114,6 +118,8 @@
 				855B24EA1BB70DAC0082791D /* OTPath.h */,
 				855B24EB1BB70DAC0082791D /* OTPath.m */,
 				85E1270A1B8227BC0015B1A3 /* Supporting Files */,
+				855B24EE1BB9B5C00082791D /* UIColor+HexString.h */,
+				855B24EF1BB9B5C00082791D /* UIColor+HexString.m */,
 			);
 			path = OTAnnotations;
 			sourceTree = "<group>";
@@ -154,6 +160,7 @@
 				85D394811BB2F73300D64B84 /* OTAnnotations.h in Headers */,
 				852D5C221BB2EA7E00A564CC /* OTAnnotationView.h in Headers */,
 				852D5C171BB2E95400A564CC /* OTAnnotationToolbar.h in Headers */,
+				855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */,
 				852D5C1A1BB2E95400A564CC /* OTAnnotationButtonItem.h in Headers */,
 				855B24EC1BB70DAC0082791D /* OTPath.h in Headers */,
 				852D5C1C1BB2E95400A564CC /* OTColorButtonItem.h in Headers */,
@@ -258,6 +265,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */,
 				852D5C1B1BB2E95400A564CC /* OTAnnotationButtonItem.m in Sources */,
 				852D5C181BB2E95400A564CC /* OTAnnotationToolbar.m in Sources */,
 				852D5C1D1BB2E95400A564CC /* OTColorButtonItem.m in Sources */,
