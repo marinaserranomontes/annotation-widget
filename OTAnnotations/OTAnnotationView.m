@@ -122,6 +122,11 @@
 
 - (void)setLineWidth:(CGFloat)lineWidth {
     _lineWidth = lineWidth;
+    
+    OTPath* path = [OTPath bezierPath];
+    [path setColor:_color];
+    [path setLineWidth:_lineWidth];
+    [_paths addObject:path];
 }
 
 - (void)clearCanvas {

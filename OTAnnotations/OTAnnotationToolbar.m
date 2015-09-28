@@ -10,6 +10,7 @@
 #import "OTAnnotationButtonItem.h"
 #import "OTColorButtonItem.h"
 #import "UIColor+HexString.h"
+#import "UIBezierPath+Image.h"
 
 @implementation OTAnnotationToolbar {
     UIView* _view;
@@ -22,6 +23,9 @@
     NSMutableArray* _colors;
     
     UIColor* _selectedColor;
+    CGFloat _activeLineWidth;
+    
+    NSMutableArray* _lineWidths;
     
     CGRect _bounds;
 }
@@ -51,7 +55,9 @@
     
     _annotationViews = [[NSMutableArray alloc] init];
     _colors = [[NSMutableArray alloc] init];
+    _lineWidths = [[NSMutableArray alloc] init];
     [self initDefaultColors];
+    [self initDefaultLineWidths];
 }
 
 - (void)initDefaultColors {
@@ -63,6 +69,16 @@
     [_colors addObject: [UIColor colorFromHex:0xFFD700]];  // Yellow
     [_colors addObject: [UIColor colorFromHex:0x4B0082]];  // Purple
     [_colors addObject: [UIColor colorFromHex:0x800000]];  // Brown
+}
+
+- (void)initDefaultLineWidths {
+    [_lineWidths addObject: [NSNumber numberWithFloat: 2.f]];
+    [_lineWidths addObject: [NSNumber numberWithFloat: 4.f]];
+    [_lineWidths addObject: [NSNumber numberWithFloat: 6.f]];
+    [_lineWidths addObject: [NSNumber numberWithFloat: 8.f]];
+    [_lineWidths addObject: [NSNumber numberWithFloat:10.f]];
+    [_lineWidths addObject: [NSNumber numberWithFloat:12.f]];
+    [_lineWidths addObject: [NSNumber numberWithFloat:14.f]];
 }
 
 - (void)awakeFromNib {
@@ -135,6 +151,18 @@
         if (item.subToolbar != nil) {
             // Add click listener to add sub toolbar to view
             [self showToolbar: item.subToolbar];
+        } else if ([item.identifier isEqualToString:@"ot_line_width"]) {
+            [self showLineWidthToolbar];
+        } else if ([item.identifier rangeOfString:@"ot_line_width_"].location != NSNotFound) {
+            NSString* str = [[item.identifier
+                              stringByReplacingOccurrencesOfString:@"ot_line_width_" withString:@""]
+                              stringByReplacingOccurrencesOfString:@"_" withString:@"."];
+            
+            _activeLineWidth = (CGFloat)[str floatValue];
+            
+            for (OTAnnotationView* annotationView in _annotationViews) {
+                [annotationView setLineWidth:_activeLineWidth];
+            }
         }
     }
 }
@@ -227,6 +255,8 @@
 
 - (void)showLineWidthToolbar {
     UIToolbar* toolbar = [[UIToolbar alloc] initWithFrame:_view.frame];
+    _subToolbar = toolbar;
+    
     toolbar.barTintColor = _barTintColor;
     toolbar.tintColor = _tintColor;
     toolbar.userInteractionEnabled = YES;
@@ -244,12 +274,10 @@
     
     // Ensure that the sub toolbar is drawn below the main toolbar
     CGRect frame = toolbar.frame;
-    frame.origin.y = _bounds.size.height;
+    frame.origin.y = _bounds.size.height / 2;
     toolbar.frame = frame;
     
 //    scrollView.contentSize = toolbar.frame.size;
-    
-    _subToolbar = toolbar;
     
 //        CGRect mainframe = _bounds;
 //        mainframe.size.height = 2 * _bounds.size.height;
@@ -257,11 +285,27 @@
     
     NSMutableArray* items = [[NSMutableArray alloc] init];
     
-    // TODO: Iterate over possible line widths and build items
+    for (NSNumber* number in _lineWidths) {
+        CGFloat lineWidth = number.floatValue;
+        
+        OTAnnotationButtonItem* item = [[OTAnnotationButtonItem alloc] init];
+        
+        // Creates a string identifier for the line width (e.g., ot_line_width_14_5 for 14.5f)
+        NSString* str = [NSString stringWithFormat:@"%.01f", lineWidth];
+        NSString* lwStr = [str stringByReplacingOccurrencesOfString:@"." withString:@"_"];
+        item.identifier = [NSString stringWithFormat: @"ot_line_width_%@", lwStr];
+        
+        UIBezierPath* icon = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, 20, lineWidth)];
+        item.image = [icon strokeImageWithColor:self.tintColor]; // FIXME: Fill instead of stroke?
+        [items addObject:item];
+        
+        item.target = self;
+        item.action = @selector(handleTap:);
+    }
     
     toolbar.items = items;
     
-    //    [scrollView addSubview: toolbar];
+//    [scrollView addSubview: toolbar];
     [self addSubview: toolbar];
     [self bringSubviewToFront: toolbar];
 }
