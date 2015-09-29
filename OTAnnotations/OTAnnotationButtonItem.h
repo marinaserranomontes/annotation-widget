@@ -17,4 +17,7 @@
 @property (nonatomic) IBInspectable NSString *identifier;
 @property (nonatomic) IBOutlet UIToolbar *subToolbar;
 
+@property (nonatomic) NSArray *points;
+@property (nonatomic) Boolean enableSmoothing;
+
 @end

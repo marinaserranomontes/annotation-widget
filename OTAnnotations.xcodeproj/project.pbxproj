@@ -23,6 +23,8 @@
 		855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EF1BB9B5C00082791D /* UIColor+HexString.m */; settings = {ASSET_TAGS = (); }; };
 		855B24F41BB9C8AE0082791D /* UIBezierPath+Image.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24F21BB9C8AE0082791D /* UIBezierPath+Image.h */; settings = {ASSET_TAGS = (); }; };
 		855B24F51BB9C8AE0082791D /* UIBezierPath+Image.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24F31BB9C8AE0082791D /* UIBezierPath+Image.m */; settings = {ASSET_TAGS = (); }; };
+		855B24F81BBB07BB0082791D /* OTShape.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24F61BBB07BB0082791D /* OTShape.h */; settings = {ASSET_TAGS = (); }; };
+		855B24F91BBB07BB0082791D /* OTShape.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24F71BBB07BB0082791D /* OTShape.m */; settings = {ASSET_TAGS = (); }; };
 		85D394811BB2F73300D64B84 /* OTAnnotations.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C251BB2F0A000A564CC /* OTAnnotations.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		85E127131B8227BD0015B1A3 /* OTAnnotations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E127071B8227BC0015B1A3 /* OTAnnotations.framework */; };
 		85E1271A1B8227BD0015B1A3 /* OTAnnotationsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */; };
@@ -57,6 +59,8 @@
 		855B24EF1BB9B5C00082791D /* UIColor+HexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+HexString.m"; sourceTree = "<group>"; };
 		855B24F21BB9C8AE0082791D /* UIBezierPath+Image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIBezierPath+Image.h"; sourceTree = "<group>"; };
 		855B24F31BB9C8AE0082791D /* UIBezierPath+Image.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIBezierPath+Image.m"; sourceTree = "<group>"; };
+		855B24F61BBB07BB0082791D /* OTShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTShape.h; sourceTree = "<group>"; };
+		855B24F71BBB07BB0082791D /* OTShape.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTShape.m; sourceTree = "<group>"; };
 		85E127071B8227BC0015B1A3 /* OTAnnotations.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OTAnnotations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		85E1270B1B8227BC0015B1A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		85E127121B8227BD0015B1A3 /* OTAnnotationsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OTAnnotationsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -121,6 +125,8 @@
 				852D5C141BB2E95400A564CC /* OTColorButtonItem.m */,
 				855B24EA1BB70DAC0082791D /* OTPath.h */,
 				855B24EB1BB70DAC0082791D /* OTPath.m */,
+				855B24F61BBB07BB0082791D /* OTShape.h */,
+				855B24F71BBB07BB0082791D /* OTShape.m */,
 				85E1270A1B8227BC0015B1A3 /* Supporting Files */,
 				855B24F21BB9C8AE0082791D /* UIBezierPath+Image.h */,
 				855B24F31BB9C8AE0082791D /* UIBezierPath+Image.m */,
@@ -166,6 +172,7 @@
 				85D394811BB2F73300D64B84 /* OTAnnotations.h in Headers */,
 				852D5C221BB2EA7E00A564CC /* OTAnnotationView.h in Headers */,
 				852D5C171BB2E95400A564CC /* OTAnnotationToolbar.h in Headers */,
+				855B24F81BBB07BB0082791D /* OTShape.h in Headers */,
 				855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */,
 				855B24F41BB9C8AE0082791D /* UIBezierPath+Image.h in Headers */,
 				852D5C1A1BB2E95400A564CC /* OTAnnotationButtonItem.h in Headers */,
@@ -272,6 +279,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				855B24F91BBB07BB0082791D /* OTShape.m in Sources */,
 				855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */,
 				855B24F51BB9C8AE0082791D /* UIBezierPath+Image.m in Sources */,
 				852D5C1B1BB2E95400A564CC /* OTAnnotationButtonItem.m in Sources */,

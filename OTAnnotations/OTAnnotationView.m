@@ -11,11 +11,15 @@
 #import "OTColorButtonItem.h"
 #import "OTPath.h"
 #import "UIColor+HexString.h"
+#import "OTShape.h"
+
+#define kTolerance 5
 
 @implementation OTAnnotationView {
     NSMutableArray *_paths;
-    CGPoint _current;
+    CGPoint _currentPoint;
     CGPoint _lastPoint;
+    CGPoint _startPoint;
     
     UIColor *_color;
     UIColor *_incomingColor;
@@ -33,6 +37,10 @@
     CGSize _videoDimensions;
     
     Boolean _mirrored;
+    
+    OTAnnotationButtonItem* _selectedItem;
+    
+    Boolean _isDrawing;
     
     /* TODO: Enum or similar
      Pen("otAnnotation_pen"),
@@ -109,6 +117,96 @@
         [path.color setStroke];
         [path stroke];
     }
+    
+    if (_isDrawing) {
+        if (_selectedItem != nil && _selectedItem.points != nil) {
+            [self drawPoints:_selectedItem.points withSmoothing:_selectedItem.enableSmoothing];
+        }
+    }
+}
+
+- (void)drawPoints:(NSArray*)points withSmoothing:(Boolean)smoothingEnabled {
+    float dx = fabsf(_currentPoint.x - _lastPoint.x);
+    float dy = fabsf(_currentPoint.y - _lastPoint.y);
+    
+    if (dx >= kTolerance || dy >= kTolerance) {
+        CGPoint scale = [self scaleForPoints: points];
+        
+        OTPath* path = [OTPath bezierPath];
+        [path setColor:_color];
+        [path setLineWidth:_lineWidth];
+        
+        if (_selectedItem.points.count == 2) {
+            // We have a line
+            [path moveToPoint: _startPoint];
+            [path addLineToPoint: _currentPoint];
+        } else {
+            float lastX = -1;
+            float lastY = -1;
+            for (int i = 0; i < _selectedItem.points.count; i++) {
+                // Scale the points according to the difference between the start and end points
+                float pointX = _startPoint.x + (scale.x * [(NSValue*)[points objectAtIndex:i] CGPointValue].x);
+                float pointY = _startPoint.y + (scale.y * [(NSValue*)[points objectAtIndex:i] CGPointValue].y);
+                
+                if (smoothingEnabled) {
+                    if (i == 0) {
+                        // Do nothing
+                    } else if (i == 1) {
+                        [path moveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2)];
+                    } else {
+                        // FIXME: This isn't drawing properly
+                        [path addQuadCurveToPoint: CGPointMake(lastX, lastY) controlPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2)];
+                    }
+                } else {
+                    if (i == 0) {
+                        [path moveToPoint: CGPointMake(pointX, pointY)];
+                    } else {
+                        [path addLineToPoint: CGPointMake(pointX, pointY)];
+                    }
+                }
+                
+                lastX = pointX;
+                lastY = pointY;
+            }
+        }
+        
+        // Ensure that this is only drawn temporarily
+        [path.color setStroke];
+        [path stroke];
+    }
+}
+
+- (CGPoint)scaleForPoints: (NSArray*)points {
+    // mX and mY refer to the end point of the enclosing rectangle (touch up)
+    float minX = FLT_MAX;
+    float minY = FLT_MAX;
+    float maxX = 0;
+    float maxY = 0;
+    
+    for (int i = 0; i < _selectedItem.points.count; i++) {
+        CGPoint point = [(NSValue*)[points objectAtIndex:i] CGPointValue];
+        
+        if (point.x < minX) {
+            minX = point.x;
+        } else if (point.x > maxX) {
+            maxX = point.x;
+        }
+        
+        if (point.y < minY) {
+            minY = point.y;
+        } else if (point.y > maxY) {
+            maxY = point.y;
+        }
+    }
+    float dx = fabsf(maxX - minX);
+    float dy = fabsf(maxY - minY);
+    
+    float scaleX = (_currentPoint.x - _startPoint.x) / dx;
+    float scaleY = (_currentPoint.y - _startPoint.y) / dy;
+    
+//    Log.i("AnnotationView", "Scale: " + scaleX + ", " + scaleY);
+    
+    return CGPointMake(scaleX, scaleY);
 }
 
 - (void)setColor:(UIColor *)color {
@@ -143,8 +241,14 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
-    CGPoint p = [touch locationInView:self];
-    [self startTouch:p];
+    CGPoint point = [touch locationInView:self];
+    _startPoint = point;
+    
+    if (_selectedItem.points != nil) {
+        _isDrawing = true;
+    } else {
+        [self startTouch:point];
+    }
 }
 
 - (void)startTouch:(CGPoint)point {
@@ -154,12 +258,24 @@
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
-    CGPoint p = [touch locationInView:self];
-    [self moveTouch:p incoming:false];
+    CGPoint point = [touch locationInView:self];
+    _currentPoint = point;
+    
+    if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
+        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+    } else {
+        if (_selectedItem.points != nil) {
+            [self setNeedsDisplay];
+        }
+    }
 }
 
-- (void)moveTouch:(CGPoint)point incoming:(Boolean) incoming {
-    [[self activePath] addLineToPoint:point];
+- (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled incoming:(Boolean) incoming {
+    if (smoothingEnabled) {
+        [[self activePath] addQuadCurveToPoint:point controlPoint: CGPointMake((point.x + _lastPoint.x) / 2, (point.y + _lastPoint.y) / 2)];
+    } else {
+        [[self activePath] addLineToPoint:point];
+    }
     [self setNeedsDisplay];
     
     if (!incoming) {
@@ -209,8 +325,73 @@
     _lastPoint = point;
 }
 
+- (void)drawShape {
+    if (_selectedItem.points != nil) {
+        _isDrawing = false;
+        
+        if (_selectedItem.points.count == 2) {
+            // We have a line
+            [self startTouch: CGPointMake(_startPoint.x, _startPoint.y)];
+            [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+//            Log.i(TAG, "Points: (" + mStartX + ", " + mStartY + "), (" + mX + ", " + mY + ")");
+//            sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(mX, mY));
+        } else {
+            CGPoint scale = [self scaleForPoints: _selectedItem.points];
+
+            for (int i = 0; i < _selectedItem.points.count; i++) {
+                CGPoint point = [(NSValue*)[_selectedItem.points objectAtIndex:i] CGPointValue];
+                
+                // Scale the points according to the difference between the start and end points
+                float pointX = _startPoint.x + (scale.x * point.x);
+                float pointY = _startPoint.y + (scale.y * point.y);
+
+                if (_selectedItem.enableSmoothing) {
+                    if (i == 0) {
+                        // Do nothing
+                    } else if (i == 1) {
+                        [self startTouch: CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2)];
+                    } else {
+                        [self moveTouch: CGPointMake(_lastPoint.x, _lastPoint.y) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+
+//                        if (i == _selectedItem.points.count == 1) {
+//                            moveTouch(pointX, pointY, true);
+//                        }
+                    }
+                } else {
+                    if (i == 0) {
+                        _lastPoint.x = pointX;
+                        _lastPoint.y = pointY;
+                        [self startTouch: CGPointMake(pointX, pointY)];
+                    } else {
+                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+                    }
+                }
+
+//                sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(pointX, pointY));
+
+                _lastPoint.x = pointX;
+                _lastPoint.y = pointY;
+            }
+        }
+        
+//        JSONObject data = new JSONObject();
+//        data.put("action", "Shape");
+//        data.put("variation", "Draw");
+//        data.put("payload", "");
+//        data.put("sessionId", mSessionId);
+//        data.put("partnerId", "");
+//        data.put("connectionId", mycid);
+        
+        //AnnotationAnalytics.logEvent(data);
+    }
+}
+
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    [self touchesMoved:touches withEvent:event];
+    if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
+        [self touchesMoved:touches withEvent:event];
+    } else {
+        [self drawShape];
+    }
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -218,7 +399,6 @@
 }
 
 - (void)didReceiveSignal:(NSString*)signal withType:(NSString*)type fromConnection:(OTConnection*)connection {
-    NSLog(@"Canvas signal received");
     if (![connection.connectionId isEqualToString:_mycid]) {
         if ([type isEqualToString:@"otAnnotation_pen"]) {
             NSError *jsonError;
@@ -322,7 +502,7 @@
                         }
                     
                         [self startTouch: CGPointMake(fromX, fromY)];
-                        [self moveTouch: CGPointMake(toX, toY) incoming:true];
+                        [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false incoming:true];
                     }
     //            }
             }
@@ -352,20 +532,24 @@
     
     if ([sender isKindOfClass: OTAnnotationButtonItem.self]) {
         OTAnnotationButtonItem* item = (OTAnnotationButtonItem*) sender;
-        // TODO: Handle the click
         
-        if ([item.identifier isEqualToString:@"ot_pen"]) {
-            
-        } else if ([item.identifier isEqualToString:@"ot_line"]) {
-            
-        } else if ([item.identifier isEqualToString:@"ot_shapes"]) {
-            
-        } else if ([item.identifier isEqualToString:@"ot_clear"]) {
+        if ([item.identifier isEqualToString:@"ot_clear"]) {
             [self clearCanvas: _mycid];
         } else if ([item.identifier isEqualToString:@"ot_capture"]) {
-            
+            // TODO: Add a tap gesture recognizer to allow the container to be captured to an image
+        } else {
+            if ([item.identifier isEqualToString:@"ot_arrow"]) {
+                item.points = [OTShape arrow];
+            } else if ([item.identifier isEqualToString:@"ot_rectangle"]) {
+                item.points = [OTShape rectangle];
+            } else if ([item.identifier isEqualToString:@"ot_oval"]) {
+                item.points = [OTShape oval];
+                item.enableSmoothing = true;
+            } else if ([item.identifier isEqualToString:@"ot_line"]) {
+                item.points = [OTShape line];
+            }
+            _selectedItem = item;
         }
-
 
     }
 }
