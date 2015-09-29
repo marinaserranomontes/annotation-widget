@@ -21,4 +21,6 @@
 - (void)setColor:(UIColor *)color;
 - (void)setLineWidth:(CGFloat)lineWidth;
 
+- (void)didReceiveSignal:(NSString*)signal withType:(NSString*)type fromConnection:(OTConnection*)connection;
+
 @end

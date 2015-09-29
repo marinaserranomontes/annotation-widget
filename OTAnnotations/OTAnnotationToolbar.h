@@ -22,5 +22,6 @@ IB_DESIGNABLE
 @property (nonatomic) IBOutlet UIToolbar *mainToolbar;
 
 -(void)attachAnnotationView:(OTAnnotationView*)annotationView;
+-(void)attachSignalType:(NSString*)type fromConnection:(OTConnection*)connection withString:(NSString*)string;
 
 @end

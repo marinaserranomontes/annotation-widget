@@ -315,4 +315,14 @@
     [annotationView setColor:_selectedColor];
 }
 
+- (void)attachSignalType:(NSString*)type fromConnection:(OTConnection*)connection withString:(NSString*)string {
+    NSLog(@"Type: %@", type);
+    if ([type rangeOfString:@"otAnnotation"].location != NSNotFound) {
+        NSLog(@"Toolbar signal received");
+        for (OTAnnotationView* annotationView in _annotationViews) {
+            [annotationView didReceiveSignal:string withType:type fromConnection:connection];
+        }
+    }
+}
+
 @end
