@@ -311,6 +311,7 @@
 }
 
 -(void)attachAnnotationView:(OTAnnotationView*)annotationView {
+    annotationView->toolbar = self;
     [_annotationViews addObject: annotationView];
     [annotationView setColor:_selectedColor];
 }
@@ -320,6 +321,14 @@
         for (OTAnnotationView* annotationView in _annotationViews) {
             [annotationView didReceiveSignal:string withType:type fromConnection:connection];
         }
+    }
+}
+
+-(void)didCaptureImage:(UIImage*)image forConnection:(NSString*)connectionId {
+    NSLog(@"Screenshot callback");
+    
+    if (_screenCaptureDelegate != nil) {
+        [_screenCaptureDelegate didCaptureImage:image forConnection:connectionId];
     }
 }
 

@@ -30,17 +30,19 @@
     OTSubscriber *_subscriber;
     OTPublisher *_publisher;
     
-    NSString* _sessionId;
-    NSString* _mycid;
-    NSString* _canvasId;
+    NSString *_sessionId;
+    NSString *_mycid;
+    NSString *_canvasId;
     
     CGSize _videoDimensions;
     
     Boolean _mirrored;
     
-    OTAnnotationButtonItem* _selectedItem;
+    OTAnnotationButtonItem *_selectedItem;
     
     Boolean _isDrawing;
+    
+    UITapGestureRecognizer *_tap;
     
     /* TODO: Enum or similar
      Pen("otAnnotation_pen"),
@@ -227,7 +229,7 @@
     [_paths addObject:path];
 }
 
-- (void)clearCanvas:(NSString*)connectionId {
+- (void)clearCanvas:(NSString*)connectionId incoming:(Boolean)incoming {
     // TODO: Only clear annotations drawn by the specified user (add param for ID to method signature)
     [_paths removeAllObjects];
     [self setNeedsDisplay];
@@ -237,6 +239,10 @@
     [path setColor:_color];
     [path setLineWidth:_lineWidth];
     [_paths addObject:path];
+    
+    if (!incoming) {
+        
+    }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -333,8 +339,8 @@
             // We have a line
             [self startTouch: CGPointMake(_startPoint.x, _startPoint.y)];
             [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
-//            Log.i(TAG, "Points: (" + mStartX + ", " + mStartY + "), (" + mX + ", " + mY + ")");
-//            sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(mX, mY));
+//            NSLog("Points: (%f, %f), (%f, %f)", mStartX, mStartY, mX, mY);
+            [self sendUpdate:[self buildSignalFromPoint: _currentPoint] forType:@"otAnnotation_pen"];
         } else {
             CGPoint scale = [self scaleForPoints: _selectedItem.points];
 
@@ -353,9 +359,9 @@
                     } else {
                         [self moveTouch: CGPointMake(_lastPoint.x, _lastPoint.y) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
 
-//                        if (i == _selectedItem.points.count == 1) {
-//                            moveTouch(pointX, pointY, true);
-//                        }
+                        if (i == _selectedItem.points.count == 1) {
+                            [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+                        }
                     }
                 } else {
                     if (i == 0) {
@@ -367,22 +373,23 @@
                     }
                 }
 
-//                sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(pointX, pointY));
+                [self sendUpdate:[self buildSignalFromPoint: CGPointMake(pointX, pointY)] forType:@"otAnnotation_pen"];
 
                 _lastPoint.x = pointX;
                 _lastPoint.y = pointY;
             }
         }
         
-//        JSONObject data = new JSONObject();
-//        data.put("action", "Shape");
-//        data.put("variation", "Draw");
-//        data.put("payload", "");
-//        data.put("sessionId", mSessionId);
-//        data.put("partnerId", "");
-//        data.put("connectionId", mycid);
+        NSDictionary* data = @{
+                                   @"action" : @"Shape",
+                                   @"variation" : @"Draw",
+                                   @"payload" : @"",
+                                   @"sessionId" : _sessionId,
+                                   @"partnerId" : @"",
+                                   @"connectionId" : _mycid
+                               };
         
-        //AnnotationAnalytics.logEvent(data);
+        //[OTAnnotationAnalytics logEvent: data];
     }
 }
 
@@ -396,6 +403,64 @@
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
     [self touchesEnded:touches withEvent:event];
+}
+
+- (NSString*)buildSignalFromPoint:(CGPoint)point {
+    Boolean mirrored = false;
+    
+    int videoWidth = 0;
+    int videoHeight = 0;
+    
+    // FIXME: Figure out how to access the renderer - see if we need custom renderer like Android
+//    OTVideoRender* renderer = nil;
+    
+    if (_publisher != nil) {
+        _canvasId = _publisher.stream.connection.connectionId;
+        _videoDimensions = _publisher.stream.videoDimensions;
+    } else if (_subscriber != nil) {
+        _canvasId = _subscriber.stream.connection.connectionId;
+        _videoDimensions = _subscriber.stream.videoDimensions;
+    }
+
+//    if (mPublisher != null) {
+//        renderer = ((AnnotationVideoRenderer) mPublisher.getRenderer());
+//    } else if (mSubscriber != null) {
+//        renderer = ((AnnotationVideoRenderer) mSubscriber.getRenderer());
+//    }
+//    
+//    if (renderer != nil) {
+//        mirrored = renderer.isMirrored();
+//        videoWidth = renderer.getVideoWidth();
+//        videoHeight = renderer.getVideoHeight();
+//    } else {
+//        // FIXME Throw exception?
+//    }
+    
+    // Send the signal
+    NSDictionary* jsonObject = @{
+                                     @"id" : _canvasId == nil ? @"" : _canvasId, // FIXME: Should never be nil here
+                                     @"fromId" : _mycid,
+                                     @"fromX" : [NSNumber numberWithFloat:_lastPoint.x],
+                                     @"fromY" : [NSNumber numberWithFloat:_lastPoint.y],
+                                     @"toX" : [NSNumber numberWithFloat:point.x],
+                                     @"toY" : [NSNumber numberWithFloat:point.y],
+                                     @"color" : [UIColor hexStringFromColor:_color],
+                                     @"lineWidth" : [NSNumber numberWithFloat:_lineWidth],
+                                     @"videoWidth" : [NSNumber numberWithFloat:_videoDimensions.width],
+                                     @"videoHeight" : [NSNumber numberWithFloat:_videoDimensions.height],
+                                     @"canvasWidth" : [NSNumber numberWithFloat:self.frame.size.width],
+                                     @"canvasHeight" : [NSNumber numberWithFloat:self.frame.size.height],
+                                     @"mirrored" : _mirrored ? @true : @false
+                                 };
+    
+    NSArray* jsonArray = [NSArray arrayWithObjects:jsonObject, nil];
+    
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonArray
+                                                       options:0
+                                                         error:&error];
+    
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
 }
 
 - (void)didReceiveSignal:(NSString*)signal withType:(NSString*)type fromConnection:(OTConnection*)connection {
@@ -507,7 +572,7 @@
     //            }
             }
         } else if ([type isEqualToString:@"otAnnotation_clear"]) {
-            [self clearCanvas:connection.connectionId];
+            [self clearCanvas:connection.connectionId incoming:true];
         }
     }
 }
@@ -527,16 +592,80 @@
     }
 }
 
+- (UIImage*)captureScreenshot {
+    NSLog(@"Capturing screenshot");
+    CGSize imageSize = CGSizeZero;
+    
+    imageSize = [UIScreen mainScreen].bounds.size;
+    
+    UIGraphicsBeginImageContextWithOptions(imageSize, NO, 0);
+    
+    UIView* videoView;
+    
+    if (_publisher != nil) {
+        videoView = _publisher.view;
+    } else if (_subscriber != nil) {
+        videoView = _subscriber.view;
+    }
+    
+    // First, draw the video
+    if ([videoView respondsToSelector:
+         @selector(drawViewHierarchyInRect:afterScreenUpdates:)])
+    {
+        [videoView drawViewHierarchyInRect:videoView.bounds afterScreenUpdates:NO];
+    }
+    else {
+        [videoView.layer renderInContext:UIGraphicsGetCurrentContext()];
+    }
+    
+    // Then, overlay the annotations on top
+    if ([self respondsToSelector:
+         @selector(drawViewHierarchyInRect:afterScreenUpdates:)])
+    {
+        [self drawViewHierarchyInRect:videoView.bounds afterScreenUpdates:NO];
+    }
+    else {
+        [self.layer renderInContext:UIGraphicsGetCurrentContext()];
+    }
+    
+    UIImage* image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    // Include a "flash" animation
+    UIView* flash = [[UIView alloc] initWithFrame:self.bounds];
+    flash.backgroundColor = [UIColor whiteColor];
+    [self addSubview:flash];
+    
+    [UIView animateWithDuration:0.5 animations:^{
+        flash.backgroundColor = [UIColor clearColor];
+    } completion:^(BOOL finished) {
+        [flash removeFromSuperview];
+    }];
+    
+    [toolbar didCaptureImage:image forConnection:_canvasId];
+    
+    return image;
+}
+
 - (void)didTapAnnotationItem:(UIBarButtonItem *)sender {
     // INFO: The color setter is handled in the toolbar, not here
+    
+    [self removeGestureRecognizer:_tap];
     
     if ([sender isKindOfClass: OTAnnotationButtonItem.self]) {
         OTAnnotationButtonItem* item = (OTAnnotationButtonItem*) sender;
         
         if ([item.identifier isEqualToString:@"ot_clear"]) {
-            [self clearCanvas: _mycid];
+            [self clearCanvas: _mycid incoming:false];
         } else if ([item.identifier isEqualToString:@"ot_capture"]) {
-            // TODO: Add a tap gesture recognizer to allow the container to be captured to an image
+            NSLog(@"Adding gesture recognizer");
+            _tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(captureScreenshot)];
+            _tap.numberOfTapsRequired = 1;
+            [self addGestureRecognizer:_tap];
+            
+            _selectedItem = nil;
+        } else if ([item.identifier rangeOfString:@"ot_line_width"].location != NSNotFound) {
+            /* Do nothing */
         } else {
             if ([item.identifier isEqualToString:@"ot_arrow"]) {
                 item.points = [OTShape arrow];

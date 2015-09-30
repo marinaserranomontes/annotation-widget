@@ -8,9 +8,13 @@
 
 #import <UIKit/UIKit.h>
 #import <OpenTok/OpenTok.h>
+#import "OTAnnotationToolbar.h"
+
+@class OTAnnotationToolbar;
 
 @interface OTAnnotationView : UIView {
-
+    @package
+    OTAnnotationToolbar* toolbar;
 }
 
 - (id)initWithSubscriber:(OTSubscriber *)subscriber;
@@ -20,6 +24,8 @@
 
 - (void)setColor:(UIColor *)color;
 - (void)setLineWidth:(CGFloat)lineWidth;
+
+- (UIImage*)captureScreenshot;
 
 - (void)didReceiveSignal:(NSString*)signal withType:(NSString*)type fromConnection:(OTConnection*)connection;
 
