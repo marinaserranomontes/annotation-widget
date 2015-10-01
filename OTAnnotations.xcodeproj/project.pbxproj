@@ -29,6 +29,8 @@
 		85E127131B8227BD0015B1A3 /* OTAnnotations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E127071B8227BC0015B1A3 /* OTAnnotations.framework */; };
 		85E1271A1B8227BD0015B1A3 /* OTAnnotationsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */; };
 		85E1272E1B822C420015B1A3 /* OpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E1272D1B822C420015B1A3 /* OpenTok.framework */; };
+		85FD15FF1BBD7EB000F847A0 /* OTAnnotationAnalytics.h in Headers */ = {isa = PBXBuildFile; fileRef = 85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */; settings = {ASSET_TAGS = (); }; };
+		85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +70,8 @@
 		85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationsTests.m; sourceTree = "<group>"; };
 		85E1272D1B822C420015B1A3 /* OpenTok.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenTok.framework; path = "../../../../../../../../Downloads/OpenTok-iOS-2.6.0/OpenTok.framework"; sourceTree = "<group>"; };
 		85E1272F1B822C950015B1A3 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+		85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationAnalytics.h; sourceTree = "<group>"; };
+		85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationAnalytics.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +117,8 @@
 			isa = PBXGroup;
 			children = (
 				852D5C231BB2EBA300A564CC /* Images.xcassets */,
+				85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */,
+				85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */,
 				852D5C111BB2E95400A564CC /* OTAnnotationButtonItem.h */,
 				852D5C121BB2E95400A564CC /* OTAnnotationButtonItem.m */,
 				852D5C251BB2F0A000A564CC /* OTAnnotations.h */,
@@ -178,6 +184,7 @@
 				852D5C1A1BB2E95400A564CC /* OTAnnotationButtonItem.h in Headers */,
 				855B24EC1BB70DAC0082791D /* OTPath.h in Headers */,
 				852D5C1C1BB2E95400A564CC /* OTColorButtonItem.h in Headers */,
+				85FD15FF1BBD7EB000F847A0 /* OTAnnotationAnalytics.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,6 +288,7 @@
 			files = (
 				855B24F91BBB07BB0082791D /* OTShape.m in Sources */,
 				855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */,
+				85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */,
 				855B24F51BB9C8AE0082791D /* UIBezierPath+Image.m in Sources */,
 				852D5C1B1BB2E95400A564CC /* OTAnnotationButtonItem.m in Sources */,
 				852D5C181BB2E95400A564CC /* OTAnnotationToolbar.m in Sources */,

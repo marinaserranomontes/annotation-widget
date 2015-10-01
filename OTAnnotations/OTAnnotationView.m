@@ -7,6 +7,7 @@
 //
 
 #import "OTAnnotationView.h"
+#import "OTAnnotationAnalytics.h"
 #import "OTAnnotationButtonItem.h"
 #import "OTColorButtonItem.h"
 #import "OTPath.h"
@@ -269,6 +270,17 @@
     
     if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
         [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+        
+        NSDictionary* data = @{
+                                   @"action" : @"Pen",
+                                   @"variation" : @"Draw",
+                                   @"payload" : @"",
+                                   @"sessionId" : _sessionId,
+                                   @"partnerId" : @"",
+                                   @"connectionId" : _mycid
+                               };
+        
+        [OTAnnotationAnalytics logEvent:data];
     } else {
         if (_selectedItem.points != nil) {
             [self setNeedsDisplay];
@@ -389,7 +401,7 @@
                                    @"connectionId" : _mycid
                                };
         
-        //[OTAnnotationAnalytics logEvent: data];
+        [OTAnnotationAnalytics logEvent:data];
     }
 }
 
@@ -643,6 +655,17 @@
     }];
     
     [toolbar didCaptureImage:image forConnection:_canvasId];
+    
+    NSDictionary* data = @{
+                               @"action" : @"Capture",
+                               @"variation" : @"",
+                               @"payload" : @"",
+                               @"sessionId" : _sessionId,
+                               @"partnerId" : @"",
+                               @"connectionId" : _mycid
+                           };
+    
+    [OTAnnotationAnalytics logEvent:data];
     
     return image;
 }
