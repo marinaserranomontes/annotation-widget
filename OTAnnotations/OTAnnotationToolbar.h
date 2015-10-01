@@ -25,8 +25,6 @@ IB_DESIGNABLE
 
 @protocol OTAnnotationToolbarDelegate <NSObject>
 
-// TODO: Add button click callbacks
-
 @end
 
 @interface OTAnnotationToolbar : UIView
@@ -37,8 +35,28 @@ IB_DESIGNABLE
 @property (nonatomic) id<OTScreenCaptureDelegate> screenCaptureDelegate;
 @property (nonatomic) id<OTAnnotationToolbarDelegate> delegate;
 
+/**
+ * Links an OTAnnotationView instance to the toolbar.
+ *
+ * @param annotationView The OpenTok annotation canvas.
+ */
 -(void)attachAnnotationView:(OTAnnotationView*)annotationView;
+
+/**
+ * Attaches an OpenTok signal to be used to handle incoming annotations.
+ *
+ * @param type The type of OpenTok signal.
+ * @param connection The OpenTok connection the signal was received on.
+ * @param string The signal string.
+ */
 -(void)attachSignalType:(NSString*)type fromConnection:(OTConnection*)connection withString:(NSString*)string;
+
+/**
+ * Called when a screen capture has been taken on an OpenTok annotation canvas.
+ *
+ * @param image The screenshot image.
+ * @param connectionId The OpenTok connection ID associated with the screen capture.
+ */
 -(void)didCaptureImage:(UIImage*)image forConnection:(NSString*)connectionId;
 
 @end
