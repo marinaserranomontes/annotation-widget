@@ -43,14 +43,6 @@
     Boolean _isDrawing;
     
     UITapGestureRecognizer *_tap;
-    
-    /* TODO: Enum or similar
-     Pen("otAnnotation_pen"),
-     Clear("otAnnotation_clear"),
-     Shape("otAnnotation_shape"),
-     Line("otAnnotation_line"),
-     Text("otAnnotation_text");
-     */
 }
 
 - (id)initWithSubscriber:(OTSubscriber *)subscriber {
@@ -153,8 +145,7 @@
                     } else if (i == 1) {
                         [path moveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2)];
                     } else {
-                        // FIXME: This isn't drawing properly
-                        [path addQuadCurveToPoint: CGPointMake(lastX, lastY) controlPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2)];
+                        [path addQuadCurveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2) controlPoint: CGPointMake(lastX, lastY)];
                     }
                 } else {
                     if (i == 0) {
@@ -280,7 +271,7 @@
                                    @"connectionId" : _mycid
                                };
         
-        [OTAnnotationAnalytics logEvent:data];
+//        [OTAnnotationAnalytics logEvent:data];
     } else {
         if (_selectedItem.points != nil) {
             [self setNeedsDisplay];
@@ -290,7 +281,7 @@
 
 - (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled incoming:(Boolean) incoming {
     if (smoothingEnabled) {
-        [[self activePath] addQuadCurveToPoint:point controlPoint: CGPointMake((point.x + _lastPoint.x) / 2, (point.y + _lastPoint.y) / 2)];
+        [[self activePath] addQuadCurveToPoint: CGPointMake((point.x + _lastPoint.x) / 2, (point.y + _lastPoint.y) / 2) controlPoint: _lastPoint];
     } else {
         [[self activePath] addLineToPoint:point];
     }
@@ -319,7 +310,7 @@
         
         // Send the signal
         NSDictionary* jsonObject = @{
-                                         @"id" : _canvasId == nil ? @"" : _canvasId, // FIXME: Should never be nil here
+                                         @"id" : _canvasId,
                                          @"fromId" : _mycid,
                                          @"fromX" : [NSNumber numberWithFloat:_lastPoint.x],
                                          @"fromY" : [NSNumber numberWithFloat:_lastPoint.y],
@@ -353,6 +344,12 @@
     if (_selectedItem.points != nil) {
         _isDrawing = false;
         
+        // Make sure we update the id of the active path
+        OTPath* path = [self activePath];
+        if (path.canvasId == nil) {
+            path.canvasId = _canvasId;
+        }
+        
         if (_selectedItem.points.count == 2) {
             // We have a line
             [self startTouch: CGPointMake(_startPoint.x, _startPoint.y)];
@@ -375,10 +372,10 @@
                     } else if (i == 1) {
                         [self startTouch: CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2)];
                     } else {
-                        [self moveTouch: CGPointMake(_lastPoint.x, _lastPoint.y) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:true incoming:false];
 
                         if (i == _selectedItem.points.count == 1) {
-                            [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+                            [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:true incoming:false];
                         }
                     }
                 } else {
@@ -387,7 +384,7 @@
                         _lastPoint.y = pointY;
                         [self startTouch: CGPointMake(pointX, pointY)];
                     } else {
-                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:false incoming:false];
                     }
                 }
 
@@ -407,7 +404,7 @@
                                    @"connectionId" : _mycid
                                };
         
-        [OTAnnotationAnalytics logEvent:data];
+//        [OTAnnotationAnalytics logEvent:data];
     }
 }
 
@@ -444,14 +441,14 @@
     }
 
     if (renderer != nil) {
-        mirrored = renderer.mirrored;
+//        mirrored = renderer.mirrored;
     } else {
-        // FIXME Throw exception?
+        // FIXME: Throw exception?
     }
     
     // Send the signal
     NSDictionary* jsonObject = @{
-                                     @"id" : _canvasId == nil ? @"" : _canvasId, // FIXME: Should never be nil here
+                                     @"id" : _canvasId,
                                      @"fromId" : _mycid,
                                      @"fromX" : [NSNumber numberWithFloat:_lastPoint.x],
                                      @"fromY" : [NSNumber numberWithFloat:_lastPoint.y],
@@ -627,21 +624,17 @@
     
     // First, draw the video
     if ([videoView respondsToSelector:
-         @selector(drawViewHierarchyInRect:afterScreenUpdates:)])
-    {
+         @selector(drawViewHierarchyInRect:afterScreenUpdates:)]) {
         [videoView drawViewHierarchyInRect:videoView.bounds afterScreenUpdates:NO];
-    }
-    else {
+    } else {
         [videoView.layer renderInContext:UIGraphicsGetCurrentContext()];
     }
     
     // Then, overlay the annotations on top
     if ([self respondsToSelector:
-         @selector(drawViewHierarchyInRect:afterScreenUpdates:)])
-    {
+         @selector(drawViewHierarchyInRect:afterScreenUpdates:)]) {
         [self drawViewHierarchyInRect:videoView.bounds afterScreenUpdates:NO];
-    }
-    else {
+    } else {
         [self.layer renderInContext:UIGraphicsGetCurrentContext()];
     }
     
@@ -670,7 +663,7 @@
                                @"connectionId" : _mycid
                            };
     
-    [OTAnnotationAnalytics logEvent:data];
+//    [OTAnnotationAnalytics logEvent:data];
     
     return image;
 }
