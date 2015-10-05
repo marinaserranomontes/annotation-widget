@@ -31,6 +31,8 @@
 		85E1272E1B822C420015B1A3 /* OpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E1272D1B822C420015B1A3 /* OpenTok.framework */; };
 		85FD15FF1BBD7EB000F847A0 /* OTAnnotationAnalytics.h in Headers */ = {isa = PBXBuildFile; fileRef = 85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */; settings = {ASSET_TAGS = (); }; };
 		85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */; settings = {ASSET_TAGS = (); }; };
+		85FD16031BC01C0800F847A0 /* OTAnnotationVideoRender.h in Headers */ = {isa = PBXBuildFile; fileRef = 85FD16011BC01C0800F847A0 /* OTAnnotationVideoRender.h */; settings = {ASSET_TAGS = (); }; };
+		85FD16041BC01C0800F847A0 /* OTAnnotationVideoRender.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FD16021BC01C0800F847A0 /* OTAnnotationVideoRender.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +74,8 @@
 		85E1272F1B822C950015B1A3 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationAnalytics.h; sourceTree = "<group>"; };
 		85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationAnalytics.m; sourceTree = "<group>"; };
+		85FD16011BC01C0800F847A0 /* OTAnnotationVideoRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationVideoRender.h; sourceTree = "<group>"; };
+		85FD16021BC01C0800F847A0 /* OTAnnotationVideoRender.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationVideoRender.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +129,8 @@
 				852D5C0E1BB2E95400A564CC /* OTAnnotationToolbar.h */,
 				852D5C0F1BB2E95400A564CC /* OTAnnotationToolbar.m */,
 				852D5C101BB2E95400A564CC /* OTAnnotationToolbar.xib */,
+				85FD16011BC01C0800F847A0 /* OTAnnotationVideoRender.h */,
+				85FD16021BC01C0800F847A0 /* OTAnnotationVideoRender.m */,
 				852D5C0C1BB2E95400A564CC /* OTAnnotationView.h */,
 				852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */,
 				852D5C131BB2E95400A564CC /* OTColorButtonItem.h */,
@@ -180,6 +186,7 @@
 				852D5C171BB2E95400A564CC /* OTAnnotationToolbar.h in Headers */,
 				855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */,
 				855B24F81BBB07BB0082791D /* OTShape.h in Headers */,
+				85FD16031BC01C0800F847A0 /* OTAnnotationVideoRender.h in Headers */,
 				855B24F41BB9C8AE0082791D /* UIBezierPath+Image.h in Headers */,
 				855B24EC1BB70DAC0082791D /* OTPath.h in Headers */,
 				852D5C1A1BB2E95400A564CC /* OTAnnotationButtonItem.h in Headers */,
@@ -291,6 +298,7 @@
 				85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */,
 				855B24F51BB9C8AE0082791D /* UIBezierPath+Image.m in Sources */,
 				852D5C1B1BB2E95400A564CC /* OTAnnotationButtonItem.m in Sources */,
+				85FD16041BC01C0800F847A0 /* OTAnnotationVideoRender.m in Sources */,
 				852D5C181BB2E95400A564CC /* OTAnnotationToolbar.m in Sources */,
 				852D5C1D1BB2E95400A564CC /* OTColorButtonItem.m in Sources */,
 				852D5C161BB2E95400A564CC /* OTAnnotationView.m in Sources */,

@@ -11,5 +11,6 @@
 @interface OTPath : UIBezierPath
 
 @property (nonatomic) UIColor* color;
+@property (nonatomic) NSString* canvasId;
 
 @end

@@ -13,6 +13,7 @@
 #import "OTPath.h"
 #import "UIColor+HexString.h"
 #import "OTShape.h"
+#import "OTAnnotationVideoRender.h"
 
 #define kTolerance 5
 
@@ -23,10 +24,8 @@
     CGPoint _startPoint;
     
     UIColor *_color;
-    UIColor *_incomingColor;
     
     CGFloat _lineWidth;
-    CGFloat _incomingLineWidth;
     
     OTSubscriber *_subscriber;
     OTPublisher *_publisher;
@@ -97,21 +96,18 @@
     [self setMultipleTouchEnabled:NO];
     [self setBackgroundColor:[UIColor clearColor]];
     
-    _paths = [[NSMutableArray alloc] init];
+    _paths = [NSMutableArray array];
     
     _lineWidth = 2.f;
     
-    OTPath* path = [OTPath bezierPath];
-    [path setColor:_color];
-    [path setLineWidth:_lineWidth];
-    [_paths addObject:path];
+    [self createPath:_canvasId]; // FIXME: I don't think _canvasId has a value here in publisher views
     
     // Ensure the canvas is always the top layer
     [self.superview bringSubviewToFront:self];
     self.userInteractionEnabled = true;
 }
 
--(UIBezierPath*)activePath {
+-(OTPath*)activePath {
     return [_paths lastObject];
 }
 
@@ -173,14 +169,14 @@
             }
         }
         
-        // Ensure that this is only drawn temporarily
+        // Only drawn temporarily
         [path.color setStroke];
         [path stroke];
     }
 }
 
 - (CGPoint)scaleForPoints: (NSArray*)points {
-    // mX and mY refer to the end point of the enclosing rectangle (touch up)
+    // _currentPoint refers to the end point of the enclosing rectangle (touch up)
     float minX = FLT_MAX;
     float minY = FLT_MAX;
     float maxX = 0;
@@ -207,42 +203,46 @@
     float scaleX = (_currentPoint.x - _startPoint.x) / dx;
     float scaleY = (_currentPoint.y - _startPoint.y) / dy;
     
-//    Log.i("AnnotationView", "Scale: " + scaleX + ", " + scaleY);
-    
     return CGPointMake(scaleX, scaleY);
+}
+
+- (void)createPath:(NSString*)canvasId {
+    OTPath* path = [OTPath bezierPath];
+    [path setColor:_color];
+    [path setLineWidth:_lineWidth];
+    [path setCanvasId:_canvasId];
+    [_paths addObject:path];
 }
 
 - (void)setColor:(UIColor *)color {
     _color = color;
-    
-    OTPath* path = [OTPath bezierPath];
-    [path setColor:color];
-    [path setLineWidth:_lineWidth];
-    [_paths addObject:path];
+    [self createPath:_canvasId];
 }
 
 - (void)setLineWidth:(CGFloat)lineWidth {
     _lineWidth = lineWidth;
-    
-    OTPath* path = [OTPath bezierPath];
-    [path setColor:_color];
-    [path setLineWidth:_lineWidth];
-    [_paths addObject:path];
+    [self createPath:_canvasId];
 }
 
-- (void)clearCanvas:(NSString*)connectionId incoming:(Boolean)incoming {
-    // TODO: Only clear annotations drawn by the specified user (add param for ID to method signature)
-    [_paths removeAllObjects];
+- (void)clearCanvas:(NSString*)canvasId incoming:(Boolean)incoming {
+    NSMutableArray *removed = [NSMutableArray array];
+    for (OTPath* path in _paths) {
+        if ([path.canvasId isEqualToString:canvasId]) {
+            [removed addObject:path];
+        }
+    }
+    [_paths removeObjectsInArray:removed];
     [self setNeedsDisplay];
     
     // Initialize a new path so that we can still draw
     OTPath* path = [OTPath bezierPath];
     [path setColor:_color];
     [path setLineWidth:_lineWidth];
+    [path setCanvasId:_canvasId];
     [_paths addObject:path];
     
     if (!incoming) {
-        
+        [self sendUpdate:nil forType:@"otAnnotation_clear"];
     }
 }
 
@@ -309,6 +309,12 @@
                 _canvasId = _subscriber.stream.connection.connectionId;
                 _videoDimensions = _subscriber.stream.videoDimensions;
             }
+            
+            // Make sure we update the id of the active path
+            OTPath* path = [self activePath];
+            if (path.canvasId == nil) {
+                path.canvasId = _canvasId;
+            }
         }
         
         // Send the signal
@@ -351,7 +357,7 @@
             // We have a line
             [self startTouch: CGPointMake(_startPoint.x, _startPoint.y)];
             [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
-//            NSLog("Points: (%f, %f), (%f, %f)", mStartX, mStartY, mX, mY);
+//            NSLog("Points: (%f, %f), (%f, %f)", _startPoint.x, _startPoint.y, _currentPoint.x, _currentPoint.y);
             [self sendUpdate:[self buildSignalFromPoint: _currentPoint] forType:@"otAnnotation_pen"];
         } else {
             CGPoint scale = [self scaleForPoints: _selectedItem.points];
@@ -420,11 +426,8 @@
 - (NSString*)buildSignalFromPoint:(CGPoint)point {
     Boolean mirrored = false;
     
-    int videoWidth = 0;
-    int videoHeight = 0;
-    
-    // FIXME: Figure out how to access the renderer - see if we need custom renderer like Android
-//    OTVideoRender* renderer = nil;
+    // FIXME: Figure out how to determine if the video feed is mirrored
+    OTAnnotationVideoRender* renderer = nil;
     
     if (_publisher != nil) {
         _canvasId = _publisher.stream.connection.connectionId;
@@ -434,19 +437,17 @@
         _videoDimensions = _subscriber.stream.videoDimensions;
     }
 
-//    if (mPublisher != null) {
-//        renderer = ((AnnotationVideoRenderer) mPublisher.getRenderer());
-//    } else if (mSubscriber != null) {
-//        renderer = ((AnnotationVideoRenderer) mSubscriber.getRenderer());
-//    }
-//    
-//    if (renderer != nil) {
-//        mirrored = renderer.isMirrored();
-//        videoWidth = renderer.getVideoWidth();
-//        videoHeight = renderer.getVideoHeight();
-//    } else {
-//        // FIXME Throw exception?
-//    }
+    if (_publisher != nil) {
+        renderer = (OTAnnotationVideoRender*) _publisher.videoRender;
+    } else if (_subscriber != nil) {
+        renderer = (OTAnnotationVideoRender*) _subscriber.videoRender;
+    }
+
+    if (renderer != nil) {
+        mirrored = renderer.mirrored;
+    } else {
+        // FIXME Throw exception?
+    }
     
     // Send the signal
     NSDictionary* jsonObject = @{
@@ -500,9 +501,7 @@
                 if ([_canvasId isEqualToString:canvasId]) {
                     Boolean signalMirrored = [json[@"mirrored"] boolValue];
                     
-                    [self setColor: [UIColor colorFromHexString: json[@"color"]]];
-                    [self setLineWidth: [(NSNumber *)json[@"lineWidth"] floatValue]];
-                    
+                    // FIXME: The custom renderer is used to tell if the feed is mirrored - see if this is necessary
     //                OTVideoRender* renderer;
     //                
     //                if (_publisher != nil) {
@@ -577,6 +576,12 @@
                             fromX = self.frame.size.width - fromX;
                             toX = self.frame.size.width - toX;
                         }
+                    
+                        OTPath* path = [OTPath bezierPath];
+                        [path setColor:[UIColor colorFromHexString: json[@"color"]]];
+                        [path setLineWidth:[(NSNumber *)json[@"lineWidth"] floatValue]];
+                        [path setCanvasId:canvasId];
+                        [_paths addObject:path];
                     
                         [self startTouch: CGPointMake(fromX, fromY)];
                         [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false incoming:true];

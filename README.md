@@ -81,13 +81,13 @@ Customizing the toolbar
 
 #### Adding/removing menu items
 
-To create menu items dynamically, you will need to create a new `UIToolbar` instance and hook it up as the `mainToolbar` outlet in your OTAnnotationToolbar instance (`_toolbar.mainToolbar = someToolbar`). Toolbar `UIBarButtonItem`s can then be added using the `items` property:
+To create menu items dynamically, you will need to create a new `UIToolbar` instance and hook it up as the `mainToolbar` outlet in your `OTAnnotationToolbar` instance (`_toolbar.mainToolbar = someToolbar`). Toolbar `UIBarButtonItem`s can then be added using the `items` property:
 
 ```objective-c
 someToolbar.items = arrayOfItems;
 ```
 
-See Add menu items using Interface Builder to create static menu items through the visual interface.
+See [Add menu items using Interface Builder](#ib-menu) to create static menu items through the visual interface.
 
 The `OTAnnotationButtonItem` class provides an `identifier` property that allows a string to be associated with the button for use on delegate callback (or you can use the `tag` property associated with all `UIView`s.
 
@@ -110,7 +110,7 @@ Below is a list of default `OTAnnotationButtonItem` identifiers and their corres
 | ot_clear | Clears active user annotations |
 | ot_capture | Tap a video frame to capture a screenshot |
 
-#### Add menu items using Interface Builder
+#### <a name="ib-menu"></a>Add menu items using Interface Builder
 
 OTAnnotations provides Interface Builder support to add custom toolbars and button items. 
 
