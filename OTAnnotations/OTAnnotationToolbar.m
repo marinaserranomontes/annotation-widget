@@ -121,17 +121,37 @@
 }
 
 - (void)drawRect:(CGRect)rect {
-    // FIXME: Scrollview isn't working
-//    UIScrollView* mainScrollView = [[UIScrollView alloc] initWithFrame:self.frame];
-//    [mainScrollView setScrollEnabled:YES];
-//    mainScrollView.contentSize = _mainToolbar.frame.size;
-//    
-//    [_view addSubview:mainScrollView];
-    [self addSubview:_mainToolbar];
-    [_mainToolbar sizeToFit];
+    UIScrollView* scrollView = [[UIScrollView alloc] init];
+    scrollView.frame = _mainToolbar.frame;
+    scrollView.bounds = _mainToolbar.bounds;
+    scrollView.autoresizingMask = _mainToolbar.autoresizingMask;
+    scrollView.showsVerticalScrollIndicator = false;
+    scrollView.showsHorizontalScrollIndicator = false;
+    scrollView.bounces = false;
+    scrollView.userInteractionEnabled = YES;
     
+    _mainToolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _mainToolbar.barTintColor = _barTintColor;
     _mainToolbar.tintColor = _tintColor;
+    
+    CGFloat contentWidth = 0;
+    
+    // Add action handlers FIXME: The button items aren't currently clickable
+    for (UIBarButtonItem* item in _mainToolbar.items) {
+        UIView *view = [item valueForKey:@"view"];
+        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f; // Buttons have 10 pixel padding
+        contentWidth += width;
+    }
+    
+    CGRect toolbarFrame = _mainToolbar.frame;
+    toolbarFrame.size.width = contentWidth < _mainToolbar.frame.size.width ? _mainToolbar.frame.size.width : contentWidth + 20.f;
+    _mainToolbar.frame = toolbarFrame;
+    
+    scrollView.contentSize = toolbarFrame.size;
+    
+    [scrollView addSubview: _mainToolbar];
+    [self addSubview: scrollView];
+    [self bringSubviewToFront: scrollView];
 }
 
 // INFO: This is a workaround to ensure that the background view is drawn with UIColor.clearColor
@@ -208,15 +228,32 @@
     toolbar.userInteractionEnabled = YES;
     [toolbar sizeToFit];
     
+    UIScrollView* scrollView = [[UIScrollView alloc] init];
+    scrollView.frame = toolbar.frame;
+    scrollView.bounds = toolbar.bounds;
+    scrollView.autoresizingMask = toolbar.autoresizingMask;
+    scrollView.showsVerticalScrollIndicator = false;
+    scrollView.showsHorizontalScrollIndicator = false;
+    scrollView.bounces = false;
+    scrollView.userInteractionEnabled = YES;
+    
+    toolbar.autoresizingMask = UIViewAutoresizingNone;
+    
     // Ensure that the sub toolbar is drawn below the main toolbar
-    CGRect frame = toolbar.frame;
+    CGRect frame = scrollView.frame;
     frame.origin.y = _bounds.size.height / 2;
-    toolbar.frame = frame;
+    scrollView.frame = frame;
+    
+    CGFloat contentWidth = 0;
     
     // Add action handlers FIXME: The button items aren't currently clickable
     for (UIBarButtonItem* item in toolbar.items) {
         item.target = self;
         item.action = @selector(handleTap:);
+        
+        UIView *view = [item valueForKey:@"view"];
+        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f; // Buttons have 10 pixel padding
+        contentWidth += width;
     }
     
 //    CGRect mainframe = _bounds;
@@ -224,8 +261,15 @@
 //    _view.frame = mainframe;
 //    self.frame = mainframe;
     
-    [self addSubview:toolbar];
-//    [_view bringSubviewToFront: toolbar];
+    CGRect toolbarFrame = toolbar.frame;
+    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 20.f;
+    toolbar.frame = toolbarFrame;
+    
+    scrollView.contentSize = toolbarFrame.size;
+    
+    [scrollView addSubview: toolbar];
+    [self addSubview: scrollView];
+    [self bringSubviewToFront: scrollView];
 }
 
 - (void)showColorToolbar {
@@ -237,26 +281,27 @@
     toolbar.userInteractionEnabled = YES;
     [toolbar sizeToFit];
     
-//    UIScrollView* scrollView = [[UIScrollView alloc] init];
-//    scrollView.frame = toolbar.frame;
-//    scrollView.bounds = toolbar.bounds;
-//    scrollView.autoresizingMask = toolbar.autoresizingMask;
-//    scrollView.showsVerticalScrollIndicator = false;
-//    scrollView.showsHorizontalScrollIndicator = false;
-//    scrollView.userInteractionEnabled = YES;
-//    
-//    toolbar.autoresizingMask = UIViewAutoresizingNone;
+    UIScrollView* scrollView = [[UIScrollView alloc] init];
+    scrollView.frame = toolbar.frame;
+    scrollView.bounds = toolbar.bounds;
+    scrollView.autoresizingMask = toolbar.autoresizingMask;
+    scrollView.showsVerticalScrollIndicator = false;
+    scrollView.showsHorizontalScrollIndicator = false;
+    scrollView.bounces = false;
+    scrollView.userInteractionEnabled = YES;
+    
+    toolbar.autoresizingMask = UIViewAutoresizingNone;
     
     // Ensure that the sub toolbar is drawn below the main toolbar
-    CGRect frame = toolbar.frame;
+    CGRect frame = scrollView.frame;
     frame.origin.y = _bounds.size.height / 2;
-    toolbar.frame = frame;
-    
-//    scrollView.contentSize = toolbar.frame.size;
+    scrollView.frame = frame;
     
 //        CGRect mainframe = _view.frame;
 //        mainframe.size.height = 2 * _bounds.size.height;
 //        _view.frame = mainframe;
+    
+    CGFloat contentWidth = 0;
     
     NSMutableArray* items = [[NSMutableArray alloc] init];
     
@@ -267,13 +312,23 @@
         
         colorItem.target = self;
         colorItem.action = @selector(handleTap:);
+        
+        UIView *view = [colorItem valueForKey:@"view"];
+        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f;
+        contentWidth += width;
     }
     
     toolbar.items = items;
     
-//    [scrollView addSubview: toolbar];
-    [self addSubview: toolbar];
-    [self bringSubviewToFront: toolbar];
+    CGRect toolbarFrame = toolbar.frame;
+    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 20.f;
+    toolbar.frame = toolbarFrame;
+    
+    scrollView.contentSize = toolbarFrame.size;
+    
+    [scrollView addSubview: toolbar];
+    [self addSubview: scrollView];
+    [self bringSubviewToFront: scrollView];
 }
 
 - (void)showLineWidthToolbar {
@@ -285,26 +340,27 @@
     toolbar.userInteractionEnabled = YES;
     [toolbar sizeToFit];
     
-//    UIScrollView* scrollView = [[UIScrollView alloc] init];
-//    scrollView.frame = toolbar.frame;
-//    scrollView.bounds = toolbar.bounds;
-//    scrollView.autoresizingMask = toolbar.autoresizingMask;
-//    scrollView.showsVerticalScrollIndicator = false;
-//    scrollView.showsHorizontalScrollIndicator = false;
-//    scrollView.userInteractionEnabled = YES;
+    UIScrollView* scrollView = [[UIScrollView alloc] init];
+    scrollView.frame = toolbar.frame;
+    scrollView.bounds = toolbar.bounds;
+    scrollView.autoresizingMask = toolbar.autoresizingMask;
+    scrollView.showsVerticalScrollIndicator = false;
+    scrollView.showsHorizontalScrollIndicator = false;
+    scrollView.bounces = false;
+    scrollView.userInteractionEnabled = YES;
     
     toolbar.autoresizingMask = UIViewAutoresizingNone;
     
     // Ensure that the sub toolbar is drawn below the main toolbar
-    CGRect frame = toolbar.frame;
+    CGRect frame = scrollView.frame;
     frame.origin.y = _bounds.size.height / 2;
-    toolbar.frame = frame;
-    
-//    scrollView.contentSize = toolbar.frame.size;
-    
+    scrollView.frame = frame;
+
 //        CGRect mainframe = _bounds;
 //        mainframe.size.height = 2 * _bounds.size.height;
 //        _view.frame = mainframe;
+    
+    CGFloat contentWidth = 0;
     
     NSMutableArray* items = [[NSMutableArray alloc] init];
     
@@ -324,13 +380,23 @@
         
         item.target = self;
         item.action = @selector(handleTap:);
+        
+        UIView *view = [item valueForKey:@"view"];
+        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f;
+        contentWidth += width;
     }
     
     toolbar.items = items;
+
+    CGRect toolbarFrame = toolbar.frame;
+    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 20.f;
+    toolbar.frame = toolbarFrame;
     
-//    [scrollView addSubview: toolbar];
-    [self addSubview: toolbar];
-    [self bringSubviewToFront: toolbar];
+    scrollView.contentSize = toolbarFrame.size;
+    
+    [scrollView addSubview: toolbar];
+    [self addSubview: scrollView];
+    [self bringSubviewToFront: scrollView];
 }
 
 -(void)attachAnnotationView:(OTAnnotationView*)annotationView {

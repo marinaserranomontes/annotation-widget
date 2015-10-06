@@ -271,7 +271,7 @@
                                    @"connectionId" : _mycid
                                };
         
-        [OTAnnotationAnalytics logEvent:data];
+//        [OTAnnotationAnalytics logEvent:data];
     } else {
         if (_selectedItem.points != nil) {
             [self setNeedsDisplay];
@@ -404,7 +404,7 @@
                                    @"connectionId" : _mycid
                                };
         
-        [OTAnnotationAnalytics logEvent:data];
+//        [OTAnnotationAnalytics logEvent:data];
     }
 }
 
@@ -663,7 +663,7 @@
                                @"connectionId" : _mycid
                            };
     
-    [OTAnnotationAnalytics logEvent:data];
+//    [OTAnnotationAnalytics logEvent:data];
     
     return image;
 }
