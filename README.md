@@ -76,6 +76,18 @@ Similarly, an annotation view can be added to an incoming subscriber feed in the
 }
 ```
 
+#### Capturing frames
+
+Frames and their annotations can be captured when using the 'ot_capture' bar button item. The `UIImage` for these captures can be handled using the following callback from the `OTScreenCaptureDelegate`:
+
+```objective-c
+-(void)didCaptureImage:(UIImage *)image forConnection:(NSString *)connectionId {
+    // Do something with the image
+}
+```
+
+Don't forget to add `<OTScreenCaptureDelegate>` to your view controller's .h file and call `screenCaptureDelegate = self;` in your view controller's .m file.
+
 Customizing the toolbar
 ----------------
 
@@ -120,7 +132,57 @@ OTAnnotations provides Interface Builder support to add custom toolbars and butt
 
 #### Handling custom items
 
+Custom added toolbar items will fire the `didTapItem` callback if the `OTAnnotationToolbarDelegate` is configured in your view controller. Add `<OTAnnotationToolbarDelegate>` to your ViewController.h file and be sure to set `_toolbar.delegate = self;`. Then, add the method below to your view controller implementation file:
+
+```objective-c
+-(void)didTapItem:(UIBarButtonItem *)item {
+    if ([item isKindOfClass:OTAnnotationButtonItem.class]) {
+        NSArray* star = [NSArray arrayWithObjects:
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.5f*cos(degreesToRadians(90)), 0.5f + 0.5f*sin(degreesToRadians(90)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.25f*cos(degreesToRadians(126)), 0.5f + 0.25f*sin(degreesToRadians(126)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.5f*cos(degreesToRadians(162)), 0.5f + 0.5f*sin(degreesToRadians(162)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.25f*cos(degreesToRadians(198)), 0.5f + 0.25f*sin(degreesToRadians(198)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.5f*cos(degreesToRadians(234)), 0.5f + 0.5f*sin(degreesToRadians(234)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.25f*cos(degreesToRadians(270)), 0.5f + 0.25f*sin(degreesToRadians(270)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.5f*cos(degreesToRadians(306)), 0.5f + 0.5f*sin(degreesToRadians(306)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.25f*cos(degreesToRadians(342)), 0.5f + 0.25f*sin(degreesToRadians(342)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.5f*cos(degreesToRadians(18)), 0.5f + 0.5f*sin(degreesToRadians(18)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.25f*cos(degreesToRadians(54)), 0.5f + 0.25f*sin(degreesToRadians(54)))],
+            [NSValue valueWithCGPoint: CGPointMake(0.5f + 0.5f*cos(degreesToRadians(90)), 0.5f + 0.5f*sin(degreesToRadians(90)))], nil];
+
+        // Add points to custom action items
+        if ([((OTAnnotationButtonItem*) item).identifier isEqualToString:@"custom_star"]) {
+            [(OTAnnotationButtonItem*) item setPoints:star];
+        }
+    }
+}
+```
+
+The example above tests for an `OTAnnotationButtonItem`, which allows a set of points to be defined as the action and will draw the result of those points on the screen as the user interacts with it.
+
 #### Custom colors
+
+To add a new color palette to be used with annotations, call `setColors:` on the toolbar instance.
+
+```objective-c
+NSArray* colors = [NSArray arrayWithObjects:
+    [UIColor blueColor],
+    [UIColor redColor],
+    [UIColor greenColor],
+    [UIColor orangeColor],
+    [UIColor yellowColor],
+    [UIColor purpleColor],
+    [UIColor brownColor],
+    nil];
+
+[_toolbar setColors:colors];
+```
+
+To add a new color to the existing palette, call `addColor:` on the toolbar instance.
+
+```objective-c
+[_toolbar addColor:[UIColor cyanColor]];
+```
 
 For best results
 ----------------

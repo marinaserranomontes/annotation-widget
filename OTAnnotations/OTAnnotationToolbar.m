@@ -20,7 +20,6 @@
     UIColor* _backgroundColor;
     
     OTColorButtonItem* _colorPickerItem;
-    NSMutableArray* _colors;
     
     UIColor* _selectedColor;
     CGFloat _activeLineWidth;
@@ -54,21 +53,23 @@
     super.backgroundColor = [UIColor clearColor];
     
     _annotationViews = [[NSMutableArray alloc] init];
-    _colors = [[NSMutableArray alloc] init];
+
     _lineWidths = [[NSMutableArray alloc] init];
     [self initDefaultColors];
     [self initDefaultLineWidths];
 }
 
 - (void)initDefaultColors {
-    [_colors addObject: [UIColor colorFromHex:0x000000]];  // Black
-    [_colors addObject: [UIColor colorFromHex:0x0000FF]];  // Blue
-    [_colors addObject: [UIColor colorFromHex:0xFF0000]];  // Red
-    [_colors addObject: [UIColor colorFromHex:0x00FF00]];  // Green
-    [_colors addObject: [UIColor colorFromHex:0xFF8C00]];  // Orange
-    [_colors addObject: [UIColor colorFromHex:0xFFD700]];  // Yellow
-    [_colors addObject: [UIColor colorFromHex:0x4B0082]];  // Purple
-    [_colors addObject: [UIColor colorFromHex:0x800000]];  // Brown
+    _colors = [NSArray arrayWithObjects:
+               [UIColor colorFromHex:0x000000],  // Black
+               [UIColor colorFromHex:0x0000FF],  // Blue
+               [UIColor colorFromHex:0xFF0000],  // Red
+               [UIColor colorFromHex:0x00FF00],  // Green
+               [UIColor colorFromHex:0xFF8C00],  // Orange
+               [UIColor colorFromHex:0xFFD700],  // Yellow
+               [UIColor colorFromHex:0x4B0082],  // Purple
+               [UIColor colorFromHex:0x800000],  // Brown
+               nil];
 }
 
 - (void)initDefaultLineWidths {
@@ -100,6 +101,25 @@
     }
 }
 
+- (void)setColors:(NSArray<UIColor*> *)colors {
+    _colors = colors;
+    _selectedColor = [_colors objectAtIndex:0];
+    
+    // Update the color of the main menu item
+    for (UIBarButtonItem* item in _mainToolbar.items) {
+        if ([item isKindOfClass: OTColorButtonItem.self]) {
+            OTColorButtonItem* colorItem = (OTColorButtonItem*) item;
+            [colorItem setColor:[_colors objectAtIndex:0]];
+        }
+    }
+}
+
+-(void)addColor:(UIColor*)color {
+    NSMutableArray* existingColors = [NSMutableArray arrayWithArray:_colors];
+    [existingColors addObject:color];
+    _colors = [NSArray arrayWithArray:existingColors];
+}
+
 - (void)drawRect:(CGRect)rect {
     // FIXME: Scrollview isn't working
 //    UIScrollView* mainScrollView = [[UIScrollView alloc] initWithFrame:self.frame];
@@ -127,6 +147,9 @@
     [self hideToolbar];
     
     // Delegate callback
+    if (_delegate != nil) {
+        [_delegate didTapItem:sender];
+    }
 
     for (OTAnnotationView* annotationView in _annotationViews) {
         [annotationView didTapAnnotationItem: sender];

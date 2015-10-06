@@ -25,6 +25,8 @@ IB_DESIGNABLE
 
 @protocol OTAnnotationToolbarDelegate <NSObject>
 
+-(void)didTapItem:(UIBarButtonItem*)item;
+
 @end
 
 @interface OTAnnotationToolbar : UIView
@@ -32,6 +34,7 @@ IB_DESIGNABLE
 @property (nonatomic) IBInspectable UIColor *barTintColor;
 @property (nonatomic) IBInspectable UIColor *tintColor;
 @property (nonatomic) IBOutlet UIToolbar *mainToolbar;
+@property (nonatomic) NSArray<UIColor*> *colors;
 @property (nonatomic) id<OTScreenCaptureDelegate> screenCaptureDelegate;
 @property (nonatomic) id<OTAnnotationToolbarDelegate> delegate;
 
@@ -58,5 +61,12 @@ IB_DESIGNABLE
  * @param connectionId The OpenTok connection ID associated with the screen capture.
  */
 -(void)didCaptureImage:(UIImage*)image forConnection:(NSString*)connectionId;
+
+/**
+ * Adds a new color to the current annotation color palette.
+ *
+ * @param color The color to add to the existing palette.
+ */
+-(void)addColor:(UIColor*)color;
 
 @end
