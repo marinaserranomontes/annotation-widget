@@ -13,7 +13,7 @@
 #import "UIBezierPath+Image.h"
 
 @implementation OTAnnotationToolbar {
-    UIView* _view;
+//    UIView* _view;
     UIToolbar* _subToolbar;
     NSMutableArray* _annotationViews;
     
@@ -44,8 +44,11 @@
 }
 
 - (void)initialize {
-    // INFO: This is required for the custom toolbar to be displayed in IB - _view = _mainToolbar
-    _view = [[[NSBundle bundleForClass:[self class]] loadNibNamed:@"OTAnnotationToolbar" owner:self options:nil] firstObject];
+    _mainToolbar = [[[NSBundle bundleForClass:[self class]] loadNibNamed:@"OTAnnotationToolbar" owner:self options:nil] firstObject];
+
+    // INFO: We can't resize the toolbar (when subtoolbars are added) when auto layout is enabled
+    self.translatesAutoresizingMaskIntoConstraints = YES;
+    _mainToolbar.translatesAutoresizingMaskIntoConstraints = YES;
     
     _bounds = self.bounds;
     
@@ -55,8 +58,48 @@
     _annotationViews = [[NSMutableArray alloc] init];
 
     _lineWidths = [[NSMutableArray alloc] init];
+    
     [self initDefaultColors];
     [self initDefaultLineWidths];
+    
+    [self updateLayout];
+}
+
+- (void)prepareForInterfaceBuilder {
+    [self updateLayout];
+}
+
+-(void)updateLayout {
+    UIScrollView* scrollView = [[UIScrollView alloc] init];
+    scrollView.frame = _bounds;
+    scrollView.bounds = _bounds;
+    scrollView.autoresizingMask = _mainToolbar.autoresizingMask;
+    scrollView.showsVerticalScrollIndicator = false;
+    scrollView.showsHorizontalScrollIndicator = false;
+    scrollView.bounces = false;
+    scrollView.userInteractionEnabled = YES;
+    
+    _mainToolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    _mainToolbar.barTintColor = _barTintColor;
+    _mainToolbar.tintColor = _tintColor;
+    
+    CGFloat contentWidth = 0;
+    
+    for (UIBarButtonItem* item in _mainToolbar.items) {
+        UIView *view = [item valueForKey:@"view"];
+        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f; // Buttons have 10 pixel padding
+        contentWidth += width;
+    }
+    
+    CGRect toolbarFrame = _mainToolbar.frame;
+    toolbarFrame.size.width = contentWidth < _mainToolbar.frame.size.width ? _mainToolbar.frame.size.width : contentWidth + 20.f;
+    _mainToolbar.frame = toolbarFrame;
+    
+    scrollView.contentSize = toolbarFrame.size;
+    
+    [scrollView addSubview: _mainToolbar];
+    [self addSubview: scrollView];
+    [self bringSubviewToFront: scrollView];
 }
 
 - (void)initDefaultColors {
@@ -83,7 +126,6 @@
 }
 
 - (void)awakeFromNib {
-    // FIXME: Find a way to override the height from IB and allow it to get set here, dynamically (needs to update when a sub toolbar is added/removed)
     CGRect mainframe = _bounds;
     mainframe.size.height = 2 * _bounds.size.height;
     self.frame = mainframe;
@@ -120,42 +162,8 @@
     _colors = [NSArray arrayWithArray:existingColors];
 }
 
-- (void)drawRect:(CGRect)rect {
-    UIScrollView* scrollView = [[UIScrollView alloc] init];
-    scrollView.frame = _mainToolbar.frame;
-    scrollView.bounds = _mainToolbar.bounds;
-    scrollView.autoresizingMask = _mainToolbar.autoresizingMask;
-    scrollView.showsVerticalScrollIndicator = false;
-    scrollView.showsHorizontalScrollIndicator = false;
-    scrollView.bounces = false;
-    scrollView.userInteractionEnabled = YES;
-    
-    _mainToolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    _mainToolbar.barTintColor = _barTintColor;
-    _mainToolbar.tintColor = _tintColor;
-    
-    CGFloat contentWidth = 0;
-    
-    // Add action handlers FIXME: The button items aren't currently clickable
-    for (UIBarButtonItem* item in _mainToolbar.items) {
-        UIView *view = [item valueForKey:@"view"];
-        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f; // Buttons have 10 pixel padding
-        contentWidth += width;
-    }
-    
-    CGRect toolbarFrame = _mainToolbar.frame;
-    toolbarFrame.size.width = contentWidth < _mainToolbar.frame.size.width ? _mainToolbar.frame.size.width : contentWidth + 20.f;
-    _mainToolbar.frame = toolbarFrame;
-    
-    scrollView.contentSize = toolbarFrame.size;
-    
-    [scrollView addSubview: _mainToolbar];
-    [self addSubview: scrollView];
-    [self bringSubviewToFront: scrollView];
-}
-
 // INFO: This is a workaround to ensure that the background view is drawn with UIColor.clearColor
-- (void) setBackgroundColor:(UIColor *)newColor {
+- (void)setBackgroundColor:(UIColor *)newColor {
     if (newColor != _backgroundColor) {
         _backgroundColor = newColor;
     }
@@ -186,7 +194,6 @@
                 [annotationView setColor: item.color];
             }
             [_colorPickerItem setColor:item.color];
-            [self hideToolbar];
         }
     } else if ([sender isKindOfClass: OTAnnotationButtonItem.self]) {
         OTAnnotationButtonItem* item = (OTAnnotationButtonItem*) sender;
@@ -214,9 +221,11 @@
     if ([_subToolbar superview] != nil) {
         [_subToolbar removeFromSuperview];
         
-//        _view.frame = _bounds;
+        // Reset the original frame
 //        self.frame = _bounds;
     }
+    
+    NSLog(@"%f, %f, %f, %f", self.frame.size.width, self.frame.size.height, self.frame.origin.x, self.frame.origin.y);
 }
 
 - (void)showToolbar:(UIToolbar*) toolbar {
@@ -241,12 +250,11 @@
     
     // Ensure that the sub toolbar is drawn below the main toolbar
     CGRect frame = scrollView.frame;
-    frame.origin.y = _bounds.size.height / 2;
+    frame.origin.y = _bounds.size.height;
     scrollView.frame = frame;
     
     CGFloat contentWidth = 0;
     
-    // Add action handlers FIXME: The button items aren't currently clickable
     for (UIBarButtonItem* item in toolbar.items) {
         item.target = self;
         item.action = @selector(handleTap:);
@@ -258,7 +266,6 @@
     
 //    CGRect mainframe = _bounds;
 //    mainframe.size.height = 2 * _bounds.size.height;
-//    _view.frame = mainframe;
 //    self.frame = mainframe;
     
     CGRect toolbarFrame = toolbar.frame;
@@ -270,10 +277,12 @@
     [scrollView addSubview: toolbar];
     [self addSubview: scrollView];
     [self bringSubviewToFront: scrollView];
+    
+    NSLog(@"%f, %f, %f, %f", _mainToolbar.frame.size.width, _mainToolbar.frame.size.height, _mainToolbar.frame.origin.x, _mainToolbar.frame.origin.y);
 }
 
 - (void)showColorToolbar {
-    UIToolbar* toolbar = [[UIToolbar alloc] initWithFrame:_view.frame];
+    UIToolbar* toolbar = [[UIToolbar alloc] initWithFrame:_bounds];
     _subToolbar = toolbar;
     
     toolbar.barTintColor = _barTintColor;
@@ -294,12 +303,12 @@
     
     // Ensure that the sub toolbar is drawn below the main toolbar
     CGRect frame = scrollView.frame;
-    frame.origin.y = _bounds.size.height / 2;
+    frame.origin.y = _bounds.size.height;
     scrollView.frame = frame;
     
-//        CGRect mainframe = _view.frame;
-//        mainframe.size.height = 2 * _bounds.size.height;
-//        _view.frame = mainframe;
+//    CGRect mainframe = _bounds;
+//    mainframe.size.height = 2 * _bounds.size.height;
+//    self.frame = mainframe;
     
     CGFloat contentWidth = 0;
     
@@ -328,11 +337,12 @@
     
     [scrollView addSubview: toolbar];
     [self addSubview: scrollView];
-    [self bringSubviewToFront: scrollView];
+    
+    NSLog(@"%f, %f, %f, %f", _mainToolbar.frame.size.width, _mainToolbar.frame.size.height, _mainToolbar.frame.origin.x, _mainToolbar.frame.origin.y);
 }
 
 - (void)showLineWidthToolbar {
-    UIToolbar* toolbar = [[UIToolbar alloc] initWithFrame:_view.frame];
+    UIToolbar* toolbar = [[UIToolbar alloc] initWithFrame:_bounds];
     _subToolbar = toolbar;
     
     toolbar.barTintColor = _barTintColor;
@@ -353,12 +363,12 @@
     
     // Ensure that the sub toolbar is drawn below the main toolbar
     CGRect frame = scrollView.frame;
-    frame.origin.y = _bounds.size.height / 2;
+    frame.origin.y = _bounds.size.height;
     scrollView.frame = frame;
 
-//        CGRect mainframe = _bounds;
-//        mainframe.size.height = 2 * _bounds.size.height;
-//        _view.frame = mainframe;
+//    CGRect mainframe = _bounds;
+//    mainframe.size.height = 2 * _bounds.size.height;
+//    self.frame = mainframe;
     
     CGFloat contentWidth = 0;
     

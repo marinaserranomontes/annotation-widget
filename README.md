@@ -86,7 +86,7 @@ Frames and their annotations can be captured when using the 'ot_capture' bar but
 }
 ```
 
-Don't forget to add `<OTScreenCaptureDelegate>` to your view controller's .h file and call `screenCaptureDelegate = self;` in your view controller's .m file.
+Don't forget to add `<OTScreenCaptureDelegate>` to your view controller's .h file and call `_toolbar.screenCaptureDelegate = self;` in your view controller's .m file.
 
 Customizing the toolbar
 ----------------

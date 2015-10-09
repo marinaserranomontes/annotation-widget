@@ -6,7 +6,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="OTAnnotationToolbar">
             <connections>
-                <outlet property="mainToolbar" destination="mCM-8D-2CD" id="xr0-MQ-Bgg"/>
+                <outlet property="mainToolbar" destination="mCM-8D-2CD" id="Tk5-u0-gu9"/>
             </connections>
         </placeholder>
         <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="mCM-8D-2CD">
@@ -56,6 +56,8 @@
                     </userDefinedRuntimeAttributes>
                 </barButtonItem>
             </items>
+            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <color key="barTintColor" red="0.1215686275" green="0.1215686275" blue="0.1215686275" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <point key="canvasLocation" x="717" y="480"/>
         </toolbar>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
@@ -79,6 +81,8 @@
                     </userDefinedRuntimeAttributes>
                 </barButtonItem>
             </items>
+            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <color key="barTintColor" red="0.1215686275" green="0.1215686275" blue="0.1215686275" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <point key="canvasLocation" x="717" y="602"/>
         </toolbar>
     </objects>
