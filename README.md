@@ -36,7 +36,7 @@ the steps below should help you incorporate the annotations plugin.
 
 Open `Main.storyboard` and drag a `UIView` component into the main view. With the view selected, click on the 'Identity inspector' tab (part of Utilities) and change the class to 'OTAnnotationToolbar'. You should see the view update to the default toolbar layout. 
 
-![image]()
+![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/set_custom_class.png?token=AGVWgIN0GNdaXEt7kHjDYEalIK6UJVoEks5WIqDwwA%3D%3D)
 
 To use the toolbar in your code, add the following line to your `ViewController.m` file and link the OpenTok toolbar you just created in Interface Builder:
 
@@ -129,10 +129,10 @@ Below is a list of default `OTAnnotationButtonItem` identifiers and their corres
 OTAnnotations provides Interface Builder support to add custom toolbars and button items. 
 
 ##### Link a main toolbar
-![image]()
+![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/link_main_toolbar.gif?token=AGVWgFS3VLgI-Sx5rEAxxb_sUqQd9rbtks5WIqDIwA%3D%3D)
 
 ##### Link a sub toolbar to an `OTAnnotationButtonItem`
-![image]()
+![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/link_sub_toolbar.gif?token=AGVWgNMJTde9NniI3rlpIE8_3XlH80wLks5WIqDlwA%3D%3D)
 
 #### Handling custom items
 
