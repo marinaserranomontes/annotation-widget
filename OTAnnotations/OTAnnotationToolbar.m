@@ -12,8 +12,10 @@
 #import "UIColor+HexString.h"
 #import "UIBezierPath+Image.h"
 
+#define kButtonPadding 10.f
+
 @implementation OTAnnotationToolbar {
-//    UIView* _view;
+    UIView* _view;
     UIToolbar* _subToolbar;
     NSMutableArray* _annotationViews;
     
@@ -44,8 +46,6 @@
 }
 
 - (void)initialize {
-    _mainToolbar = [[[NSBundle bundleForClass:[self class]] loadNibNamed:@"OTAnnotationToolbar" owner:self options:nil] firstObject];
-
     _bounds = self.bounds;
     
     self.opaque = false;
@@ -57,14 +57,23 @@
     
     [self initDefaultColors];
     [self initDefaultLineWidths];
+    
+    // INFO: This is just a "dummy" view that shows up in Interface Builder
+    _view = [[[NSBundle bundleForClass:[self class]] loadNibNamed:@"OTAnnotationToolbar" owner:self options:nil] firstObject];
+    _view.frame = _mainToolbar.frame = self.bounds;
+    _view.bounds = _mainToolbar.bounds = self.bounds;
+    [self addSubview:_view];
 }
 
-- (void)prepareForInterfaceBuilder {
-    NSLog(@"Updating for IB");
-    [self updateLayout];
+- (void)drawRect:(CGRect)rect {
+    _mainToolbar.barTintColor = _barTintColor;
+    _mainToolbar.tintColor = _tintColor;
 }
 
 -(void)updateLayout {
+    // INFO: Removes the "dummy" IB view.
+    [_view removeFromSuperview];
+    
     UIScrollView* scrollView = [[UIScrollView alloc] init];
     scrollView.frame = _bounds;
     scrollView.bounds = _bounds;
@@ -73,26 +82,23 @@
     scrollView.bounces = false;
     scrollView.userInteractionEnabled = YES;
     
-    _mainToolbar.barTintColor = _barTintColor;
-    _mainToolbar.tintColor = _tintColor;
-    
     CGFloat contentWidth = 0;
     
     for (UIBarButtonItem* item in _mainToolbar.items) {
         UIView *view = [item valueForKey:@"view"];
-        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f; // Buttons have 10 pixel padding
+        CGFloat width = view ? view.frame.size.width + kButtonPadding : (CGFloat)0.f;
         contentWidth += width;
     }
     
+    _mainToolbar.translatesAutoresizingMaskIntoConstraints = YES;
     CGRect toolbarFrame = _mainToolbar.frame;
-    toolbarFrame.size.width = contentWidth < _mainToolbar.frame.size.width ? _mainToolbar.frame.size.width : contentWidth + 20.f;
+    toolbarFrame.size.width = contentWidth < _mainToolbar.frame.size.width ? _mainToolbar.frame.size.width : contentWidth + 2*kButtonPadding;
     _mainToolbar.frame = toolbarFrame;
     
     scrollView.contentSize = toolbarFrame.size;
     
     [scrollView addSubview: _mainToolbar];
     [self addSubview: scrollView];
-    [self bringSubviewToFront: scrollView];
 }
 
 - (void)initDefaultColors {
@@ -120,13 +126,6 @@
 
 - (void)awakeFromNib {
     [self updateLayout];
-    
-    // INFO: We can't resize the toolbar (when subtoolbars are added) when auto layout is enabled
-    self.translatesAutoresizingMaskIntoConstraints = YES;
-    
-    CGRect mainframe = _bounds;
-    mainframe.size.height = 2 * _bounds.size.height;
-    self.frame = mainframe;
     
     _selectedColor = [_colors objectAtIndex:0];
 
@@ -160,7 +159,7 @@
     _colors = [NSArray arrayWithArray:existingColors];
 }
 
-// INFO: This is a workaround to ensure that the background view is drawn with UIColor.clearColor
+// INFO: This is a workaround to ensure that the background is drawn with [UIColor clearColor]
 - (void)setBackgroundColor:(UIColor *)newColor {
     if (newColor != _backgroundColor) {
         _backgroundColor = newColor;
@@ -220,10 +219,8 @@
         [_subToolbar removeFromSuperview];
         
         // Reset the original frame
-//        self.frame = _bounds;
+        self.frame = _bounds;
     }
-    
-    NSLog(@"%f, %f, %f, %f", self.frame.size.width, self.frame.size.height, self.frame.origin.x, self.frame.origin.y);
 }
 
 - (void)showToolbar:(UIToolbar*) toolbar {
@@ -255,25 +252,25 @@
         item.action = @selector(handleTap:);
         
         UIView *view = [item valueForKey:@"view"];
-        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f; // Buttons have 10 pixel padding
+        CGFloat width = view ? view.frame.size.width + kButtonPadding : (CGFloat)0.f;
         contentWidth += width;
     }
     
-//    CGRect mainframe = _bounds;
-//    mainframe.size.height = 2 * _bounds.size.height;
-//    self.frame = mainframe;
+    // INFO: We can't resize the toolbar (when subtoolbars are added) when auto layout is enabled
+    self.translatesAutoresizingMaskIntoConstraints = YES;
+    
+    CGRect mainframe = _bounds;
+    mainframe.size.height = 2 * _bounds.size.height;
+    self.frame = mainframe;
     
     CGRect toolbarFrame = toolbar.frame;
-    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 20.f;
+    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 2*kButtonPadding;
     toolbar.frame = toolbarFrame;
     
     scrollView.contentSize = toolbarFrame.size;
     
     [scrollView addSubview: toolbar];
     [self addSubview: scrollView];
-    [self bringSubviewToFront: scrollView];
-    
-    NSLog(@"%f, %f, %f, %f", _mainToolbar.frame.size.width, _mainToolbar.frame.size.height, _mainToolbar.frame.origin.x, _mainToolbar.frame.origin.y);
 }
 
 - (void)showColorToolbar {
@@ -298,9 +295,12 @@
     frame.origin.y = _bounds.size.height;
     scrollView.frame = frame;
     
-//    CGRect mainframe = _bounds;
-//    mainframe.size.height = 2 * _bounds.size.height;
-//    self.frame = mainframe;
+    // INFO: We can't resize the toolbar (when subtoolbars are added) when auto layout is enabled
+    self.translatesAutoresizingMaskIntoConstraints = YES;
+    
+    CGRect mainframe = _bounds;
+    mainframe.size.height = 2 * _bounds.size.height;
+    self.frame = mainframe;
     
     CGFloat contentWidth = 0;
     
@@ -315,22 +315,20 @@
         colorItem.action = @selector(handleTap:);
         
         UIView *view = [colorItem valueForKey:@"view"];
-        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f;
+        CGFloat width = view ? view.frame.size.width + kButtonPadding : (CGFloat)0.f;
         contentWidth += width;
     }
     
     toolbar.items = items;
     
     CGRect toolbarFrame = toolbar.frame;
-    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 20.f;
+    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 2*kButtonPadding;
     toolbar.frame = toolbarFrame;
     
     scrollView.contentSize = toolbarFrame.size;
     
     [scrollView addSubview: toolbar];
     [self addSubview: scrollView];
-    
-    NSLog(@"%f, %f, %f, %f", _mainToolbar.frame.size.width, _mainToolbar.frame.size.height, _mainToolbar.frame.origin.x, _mainToolbar.frame.origin.y);
 }
 
 - (void)showLineWidthToolbar {
@@ -355,9 +353,12 @@
     frame.origin.y = _bounds.size.height;
     scrollView.frame = frame;
 
-//    CGRect mainframe = _bounds;
-//    mainframe.size.height = 2 * _bounds.size.height;
-//    self.frame = mainframe;
+    // INFO: We can't resize the toolbar (when subtoolbars are added) when auto layout is enabled
+    self.translatesAutoresizingMaskIntoConstraints = YES;
+    
+    CGRect mainframe = _bounds;
+    mainframe.size.height = 2 * _bounds.size.height;
+    self.frame = mainframe;
     
     CGFloat contentWidth = 0;
     
@@ -381,21 +382,20 @@
         item.action = @selector(handleTap:);
         
         UIView *view = [item valueForKey:@"view"];
-        CGFloat width = view ? view.frame.size.width + 10.f : (CGFloat)0.f;
+        CGFloat width = view ? view.frame.size.width + kButtonPadding : (CGFloat)0.f;
         contentWidth += width;
     }
     
     toolbar.items = items;
 
     CGRect toolbarFrame = toolbar.frame;
-    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 20.f;
+    toolbarFrame.size.width = contentWidth < toolbar.frame.size.width ? toolbar.frame.size.width : contentWidth + 2*kButtonPadding;
     toolbar.frame = toolbarFrame;
     
     scrollView.contentSize = toolbarFrame.size;
     
     [scrollView addSubview: toolbar];
     [self addSubview: scrollView];
-    [self bringSubviewToFront: scrollView];
 }
 
 -(void)attachAnnotationView:(OTAnnotationView*)annotationView {
@@ -413,8 +413,6 @@
 }
 
 -(void)didCaptureImage:(UIImage*)image forConnection:(NSString*)connectionId {
-    NSLog(@"Screenshot callback");
-    
     if (_screenCaptureDelegate != nil) {
         [_screenCaptureDelegate didCaptureImage:image forConnection:connectionId];
     }
