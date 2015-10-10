@@ -34,9 +34,11 @@ Using the plugin
 For a quick start, download the [OpenTok iOS samples](https://github.com/opentok/opentok-ios-sdk-samples). If you already have your own project to work with,
 the steps below should help you incorporate the annotations plugin.
 
-Open `Main.storyboard` and drag a `UIView` component into the main view. With the view selected, click on the 'Identity inspector' tab (part of Utilities) and change the class to 'OTAnnotationToolbar'. You should see the view update to the default toolbar layout. To use the toolbar in your code, add the following line to your `ViewController.m` file and link the OpenTok toolbar you just created in Interface Builder:
+Open `Main.storyboard` and drag a `UIView` component into the main view. With the view selected, click on the 'Identity inspector' tab (part of Utilities) and change the class to 'OTAnnotationToolbar'. You should see the view update to the default toolbar layout. 
 
 ![image]()
+
+To use the toolbar in your code, add the following line to your `ViewController.m` file and link the OpenTok toolbar you just created in Interface Builder:
 
 ```objective-c
 @implementation ViewController {
@@ -126,8 +128,10 @@ Below is a list of default `OTAnnotationButtonItem` identifiers and their corres
 
 OTAnnotations provides Interface Builder support to add custom toolbars and button items. 
 
+##### Link a main toolbar
 ![image]()
 
+##### Link a sub toolbar to an `OTAnnotationButtonItem`
 ![image]()
 
 #### Handling custom items

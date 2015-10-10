@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		851784531BC99D6300ED1CE2 /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 851784521BC99D6300ED1CE2 /* Images */; settings = {ASSET_TAGS = (); }; };
 		852D5C161BB2E95400A564CC /* OTAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */; settings = {ASSET_TAGS = (); }; };
 		852D5C171BB2E95400A564CC /* OTAnnotationToolbar.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C0E1BB2E95400A564CC /* OTAnnotationToolbar.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		852D5C181BB2E95400A564CC /* OTAnnotationToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C0F1BB2E95400A564CC /* OTAnnotationToolbar.m */; settings = {ASSET_TAGS = (); }; };
@@ -46,6 +47,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		851784521BC99D6300ED1CE2 /* Images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Images; sourceTree = SOURCE_ROOT; };
 		852D5C0C1BB2E95400A564CC /* OTAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationView.h; sourceTree = "<group>"; };
 		852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationView.m; sourceTree = "<group>"; };
 		852D5C0E1BB2E95400A564CC /* OTAnnotationToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationToolbar.h; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 		85E1270A1B8227BC0015B1A3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				851784521BC99D6300ED1CE2 /* Images */,
 				85E1272F1B822C950015B1A3 /* README.md */,
 				85E1270B1B8227BC0015B1A3 /* Info.plist */,
 			);
@@ -275,6 +278,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				852D5C191BB2E95400A564CC /* OTAnnotationToolbar.xib in Resources */,
+				851784531BC99D6300ED1CE2 /* Images in Resources */,
 				852D5C241BB2EBA300A564CC /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
