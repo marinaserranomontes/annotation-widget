@@ -46,10 +46,6 @@
 - (void)initialize {
     _mainToolbar = [[[NSBundle bundleForClass:[self class]] loadNibNamed:@"OTAnnotationToolbar" owner:self options:nil] firstObject];
 
-    // INFO: We can't resize the toolbar (when subtoolbars are added) when auto layout is enabled
-    self.translatesAutoresizingMaskIntoConstraints = YES;
-    _mainToolbar.translatesAutoresizingMaskIntoConstraints = YES;
-    
     _bounds = self.bounds;
     
     self.opaque = false;
@@ -61,11 +57,10 @@
     
     [self initDefaultColors];
     [self initDefaultLineWidths];
-    
-    [self updateLayout];
 }
 
 - (void)prepareForInterfaceBuilder {
+    NSLog(@"Updating for IB");
     [self updateLayout];
 }
 
@@ -73,13 +68,11 @@
     UIScrollView* scrollView = [[UIScrollView alloc] init];
     scrollView.frame = _bounds;
     scrollView.bounds = _bounds;
-    scrollView.autoresizingMask = _mainToolbar.autoresizingMask;
     scrollView.showsVerticalScrollIndicator = false;
     scrollView.showsHorizontalScrollIndicator = false;
     scrollView.bounces = false;
     scrollView.userInteractionEnabled = YES;
     
-    _mainToolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _mainToolbar.barTintColor = _barTintColor;
     _mainToolbar.tintColor = _tintColor;
     
@@ -126,6 +119,11 @@
 }
 
 - (void)awakeFromNib {
+    [self updateLayout];
+    
+    // INFO: We can't resize the toolbar (when subtoolbars are added) when auto layout is enabled
+    self.translatesAutoresizingMaskIntoConstraints = YES;
+    
     CGRect mainframe = _bounds;
     mainframe.size.height = 2 * _bounds.size.height;
     self.frame = mainframe;
@@ -240,13 +238,10 @@
     UIScrollView* scrollView = [[UIScrollView alloc] init];
     scrollView.frame = toolbar.frame;
     scrollView.bounds = toolbar.bounds;
-    scrollView.autoresizingMask = toolbar.autoresizingMask;
     scrollView.showsVerticalScrollIndicator = false;
     scrollView.showsHorizontalScrollIndicator = false;
     scrollView.bounces = false;
     scrollView.userInteractionEnabled = YES;
-    
-    toolbar.autoresizingMask = UIViewAutoresizingNone;
     
     // Ensure that the sub toolbar is drawn below the main toolbar
     CGRect frame = scrollView.frame;
@@ -293,13 +288,10 @@
     UIScrollView* scrollView = [[UIScrollView alloc] init];
     scrollView.frame = toolbar.frame;
     scrollView.bounds = toolbar.bounds;
-    scrollView.autoresizingMask = toolbar.autoresizingMask;
     scrollView.showsVerticalScrollIndicator = false;
     scrollView.showsHorizontalScrollIndicator = false;
     scrollView.bounces = false;
     scrollView.userInteractionEnabled = YES;
-    
-    toolbar.autoresizingMask = UIViewAutoresizingNone;
     
     // Ensure that the sub toolbar is drawn below the main toolbar
     CGRect frame = scrollView.frame;
@@ -353,13 +345,10 @@
     UIScrollView* scrollView = [[UIScrollView alloc] init];
     scrollView.frame = toolbar.frame;
     scrollView.bounds = toolbar.bounds;
-    scrollView.autoresizingMask = toolbar.autoresizingMask;
     scrollView.showsVerticalScrollIndicator = false;
     scrollView.showsHorizontalScrollIndicator = false;
     scrollView.bounces = false;
     scrollView.userInteractionEnabled = YES;
-    
-    toolbar.autoresizingMask = UIViewAutoresizingNone;
     
     // Ensure that the sub toolbar is drawn below the main toolbar
     CGRect frame = scrollView.frame;

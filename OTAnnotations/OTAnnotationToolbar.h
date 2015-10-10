@@ -15,8 +15,6 @@
     #define IBInspectable
 #endif
 
-IB_DESIGNABLE
-
 @protocol OTScreenCaptureDelegate <NSObject>
 
 -(void)didCaptureImage:(UIImage*)image forConnection:(NSString*)connectionId;
@@ -29,7 +27,7 @@ IB_DESIGNABLE
 
 @end
 
-@interface OTAnnotationToolbar : UIView
+IB_DESIGNABLE @interface OTAnnotationToolbar : UIView
 
 @property (nonatomic) IBInspectable UIColor *barTintColor;
 @property (nonatomic) IBInspectable UIColor *tintColor;

@@ -428,6 +428,7 @@
 				);
 				INFOPLIST_FILE = OTAnnotations/Info.plist;
 				INSTALL_PATH = "@executable_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_DYLIB_INSTALL_NAME = "@executable_path/Frameworks/$(EXECUTABLE_PATH)";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = mh_dylib;
@@ -451,6 +452,7 @@
 				);
 				INFOPLIST_FILE = OTAnnotations/Info.plist;
 				INSTALL_PATH = "@executable_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_DYLIB_INSTALL_NAME = "@executable_path/Frameworks/$(EXECUTABLE_PATH)";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = mh_dylib;
