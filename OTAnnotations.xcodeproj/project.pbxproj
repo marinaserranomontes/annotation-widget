@@ -18,6 +18,7 @@
 		852D5C1D1BB2E95400A564CC /* OTColorButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C141BB2E95400A564CC /* OTColorButtonItem.m */; settings = {ASSET_TAGS = (); }; };
 		852D5C221BB2EA7E00A564CC /* OTAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C0C1BB2E95400A564CC /* OTAnnotationView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		852D5C241BB2EBA300A564CC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 852D5C231BB2EBA300A564CC /* Images.xcassets */; settings = {ASSET_TAGS = (); }; };
+		854CB3531BCBF68F002861E9 /* OTAnnotation.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 854CB3521BCBF68F002861E9 /* OTAnnotation.podspec */; settings = {ASSET_TAGS = (); }; };
 		855B24EC1BB70DAC0082791D /* OTPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EA1BB70DAC0082791D /* OTPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		855B24ED1BB70DAC0082791D /* OTPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EB1BB70DAC0082791D /* OTPath.m */; settings = {ASSET_TAGS = (); }; };
 		855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EE1BB9B5C00082791D /* UIColor+HexString.h */; settings = {ASSET_TAGS = (); }; };
@@ -59,6 +60,7 @@
 		852D5C141BB2E95400A564CC /* OTColorButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTColorButtonItem.m; sourceTree = "<group>"; };
 		852D5C231BB2EBA300A564CC /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		852D5C251BB2F0A000A564CC /* OTAnnotations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OTAnnotations.h; sourceTree = "<group>"; };
+		854CB3521BCBF68F002861E9 /* OTAnnotation.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OTAnnotation.podspec; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		855B24EA1BB70DAC0082791D /* OTPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTPath.h; sourceTree = "<group>"; };
 		855B24EB1BB70DAC0082791D /* OTPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTPath.m; sourceTree = "<group>"; };
 		855B24EE1BB9B5C00082791D /* UIColor+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+HexString.h"; sourceTree = "<group>"; };
@@ -153,6 +155,7 @@
 		85E1270A1B8227BC0015B1A3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				854CB3521BCBF68F002861E9 /* OTAnnotation.podspec */,
 				851784521BC99D6300ED1CE2 /* Images */,
 				85E1272F1B822C950015B1A3 /* README.md */,
 				85E1270B1B8227BC0015B1A3 /* Info.plist */,
@@ -279,6 +282,7 @@
 			files = (
 				852D5C191BB2E95400A564CC /* OTAnnotationToolbar.xib in Resources */,
 				851784531BC99D6300ED1CE2 /* Images in Resources */,
+				854CB3531BCBF68F002861E9 /* OTAnnotation.podspec in Resources */,
 				852D5C241BB2EBA300A564CC /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
