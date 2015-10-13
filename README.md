@@ -6,7 +6,7 @@ Plugin to add annotation support to OpenTok.
 Installation
 -----
 
-`bower install opentok-annotations`
+Add [opentok-annotations.js]() to your source.
 
 Using the plugin
 -----
@@ -14,7 +14,7 @@ Using the plugin
 Link the active OpenTok session to the annotation toolbar and add it to a parent container
 
 ```javascript
-toolbar = new OT.Annotations.Toolbar({
+toolbar = new OTSolution.Annotations.Toolbar({
     session: session,
     container: document.getElementById('toolbar')
 });
@@ -23,7 +23,7 @@ toolbar = new OT.Annotations.Toolbar({
 When the publisher is created, attach the annotation canvas and link it to the toolbar
 
 ```javascript
-var canvas = new OT.Annotations({
+var canvas = new OTSolution.Annotations({
     session:  publisher.session,
     container: parentDiv
 });
@@ -37,7 +37,7 @@ var subscriber = session.subscribe(stream, subscriberDiv.id);
 
 ...
 
-var canvas = new OT.Annotations({
+var canvas = new OTSolution.Annotations({
     feed:  subscriber,
     container: subscriberDiv
 });
@@ -50,7 +50,7 @@ Customization
 #### Adding menu items
 
 ```javascript
-toolbar = new OT.Annotations.Toolbar({
+toolbar = new OTSolution.Annotations.Toolbar({
     ...
     items: [
         {
@@ -153,7 +153,7 @@ If no custom items are added to the toolbar initializer, these will be automatic
 A set of custom color choices can be added when the toolbar is initialized:
 
 ```javascript
-toolbar = new OT.Annotations.Toolbar({
+toolbar = new OTSolution.Annotations.Toolbar({
     ...
     colors: [
         "#1abc9c",
@@ -193,11 +193,3 @@ toolbar.remove();
 ```
 
 See [demo.html](sample/demo.html)
-
-Build
--------
-```
-npm install
-bower install
-gulp
-```

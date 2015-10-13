@@ -9,7 +9,9 @@
 //  OPENTOK ANNOTATION CANVAS/VIEW
 //--------------------------------------
 
-OT.Annotations = function(options) {
+window.OTSolution = window.OTSolution || {};
+
+OTSolution.Annotations = function(options) {
     options || (options = {});
 
     this.parent = options.container;
@@ -29,8 +31,6 @@ OT.Annotations = function(options) {
     var self = this,
         ctx,
         cbs = [],
-        colors,
-        lineWidth,
         mirrored,
         scaledToFill,
         batchUpdates = [],
@@ -39,7 +39,6 @@ OT.Annotations = function(options) {
         client = {dragging: false};
 
     // INFO Mirrored feeds contain the OT_mirrored class
-    // FIXME Looks like there may be a bug here - all divs seem to have this class
     mirrored = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_mirrored' + ' ') > -1;
     scaledToFill = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_fit-mode-cover' + ' ') > -1;
 
@@ -148,7 +147,7 @@ OT.Annotations = function(options) {
      */
     this.captureScreenshot = function() {
 
-        OT.Annotations.Analytics.logEvent({
+        OTSolution.Annotations.Analytics.logEvent({
             action: 'Capture',
             variation: '',
             payload: '',
@@ -252,7 +251,7 @@ OT.Annotations = function(options) {
 
         if (self.selectedItem.id === 'OT_pen') {
 
-            OT.Annotations.Analytics.logEvent({
+            OTSolution.Annotations.Analytics.logEvent({
                 action: 'Pen',
                 variation: 'Draw',
                 payload: '',
@@ -298,7 +297,7 @@ OT.Annotations = function(options) {
                     client.dragging = false;
             }
         } else {
-            OT.Annotations.Analytics.logEvent({
+            OTSolution.Annotations.Analytics.logEvent({
                 action: 'Shape',
                 variation: 'Draw',
                 payload: '',
@@ -554,6 +553,11 @@ OT.Annotations = function(options) {
         update.toX = centerX - (scale * (iCenterX - update.toX));
         update.toY = centerY - (scale * (iCenterY - update.toY));
 
+        // INFO iOS serializes bools as 0 or 1
+        if (update.mirrored % 1 === 0) {
+            update.mirrored = update.mirrored === 1;
+        }
+
         // Check if the incoming signal was mirrored
         if (update.mirrored) {
             update.fromX = canvas.width - update.fromX;
@@ -675,7 +679,7 @@ OT.Annotations = function(options) {
 //  OPENTOK ANNOTATION TOOLBAR
 //--------------------------------------
 
-OT.Annotations.Toolbar = function(options) {
+OTSolution.Annotations.Toolbar = function(options) {
     var self = this;
 
     options || (options = {});
@@ -1244,9 +1248,9 @@ OT.Annotations.Toolbar = function(options) {
 //  ANALYTICS
 //--------------------------------------
 
-OT.Annotations.Analytics = function() { };
+OTSolution.Annotations.Analytics = function() { };
 
-OT.Annotations.Analytics.logEvent = function (data) {
+OTSolution.Annotations.Analytics.logEvent = function (data) {
     var payload = data.payload || "";
 
     // convert JS object payload to url query string

@@ -5,7 +5,6 @@
 <title>OpenTok Annotations Demo</title>
 
 <script src='http://static.opentok.com/webrtc/v2.2/js/opentok.min.js'></script>
-<script src="//static.opentok.com/webrtc/v2.2/js/TB.js" type="text/javascript" charset="utf-8"></script>
 <script src="../opentok-annotations.js" type="text/javascript" charset="utf-8"></script>
 <link rel="stylesheet" href="../opentok-annotations.css" type="text/css" media="screen" charset="utf-8">
 
@@ -14,9 +13,9 @@
     // *** Fill the following variables using your own Project info from the Dashboard  ***
     // ***                  (https://dashboard.tokbox.com/projects)                     ***
 
-    var apiKey = '44631542';    // Replace with your own API key.
-    var sessionId = '2_MX40NDYzMTU0Mn5-MTQ0MDc4MzAwNDEwOH5NVUdUWjJOWlRpMEkycjFXRXJESFJ0TWJ-UH4'; // Replace with your generated Session ID.
-    var token = 'T1==cGFydG5lcl9pZD00NDYzMTU0MiZzaWc9YTUwOGUzNjJlNWVmZjBiZTU5OGMwNDI0Njc2ZGQ5YjEwMWNmYTRjNjpyb2xlPXB1Ymxpc2hlciZzZXNzaW9uX2lkPTJfTVg0ME5EWXpNVFUwTW41LU1UUTBNRGM0TXpBd05ERXdPSDVOVlVkVVdqSk9XbFJwTUVreWNqRlhSWEpFU0ZKMFRXSi1VSDQmY3JlYXRlX3RpbWU9MTQ0MDc4MzAyMSZub25jZT0wLjIyMzc0MjQ1MzA2NTk5NTUmZXhwaXJlX3RpbWU9MTQ0MzM3NDk3OCZjb25uZWN0aW9uX2RhdGE9';     // Replace with your generated Token (use Project Tools or from a server-side library)
+    var apiKey = '45353532';    // Replace with your own API key.
+    var sessionId = '2_MX40NTM1MzUzMn5-MTQ0MzEyMjQxOTE2MX5FVE1jaGR6RWJGY2ZCKzk5bEIvU3FLVkd-UH4'; // Replace with your generated Session ID.
+    var token = 'T1==cGFydG5lcl9pZD00NTM1MzUzMiZzaWc9YTlmZDA5NDI4NDgyNzlmODYzMmI4NzRhOTNiZmYyZDY0ZWY1YmZlMzpyb2xlPXB1Ymxpc2hlciZzZXNzaW9uX2lkPTJfTVg0ME5UTTFNelV6TW41LU1UUTBNekV5TWpReE9URTJNWDVGVkUxamFHUjZSV0pHWTJaQ0t6azViRUl2VTNGTFZrZC1VSDQmY3JlYXRlX3RpbWU9MTQ0MzEyMjQyNCZub25jZT0wLjU2NDgyNjEyOTg5NDA2NzgmZXhwaXJlX3RpbWU9MTQ0NTcxNDQxMyZjb25uZWN0aW9uX2RhdGE9';     // Replace with your generated Token (use Project Tools or from a server-side library)
 
     var toolbar;
     var session;
@@ -70,7 +69,7 @@
         session.connect(apiKey, token);
 
         // Initialize a toolbar for controlling annotation canvases
-        toolbar = new OT.Annotations.Toolbar({
+        toolbar = new OTSolution.Annotations.Toolbar({
             session: session,
             container: document.getElementById('toolbar'),
             colors: palette,
@@ -184,7 +183,7 @@
                 }
             });
 
-            var canvas = new OT.Annotations({
+            var canvas = new OTSolution.Annotations({
                 feed: publisher,
                 container: parentDiv
             });
@@ -299,7 +298,7 @@
         console.log("Stream ID: " + stream.connection.connectionId + ", Subscriber ID: " + subscriber.stream.connection.connectionId
             + ", Session ID: " + session.connection.connectionId);
 
-        var canvas = new OT.Annotations({
+        var canvas = new OTSolution.Annotations({
             feed:  subscriber,
             container: subscriberDiv
         });
@@ -338,7 +337,7 @@
     }
 </style>
 </head>
-<body ng-controller="DemoCtrl">
+<body>
 <div id="links">
     <input type="button" value="Connect" id="connectLink" onClick="javascript:connect()"/>
     <input type="button" value="Disconnect" id="disconnectLink" onClick="javascript:disconnect()" style="display:none"/>
