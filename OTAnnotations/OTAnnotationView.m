@@ -50,9 +50,18 @@
         _subscriber = subscriber;
         _sessionId = subscriber.session.sessionId;
         _mycid = subscriber.session.connection.connectionId;
-        _canvasId = subscriber.stream.connection.connectionId;
-        _videoDimensions = subscriber.stream.videoDimensions;
-        [self setupView];
+        
+        dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            while (subscriber.stream.connection.connectionId == nil) {
+                /* wait */
+            }
+            
+            dispatch_async( dispatch_get_main_queue(), ^{
+                _canvasId = subscriber.stream.connection.connectionId;
+                _videoDimensions = subscriber.stream.videoDimensions;
+                [self setupView];
+            });
+        });
     }
     return self;
 }
@@ -62,10 +71,18 @@
         _publisher = publisher;
         _sessionId = publisher.session.sessionId;
         _mycid = publisher.session.connection.connectionId;
-        // FIXME: Publisher stream is nil when initialized
-        _canvasId = publisher.stream.connection.connectionId;
-        _videoDimensions = publisher.stream.videoDimensions;
-        [self setupView];
+        
+        dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            while (publisher.stream.connection.connectionId == nil) {
+                /* wait */
+            }
+            
+            dispatch_async( dispatch_get_main_queue(), ^{
+                _canvasId = publisher.stream.connection.connectionId;
+                _videoDimensions = publisher.stream.videoDimensions;
+                [self setupView];
+            });
+        });
     }
     return self;
 }
@@ -92,7 +109,7 @@
     
     _lineWidth = 2.f;
     
-    [self createPath:_canvasId]; // FIXME: I don't think _canvasId has a value here in publisher views
+    [self createPath:_mycid];
     
     // Ensure the canvas is always the top layer
     [self.superview bringSubviewToFront:self];
@@ -201,18 +218,18 @@
     OTPath* path = [OTPath bezierPath];
     [path setColor:_color];
     [path setLineWidth:_lineWidth];
-    [path setCanvasId:_canvasId];
+    [path setCanvasId:_mycid];
     [_paths addObject:path];
 }
 
 - (void)setColor:(UIColor *)color {
     _color = color;
-    [self createPath:_canvasId];
+    [self createPath:_mycid];
 }
 
 - (void)setLineWidth:(CGFloat)lineWidth {
     _lineWidth = lineWidth;
-    [self createPath:_canvasId];
+    [self createPath:_mycid];
 }
 
 - (void)clearCanvas:(NSString*)canvasId incoming:(Boolean)incoming {
@@ -229,7 +246,7 @@
     OTPath* path = [OTPath bezierPath];
     [path setColor:_color];
     [path setLineWidth:_lineWidth];
-    [path setCanvasId:_canvasId];
+    [path setCanvasId:_mycid];
     [_paths addObject:path];
     
     if (!incoming) {
@@ -241,6 +258,8 @@
     UITouch *touch = [touches anyObject];
     CGPoint point = [touch locationInView:self];
     _startPoint = point;
+    
+    [self createPath:_mycid];
     
     if (_selectedItem.points != nil) {
         _isDrawing = true;
@@ -288,8 +307,8 @@
     [self setNeedsDisplay];
     
     if (!incoming) {
-        NSLog(@"%f, %f", _lastPoint.x, _lastPoint.y);
-        NSLog(@"%f, %f", point.x, point.y);
+//        NSLog(@"%f, %f", _lastPoint.x, _lastPoint.y);
+//        NSLog(@"%f, %f", point.x, point.y);
         
         // INFO: This should only be an issue for publishers, but check subscribers too just in case
         if (_canvasId == nil) {
@@ -324,6 +343,8 @@
                                          @"canvasHeight" : [NSNumber numberWithFloat:self.frame.size.height],
                                          @"mirrored" : _mirrored ? @true : @false
                                      };
+        
+        NSLog(@"%@", jsonObject);
         
         NSArray* jsonArray = [NSArray arrayWithObjects:jsonObject, nil];
         
@@ -424,7 +445,7 @@
     Boolean mirrored = false;
     
     // FIXME: Figure out how to determine if the video feed is mirrored
-    OTAnnotationVideoRender* renderer = nil;
+//    OTAnnotationVideoRender* renderer = nil;
     
     if (_publisher != nil) {
         _canvasId = _publisher.stream.connection.connectionId;
@@ -434,17 +455,17 @@
         _videoDimensions = _subscriber.stream.videoDimensions;
     }
 
-    if (_publisher != nil) {
-        renderer = (OTAnnotationVideoRender*) _publisher.videoRender;
-    } else if (_subscriber != nil) {
-        renderer = (OTAnnotationVideoRender*) _subscriber.videoRender;
-    }
-
-    if (renderer != nil) {
-//        mirrored = renderer.mirrored;
-    } else {
-        // FIXME: Throw exception?
-    }
+//    if (_publisher != nil) {
+//        renderer = (OTAnnotationVideoRender*) _publisher.videoRender;
+//    } else if (_subscriber != nil) {
+//        renderer = (OTAnnotationVideoRender*) _subscriber.videoRender;
+//    }
+//
+//    if (renderer != nil) {
+//        mirrored = [renderer mirrored];
+//    } else {
+//        // FIXME: Throw exception?
+//    }
     
     // Send the signal
     NSDictionary* jsonObject = @{
@@ -499,17 +520,19 @@
                     Boolean signalMirrored = [json[@"mirrored"] boolValue];
                     
                     // FIXME: The custom renderer is used to tell if the feed is mirrored - see if this is necessary
-    //                OTVideoRender* renderer;
-    //                
-    //                if (_publisher != nil) {
-    //                    renderer = _publisher.videoRender;
-    //                } else if (_subscriber != nil) {
-    //                    renderer = _subscriber.videoRender;
-    //                }
+//                    OTAnnotationVideoRender* renderer;
+//                    
+//                    if (_publisher != nil) {
+//                        renderer = _publisher.videoRender;
+//                        _mirrored = [renderer mirrored];
+//                    } else if (_subscriber != nil) {
+//                        renderer = _subscriber.videoRender;
+//                        _mirrored = [renderer mirrored];
+//                    }
                     
-    //                NSLog(@"CanvasOffset CanvasSize: %f, %f", self.frame.size.width, self.frame.size.height);
+                    NSLog(@"CanvasOffset CanvasSize: %f, %f", self.frame.size.width, self.frame.size.height);
                     
-    //                if (renderer != nil) {
+//                    if (renderer != nil) {
                         // Handle scale
                         float scale = 1;
                         
@@ -577,13 +600,13 @@
                         OTPath* path = [OTPath bezierPath];
                         [path setColor:[UIColor colorFromHexString: json[@"color"]]];
                         [path setLineWidth:[(NSNumber *)json[@"lineWidth"] floatValue]];
-                        [path setCanvasId:canvasId];
+                        [path setCanvasId:connection.connectionId];
                         [_paths addObject:path];
                     
                         [self startTouch: CGPointMake(fromX, fromY)];
                         [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false incoming:true];
                     }
-    //            }
+//                }
             }
         } else if ([type isEqualToString:@"otAnnotation_clear"]) {
             [self clearCanvas:connection.connectionId incoming:true];
@@ -594,15 +617,12 @@
 - (void)sendUpdate:(NSString *)update forType:(NSString *)type {
     NSError *error;
     
-    NSLog(@"%@", update);
-    
     if (_publisher != nil) {
-        [_publisher.session signalWithType:type string:update connection:_publisher.session.connection error:&error];
+        [_publisher.session signalWithType:type string:update connection:nil error:&error];
     } else if (_subscriber != nil) {
-        [_subscriber.session signalWithType:type string:update connection:_publisher.session.connection error:&error];
+        [_subscriber.session signalWithType:type string:update connection:nil error:&error];
     } else {
-        // TODO: Throw an error - either a publisher or subscriber should have been supplied
-        NSLog(@"Please provide either a subscriber or publisher.");
+        [NSException raise:@"Invalid publisher/subscriber" format:@"Please pass either a subscriber or publisher into the OTAnnotationView."];
     }
 }
 
@@ -679,7 +699,6 @@
         if ([item.identifier isEqualToString:@"ot_clear"]) {
             [self clearCanvas: _mycid incoming:false];
         } else if ([item.identifier isEqualToString:@"ot_capture"]) {
-            NSLog(@"Adding gesture recognizer");
             _tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(captureScreenshot)];
             _tap.numberOfTapsRequired = 1;
             [self addGestureRecognizer:_tap];

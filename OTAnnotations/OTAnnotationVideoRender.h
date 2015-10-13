@@ -9,8 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <OpenTok/OpenTok.h>
 
-@interface OTAnnotationVideoRender : NSObject<OTVideoRender>
+@protocol OTAnnotationVideoRender <OTVideoRender>
 
-@property (nonatomic) Boolean mirrored;
+@property (nonatomic, assign) BOOL mirrored;
 
 @end

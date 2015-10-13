@@ -16,7 +16,7 @@ Installing
 
 ### CocoaPods
 
-1. Add `pod 'OpenTokAnnotations'` to your podfile.
+1. Add `pod 'OTAnnotation'` to your podfile.
 2. Run `pod install` from your Terminal or using an Xcode plugin.
 
 ### Manually add the framework
@@ -194,4 +194,12 @@ For best results
 In order to ensure that all annotations are visible across devices, it is recommended to use predefined
 aspect ratios for your video frames.
 
-[code sample]
+```objective-c
+...
+
+[_subscriber.view setFrame:CGRectMake()];
+
+...
+
+[_publisher.view setFrame:CGRectMake()];
+```
