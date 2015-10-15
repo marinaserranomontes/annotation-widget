@@ -191,15 +191,16 @@ To add a new color to the existing palette, call `addColor:` on the toolbar inst
 For best results
 ----------------
 
-In order to ensure that all annotations are visible across devices, it is recommended to use predefined
-aspect ratios for your video frames.
+In order to ensure that all annotations aren't cut off across devices, it is recommended to use predefined
+aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
+(see how to set the aspect ratio for [Android]() and [JavaScript]()).
 
 ```objective-c
 ...
 
-[_subscriber.view setFrame:CGRectMake()];
+[_subscriber.view setFrame:CGRectMake(x, y, width, height)];
 
 ...
 
-[_publisher.view setFrame:CGRectMake()];
+[_publisher.view setFrame:CGRectMake(x, y, scale*width, scale*height)];
 ```

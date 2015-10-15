@@ -50,6 +50,7 @@
         _subscriber = subscriber;
         _sessionId = subscriber.session.sessionId;
         _mycid = subscriber.session.connection.connectionId;
+        _mirrored = false;
         
         dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             while (subscriber.stream.connection.connectionId == nil) {
@@ -71,6 +72,7 @@
         _publisher = publisher;
         _sessionId = publisher.session.sessionId;
         _mycid = publisher.session.connection.connectionId;
+        _mirrored = ((OTAnnotationVideoRender*)publisher.videoRender).mirroring;
         
         dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             while (publisher.stream.connection.connectionId == nil) {
@@ -442,11 +444,6 @@
 }
 
 - (NSString*)buildSignalFromPoint:(CGPoint)point {
-    Boolean mirrored = false;
-    
-    // FIXME: Figure out how to determine if the video feed is mirrored
-//    OTAnnotationVideoRender* renderer = nil;
-    
     if (_publisher != nil) {
         _canvasId = _publisher.stream.connection.connectionId;
         _videoDimensions = _publisher.stream.videoDimensions;
@@ -454,18 +451,6 @@
         _canvasId = _subscriber.stream.connection.connectionId;
         _videoDimensions = _subscriber.stream.videoDimensions;
     }
-
-//    if (_publisher != nil) {
-//        renderer = (OTAnnotationVideoRender*) _publisher.videoRender;
-//    } else if (_subscriber != nil) {
-//        renderer = (OTAnnotationVideoRender*) _subscriber.videoRender;
-//    }
-//
-//    if (renderer != nil) {
-//        mirrored = [renderer mirrored];
-//    } else {
-//        // FIXME: Throw exception?
-//    }
     
     // Send the signal
     NSDictionary* jsonObject = @{
@@ -518,95 +503,79 @@
                 
                 if ([_canvasId isEqualToString:canvasId]) {
                     Boolean signalMirrored = [json[@"mirrored"] boolValue];
+
+//                    NSLog(@"CanvasOffset CanvasSize: %f, %f", self.frame.size.width, self.frame.size.height);
                     
-                    // FIXME: The custom renderer is used to tell if the feed is mirrored - see if this is necessary
-//                    OTAnnotationVideoRender* renderer;
-//                    
-//                    if (_publisher != nil) {
-//                        renderer = _publisher.videoRender;
-//                        _mirrored = [renderer mirrored];
-//                    } else if (_subscriber != nil) {
-//                        renderer = _subscriber.videoRender;
-//                        _mirrored = [renderer mirrored];
-//                    }
+                    float scale = 1;
                     
-                    NSLog(@"CanvasOffset CanvasSize: %f, %f", self.frame.size.width, self.frame.size.height);
+                    CGSize canvas = CGSizeMake(self.frame.size.width, self.frame.size.height);
+                    CGSize video = CGSizeMake(self.frame.size.width, self.frame.size.height);
+                    CGSize iCanvas = CGSizeMake([(NSNumber*)json[@"canvasWidth"] floatValue], [(NSNumber*)json[@"canvasHeight"] floatValue]);
+                    CGSize iVideo = CGSizeMake([(NSNumber*)json[@"videoWidth"] floatValue], [(NSNumber*)json[@"videoHeight"] floatValue]);
                     
-//                    if (renderer != nil) {
-                        // Handle scale
-                        float scale = 1;
-                        
-                        CGSize canvas = CGSizeMake(self.frame.size.width, self.frame.size.height);
-                        CGSize video = CGSizeMake(self.frame.size.width, self.frame.size.height);
-                        CGSize iCanvas = CGSizeMake([(NSNumber*)json[@"canvasWidth"] floatValue], [(NSNumber*)json[@"canvasHeight"] floatValue]);
-                        CGSize iVideo = CGSizeMake([(NSNumber*)json[@"videoWidth"] floatValue], [(NSNumber*)json[@"videoHeight"] floatValue]);
-                        
-                        NSLog(@"CanvasOffset Sizes [Canvas: %f, %f Video: %f, %f iCanvas: %f, %f iVideo: %f, %f]",
-                                canvas.width, canvas.height,
-                                video.width, video.height,
-                                iCanvas.width, iCanvas.height,
-                                iVideo.width, iVideo.height);
+//                    NSLog(@"CanvasOffset Sizes [Canvas: %f, %f Video: %f, %f iCanvas: %f, %f iVideo: %f, %f]",
+//                            canvas.width, canvas.height,
+//                            video.width, video.height,
+//                            iCanvas.width, iCanvas.height,
+//                            iVideo.width, iVideo.height);
+                
+                    float canvasRatio = canvas.width / canvas.height;
+                    float videoRatio = video.width / video.height;
+                    float iCanvasRatio = iCanvas.width / iCanvas.height;
+                    float iVideoRatio = iVideo.width / iVideo.height;
                     
-                        float canvasRatio = canvas.width / canvas.height;
-                        float videoRatio = video.width / video.height;
-                        float iCanvasRatio = iCanvas.width / iCanvas.height;
-                        float iVideoRatio = iVideo.width / iVideo.height;
-                        
-                        /**
-                         * This assumes that if the width is the greater value, video frames
-                         * can be scaled so that they have equal widths, which can be used to
-                         * find the offset in the y axis. Therefore, the offset on the x axis
-                         * will be 0. If the height is the greater value, the offset on the y
-                         * axis will be 0.
-                         */
-                        if (canvasRatio < 0) {
-                            scale = canvas.width / iCanvas.width;
-                        } else {
-                            scale = canvas.height / iCanvas.height;
-                        }
-                        
-                        NSLog(@"CanvasOffset Scale: %f", scale);
-                        
-                        // FIXME If possible, the scale should also scale the line width (use a min width value?)
-                        
-                        float centerX = canvas.width / 2;
-                        float centerY = canvas.height / 2;
-                        
-                        float iCenterX = iCanvas.width / 2;
-                        float iCenterY = iCanvas.height / 2;
-                        
-                        float fromX = centerX - (scale * (iCenterX - [(NSNumber*) json[@"fromX"] floatValue]));
-                        float fromY = centerY - (scale * (iCenterY - [(NSNumber*) json[@"fromY"] floatValue]));
-                        
-                        float toX = centerX - (scale * (iCenterX - [(NSNumber*) json[@"toX"] floatValue]));
-                        float toY = centerY - (scale * (iCenterY - [(NSNumber*) json[@"toY"] floatValue]));
-                        
-                        NSLog(@"CanvasOffset From: %f, %f", fromX, fromY);
-                        NSLog(@"CanvasOffset To: %f, %f", toX, toY);
-                        
-                        if (signalMirrored) {
-                            NSLog(@"CanvasOffset Signal is mirrored");
-                            fromX = self.frame.size.width - fromX;
-                            toX = self.frame.size.width - toX;
-                        }
-                        
-                        if (_mirrored) {
-                            NSLog(@"CanvasOffset Feed is mirrored");
-                            // Revert (Double negative)
-                            fromX = self.frame.size.width - fromX;
-                            toX = self.frame.size.width - toX;
-                        }
-                    
-                        OTPath* path = [OTPath bezierPath];
-                        [path setColor:[UIColor colorFromHexString: json[@"color"]]];
-                        [path setLineWidth:[(NSNumber *)json[@"lineWidth"] floatValue]];
-                        [path setCanvasId:connection.connectionId];
-                        [_paths addObject:path];
-                    
-                        [self startTouch: CGPointMake(fromX, fromY)];
-                        [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false incoming:true];
+                    /**
+                     * This assumes that if the width is the greater value, video frames
+                     * can be scaled so that they have equal widths, which can be used to
+                     * find the offset in the y axis. Therefore, the offset on the x axis
+                     * will be 0. If the height is the greater value, the offset on the y
+                     * axis will be 0.
+                     */
+                    if (canvasRatio < 0) {
+                        scale = canvas.width / iCanvas.width;
+                    } else {
+                        scale = canvas.height / iCanvas.height;
                     }
-//                }
+                    
+//                    NSLog(@"CanvasOffset Scale: %f", scale);
+                    
+                    // FIXME If possible, the scale should also scale the line width (use a min width value?)
+                    
+                    float centerX = canvas.width / 2;
+                    float centerY = canvas.height / 2;
+                    
+                    float iCenterX = iCanvas.width / 2;
+                    float iCenterY = iCanvas.height / 2;
+                    
+                    float fromX = centerX - (scale * (iCenterX - [(NSNumber*) json[@"fromX"] floatValue]));
+                    float fromY = centerY - (scale * (iCenterY - [(NSNumber*) json[@"fromY"] floatValue]));
+                    
+                    float toX = centerX - (scale * (iCenterX - [(NSNumber*) json[@"toX"] floatValue]));
+                    float toY = centerY - (scale * (iCenterY - [(NSNumber*) json[@"toY"] floatValue]));
+                    
+//                    NSLog(@"CanvasOffset From: %f, %f", fromX, fromY);
+//                    NSLog(@"CanvasOffset To: %f, %f", toX, toY);
+                    
+                    if (signalMirrored) {
+                        fromX = self.frame.size.width - fromX;
+                        toX = self.frame.size.width - toX;
+                    }
+                    
+                    if (_mirrored) {
+                        // Revert (Double negative)
+                        fromX = self.frame.size.width - fromX;
+                        toX = self.frame.size.width - toX;
+                    }
+                
+                    OTPath* path = [OTPath bezierPath];
+                    [path setColor:[UIColor colorFromHexString: json[@"color"]]];
+                    [path setLineWidth:[(NSNumber *)json[@"lineWidth"] floatValue]];
+                    [path setCanvasId:connection.connectionId];
+                    [_paths addObject:path];
+                
+                    [self startTouch: CGPointMake(fromX, fromY)];
+                    [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false incoming:true];
+                }
             }
         } else if ([type isEqualToString:@"otAnnotation_clear"]) {
             [self clearCanvas:connection.connectionId incoming:true];

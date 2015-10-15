@@ -33,7 +33,6 @@
 		85E1272E1B822C420015B1A3 /* OpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E1272D1B822C420015B1A3 /* OpenTok.framework */; };
 		85FD15FF1BBD7EB000F847A0 /* OTAnnotationAnalytics.h in Headers */ = {isa = PBXBuildFile; fileRef = 85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */; settings = {ASSET_TAGS = (); }; };
 		85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */; settings = {ASSET_TAGS = (); }; };
-		85FD16031BC01C0800F847A0 /* OTAnnotationVideoRender.h in Headers */ = {isa = PBXBuildFile; fileRef = 85FD16011BC01C0800F847A0 /* OTAnnotationVideoRender.h */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +59,7 @@
 		852D5C231BB2EBA300A564CC /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		852D5C251BB2F0A000A564CC /* OTAnnotations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OTAnnotations.h; sourceTree = "<group>"; };
 		854CB3521BCBF68F002861E9 /* OTAnnotation.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OTAnnotation.podspec; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		854CB3561BCFE612002861E9 /* OTAnnotationVideoRender.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OTAnnotationVideoRender.h; sourceTree = "<group>"; };
 		855B24EA1BB70DAC0082791D /* OTPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTPath.h; sourceTree = "<group>"; };
 		855B24EB1BB70DAC0082791D /* OTPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTPath.m; sourceTree = "<group>"; };
 		855B24EE1BB9B5C00082791D /* UIColor+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+HexString.h"; sourceTree = "<group>"; };
@@ -77,7 +77,6 @@
 		85E1272F1B822C950015B1A3 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationAnalytics.h; sourceTree = "<group>"; };
 		85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationAnalytics.m; sourceTree = "<group>"; };
-		85FD16011BC01C0800F847A0 /* OTAnnotationVideoRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationVideoRender.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,8 +129,8 @@
 				852D5C251BB2F0A000A564CC /* OTAnnotations.h */,
 				852D5C0E1BB2E95400A564CC /* OTAnnotationToolbar.h */,
 				852D5C0F1BB2E95400A564CC /* OTAnnotationToolbar.m */,
+				854CB3561BCFE612002861E9 /* OTAnnotationVideoRender.h */,
 				852D5C101BB2E95400A564CC /* OTAnnotationToolbar.xib */,
-				85FD16011BC01C0800F847A0 /* OTAnnotationVideoRender.h */,
 				852D5C0C1BB2E95400A564CC /* OTAnnotationView.h */,
 				852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */,
 				852D5C131BB2E95400A564CC /* OTColorButtonItem.h */,
@@ -189,7 +188,6 @@
 				852D5C171BB2E95400A564CC /* OTAnnotationToolbar.h in Headers */,
 				855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */,
 				855B24F81BBB07BB0082791D /* OTShape.h in Headers */,
-				85FD16031BC01C0800F847A0 /* OTAnnotationVideoRender.h in Headers */,
 				855B24F41BB9C8AE0082791D /* UIBezierPath+Image.h in Headers */,
 				855B24EC1BB70DAC0082791D /* OTPath.h in Headers */,
 				852D5C1A1BB2E95400A564CC /* OTAnnotationButtonItem.h in Headers */,
