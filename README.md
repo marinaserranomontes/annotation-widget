@@ -260,8 +260,12 @@ In order to ensure that all annotations aren't cut off across devices, it is rec
 aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
 (see how to set the aspect ratio for [iOS]() and [JavaScript]()).
 
+```java
 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
 mSubscriberViewContainer.addView(mSubscriber.getView(), layoutParams);
+```
 
+```java
 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(scale*width, scale*height);
 mPublisherViewContainer.addView(mPublisher.getView(), layoutParams);
+```
