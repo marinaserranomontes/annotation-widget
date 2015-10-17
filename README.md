@@ -57,7 +57,7 @@ toolbar = new OTSolution.Annotations.Toolbar({
             id: 'OT_pen',
             title: 'Pen',
             icon: '../img/freehand.png',
-            selectedIcon: '../img/freehand.png'
+            selectedIcon: '../img/freehand_selected.png'
         },
         {
             id: 'OT_line',

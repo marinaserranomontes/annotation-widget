@@ -249,102 +249,35 @@ OTSolution.Annotations = function(options) {
 
         var update;
 
-        if (self.selectedItem.id === 'OT_pen') {
+        if (self.selectedItem) {
+            if (self.selectedItem.id === 'OT_pen') {
 
-            OTSolution.Annotations.Analytics.logEvent({
-                action: 'Pen',
-                variation: 'Draw',
-                payload: '',
-                sessionId: self.session.sessionId,
-                partnerId: '',
-                connectionId: self.session.connection.connectionId
-            });
-
-            switch (event.type) {
-                case 'mousedown':
-                case 'touchstart':
-                    client.dragging = true;
-                    client.lastX = x;
-                    client.lastY = y;
-                    break;
-                case 'mousemove':
-                case 'touchmove':
-                    if (client.dragging) {
-                        update = {
-                            id: self.videoFeed.stream.connection.connectionId,
-                            fromId: self.session.connection.connectionId,
-                            fromX: client.lastX,
-                            fromY: client.lastY,
-                            toX: x,
-                            toY: y,
-                            color: self.userColor,
-                            lineWidth: self.lineWidth,
-                            videoWidth: self.videoFeed.videoWidth(),
-                            videoHeight: self.videoFeed.videoHeight(),
-                            canvasWidth: canvas.width,
-                            canvasHeight: canvas.height,
-                            mirrored: mirrored
-                        };
-                        draw(update);
-                        client.lastX = x;
-                        client.lastY = y;
-                        sendUpdate(update);
-                    }
-                    break;
-                case 'mouseup':
-                case 'touchend':
-                case 'mouseout':
-                    client.dragging = false;
-            }
-        } else {
-            OTSolution.Annotations.Analytics.logEvent({
-                action: 'Shape',
-                variation: 'Draw',
-                payload: '',
-                sessionId: self.session.sessionId,
-                partnerId: '',
-                connectionId: self.session.connection.connectionId
-            });
-
-            // We have a shape or custom object
-            if (self.selectedItem && self.selectedItem.points) {
-                client.mX = x;
-                client.mY = y;
+                OTSolution.Annotations.Analytics.logEvent({
+                    action: 'Pen',
+                    variation: 'Draw',
+                    payload: '',
+                    sessionId: self.session.sessionId,
+                    partnerId: '',
+                    connectionId: self.session.connection.connectionId
+                });
 
                 switch (event.type) {
                     case 'mousedown':
                     case 'touchstart':
-                        client.isDrawing = true;
                         client.dragging = true;
-                        client.startX = x;
-                        client.startY = y;
+                        client.lastX = x;
+                        client.lastY = y;
                         break;
                     case 'mousemove':
                     case 'touchmove':
                         if (client.dragging) {
                             update = {
-                                color: self.userColor,
-                                lineWidth: self.lineWidth
-                                // INFO The points for scaling will get added when drawing is complete
-                            };
-
-                            draw(update);
-                        }
-                        break;
-                    case 'mouseup':
-                    case 'touchend':
-                        client.isDrawing = false;
-
-                        var points = self.selectedItem.points;
-
-                        if (points.length == 2) {
-                            update = {
                                 id: self.videoFeed.stream.connection.connectionId,
                                 fromId: self.session.connection.connectionId,
-                                fromX: client.startX,
-                                fromY: client.startY,
-                                toX: client.mX,
-                                toY: client.mY,
+                                fromX: client.lastX,
+                                fromY: client.lastY,
+                                toX: x,
+                                toY: y,
                                 color: self.userColor,
                                 lineWidth: self.lineWidth,
                                 videoWidth: self.videoFeed.videoWidth(),
@@ -353,30 +286,66 @@ OTSolution.Annotations = function(options) {
                                 canvasHeight: canvas.height,
                                 mirrored: mirrored
                             };
-
-                            drawHistory.push(update);
-
+                            draw(update);
+                            client.lastX = x;
+                            client.lastY = y;
                             sendUpdate(update);
-                        } else {
-                            var scale = scaleForPoints(points);
+                        }
+                        break;
+                    case 'mouseup':
+                    case 'touchend':
+                    case 'mouseout':
+                        client.dragging = false;
+                }
+            } else {
+                OTSolution.Annotations.Analytics.logEvent({
+                    action: 'Shape',
+                    variation: 'Draw',
+                    payload: '',
+                    sessionId: self.session.sessionId,
+                    partnerId: '',
+                    connectionId: self.session.connection.connectionId
+                });
 
-                            for (var i = 0; i < points.length; i++) {
-                                // Scale the points according to the difference between the start and end points
-                                var pointX = client.startX + (scale.x * points[i][0]);
-                                var pointY = client.startY + (scale.y * points[i][1]);
+                // We have a shape or custom object
+                if (self.selectedItem && self.selectedItem.points) {
+                    client.mX = x;
+                    client.mY = y;
 
-                                if (i === 0) {
-                                    client.lastX = pointX;
-                                    client.lastY = pointY;
-                                }
+                    switch (event.type) {
+                        case 'mousedown':
+                        case 'touchstart':
+                            client.isDrawing = true;
+                            client.dragging = true;
+                            client.startX = x;
+                            client.startY = y;
+                            break;
+                        case 'mousemove':
+                        case 'touchmove':
+                            if (client.dragging) {
+                                update = {
+                                    color: self.userColor,
+                                    lineWidth: self.lineWidth
+                                    // INFO The points for scaling will get added when drawing is complete
+                                };
 
+                                draw(update);
+                            }
+                            break;
+                        case 'mouseup':
+                        case 'touchend':
+                            client.isDrawing = false;
+
+                            var points = self.selectedItem.points;
+
+                            if (points.length == 2) {
                                 update = {
                                     id: self.videoFeed.stream.connection.connectionId,
                                     fromId: self.session.connection.connectionId,
-                                    fromX: client.lastX,
-                                    fromY: client.lastY,
-                                    toX: pointX,
-                                    toY: pointY,
+                                    fromX: client.startX,
+                                    fromY: client.startY,
+                                    toX: client.mX,
+                                    toY: client.mY,
                                     color: self.userColor,
                                     lineWidth: self.lineWidth,
                                     videoWidth: self.videoFeed.videoWidth(),
@@ -389,15 +358,48 @@ OTSolution.Annotations = function(options) {
                                 drawHistory.push(update);
 
                                 sendUpdate(update);
+                            } else {
+                                var scale = scaleForPoints(points);
 
-                                client.lastX = pointX;
-                                client.lastY = pointY;
+                                for (var i = 0; i < points.length; i++) {
+                                    // Scale the points according to the difference between the start and end points
+                                    var pointX = client.startX + (scale.x * points[i][0]);
+                                    var pointY = client.startY + (scale.y * points[i][1]);
+
+                                    if (i === 0) {
+                                        client.lastX = pointX;
+                                        client.lastY = pointY;
+                                    }
+
+                                    update = {
+                                        id: self.videoFeed.stream.connection.connectionId,
+                                        fromId: self.session.connection.connectionId,
+                                        fromX: client.lastX,
+                                        fromY: client.lastY,
+                                        toX: pointX,
+                                        toY: pointY,
+                                        color: self.userColor,
+                                        lineWidth: self.lineWidth,
+                                        videoWidth: self.videoFeed.videoWidth(),
+                                        videoHeight: self.videoFeed.videoHeight(),
+                                        canvasWidth: canvas.width,
+                                        canvasHeight: canvas.height,
+                                        mirrored: mirrored
+                                    };
+
+                                    drawHistory.push(update);
+
+                                    sendUpdate(update);
+
+                                    client.lastX = pointX;
+                                    client.lastY = pointY;
+                                }
+
+                                draw(null);
                             }
 
-                            draw(null);
-                        }
-
-                        client.dragging = false;
+                            client.dragging = false;
+                    }
                 }
             }
         }
@@ -697,12 +699,13 @@ OTSolution.Annotations.Toolbar = function(options) {
             id: 'OT_pen',
             title: 'Pen',
             icon: '../img/freehand.png',
-            selectedIcon: '../img/freehand.png' // TODO Create an icon for selected states
+            selectedIcon: '../img/freehand_selected.png'
         },
         {
             id: 'OT_line',
             title: 'Line',
             icon: '../img/line.png',
+            selectedIcon: '../img/line_selected.png',
             points: [
                 [0, 0],
                 [0, 1]
@@ -778,7 +781,8 @@ OTSolution.Annotations.Toolbar = function(options) {
         {
             id: 'OT_capture',
             title: 'Capture',
-            icon: '../img/camera.png'
+            icon: '../img/camera.png',
+            selectedIcon: '../img/camera_selected.png'
         }
     ];
     this.colors = options.colors || [
@@ -1005,6 +1009,21 @@ OTSolution.Annotations.Toolbar = function(options) {
             if (!group) {
                 self.items.forEach(function (item) {
                     if (item.title !== 'Clear' && item.title === itemName) {
+                        if (self.selectedItem) {
+                            var lastBtn = document.getElementById(self.selectedItem.id);
+                            lastBtn.style.background = 'url("' + self.selectedItem.icon + '") no-repeat';
+                            lastBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                            lastBtn.style.backgroundPosition = 'center';
+                        }
+
+                        if (item.selectedIcon) {
+                            var selBtn = document.getElementById(item.id);
+                            console.log(selBtn);
+                            selBtn.style.background = 'url("' + item.selectedIcon + '") no-repeat';
+                            selBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                            selBtn.style.backgroundPosition = 'center';
+                        }
+
                         self.selectedItem = item;
 
                         attachDefaultAction(item);
@@ -1120,6 +1139,21 @@ OTSolution.Annotations.Toolbar = function(options) {
             if (!group) {
                 self.selectedGroup.items.forEach(function (item) {
                     if (item.id !== 'OT_clear' && item.id === id) {
+                        if (self.selectedItem) {
+                            var lastBtn = document.getElementById(self.selectedItem.id);
+                            lastBtn.style.background = 'url("' + self.selectedItem.icon + '") no-repeat';
+                            lastBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                            lastBtn.style.backgroundPosition = 'center';
+                        }
+
+                        if (item.selectedIcon) {
+                            var selBtn = document.getElementById(item.id);
+                            console.log(selBtn);
+                            selBtn.style.background = 'url("' + item.selectedIcon + '") no-repeat';
+                            selBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                            selBtn.style.backgroundPosition = 'center';
+                        }
+
                         self.selectedItem = item;
 
                         attachDefaultAction(item);

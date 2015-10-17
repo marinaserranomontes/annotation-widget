@@ -13,9 +13,9 @@
     // *** Fill the following variables using your own Project info from the Dashboard  ***
     // ***                  (https://dashboard.tokbox.com/projects)                     ***
 
-    var apiKey = '45353532';    // Replace with your own API key.
-    var sessionId = '2_MX40NTM1MzUzMn5-MTQ0MzEyMjQxOTE2MX5FVE1jaGR6RWJGY2ZCKzk5bEIvU3FLVkd-UH4'; // Replace with your generated Session ID.
-    var token = 'T1==cGFydG5lcl9pZD00NTM1MzUzMiZzaWc9YTlmZDA5NDI4NDgyNzlmODYzMmI4NzRhOTNiZmYyZDY0ZWY1YmZlMzpyb2xlPXB1Ymxpc2hlciZzZXNzaW9uX2lkPTJfTVg0ME5UTTFNelV6TW41LU1UUTBNekV5TWpReE9URTJNWDVGVkUxamFHUjZSV0pHWTJaQ0t6azViRUl2VTNGTFZrZC1VSDQmY3JlYXRlX3RpbWU9MTQ0MzEyMjQyNCZub25jZT0wLjU2NDgyNjEyOTg5NDA2NzgmZXhwaXJlX3RpbWU9MTQ0NTcxNDQxMyZjb25uZWN0aW9uX2RhdGE9';     // Replace with your generated Token (use Project Tools or from a server-side library)
+    var apiKey = '';    // Replace with your own API key.
+    var sessionId = ''; // Replace with your generated Session ID.
+    var token = '';     // Replace with your generated Token (use Project Tools or from a server-side library)
 
     var toolbar;
     var session;
@@ -78,12 +78,13 @@
                     id: 'OT_pen',
                     title: 'Pen',
                     icon: '../img/freehand.png',
-                    selectedIcon: '../img/freehand.png'
+                    selectedIcon: '../img/freehand_selected.png'
                 },
                 {
                     id: 'OT_line',
                     title: 'Line',
-                    icon: '../img/line.png'
+                    icon: '../img/line.png',
+                    selectedIcon: '../img/line_selected.png'
                 },
                 {
                     id: 'OT_shapes',
@@ -145,7 +146,8 @@
                 {
                     id: 'OT_capture',
                     title: 'Capture',
-                    icon: '../img/camera.png'
+                    icon: '../img/camera.png',
+                    selectedIcon: '../img/camera_selected.png'
                 }
             ]
         });
