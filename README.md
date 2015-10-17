@@ -24,7 +24,7 @@ When the publisher is created, attach the annotation canvas and link it to the t
 
 ```javascript
 var canvas = new OTSolution.Annotations({
-    session:  publisher.session,
+    feed: publisher,
     container: parentDiv
 });
 toolbar.addCanvas(canvas);
@@ -193,3 +193,10 @@ toolbar.remove();
 ```
 
 See [demo.html](sample/demo.html)
+
+For best results
+----------------
+
+In order to ensure that all annotations aren't cut off across devices, it is recommended to use predefined
+aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
+(see how to set the aspect ratio for [iOS]() and [Android]()).
