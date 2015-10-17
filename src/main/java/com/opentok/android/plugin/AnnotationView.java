@@ -45,7 +45,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 	public int width;
 	public int height;
 	private Bitmap mBitmap;
-	private Canvas mCanvas;
     // TODO Merge these lists so that they can be used for history (undo)
 	private List<AnnotationPath> mPaths;
 	private List<AnnotationText> mLabels;
@@ -190,12 +189,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 createPath(false, mycid);
             }
         }.start();
-
-//        mSubscriber.setRenderer(new AnnotationVideoRenderer(getContext()));
-
-//        ViewGroup parent = (ViewGroup) subscriber.getView().getParent();
-//        parent.removeView(subscriber.getView());
-//        parent.addView(mSubscriber.getView());
     }
 
     /**
@@ -306,14 +299,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         return mPaths.get(mPaths.size()-1).path;
     }
 
-//    void drawText(String text, int x, int y) {
-//
-//    }
-//
-//    void changeTextSize(float size) {
-//        getActivePaint().setTextSize(size);
-//    }
-
     /** ==== Signal Handling ==== **/
 
     @Override
@@ -342,7 +327,12 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                             String id = (String) json.get("id");
                             if (canvascid.equals(id)) {
-                                mSignalMirrored = (boolean) json.get("mirrored");
+                                if (json.get("mirrored") instanceof Long) {
+                                    Long value = (Long) json.get("mirrored");
+                                    mSignalMirrored = value == 1;
+                                } else {
+                                    mSignalMirrored = (boolean) json.get("mirrored");
+                                }
 
                                 changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()), cid);
                                 changeStrokeWidth(((Number) json.get("lineWidth")).floatValue(), cid);
@@ -354,9 +344,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 } else if (mSubscriber != null) {
                                     renderer = ((AnnotationVideoRenderer) mSubscriber.getRenderer());
                                 }
-
-                                Log.i("CanvasOffset", "Size: " + width + ", " + height);
-                                Log.i("CanvasOffset", "CanvasSize: " + this.width + ", " + this.height);
 
                                 if (renderer != null) {
                                     // Handle scale
@@ -452,7 +439,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         }
     }
 
-    private String buildSignalFromPoints(float x, float y) {
+    private String buildSignalFromPoint(float x, float y) {
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonObject = new JSONObject();
 
@@ -473,8 +460,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
             mirrored = renderer.isMirrored();
             videoWidth = renderer.getVideoWidth();
             videoHeight = renderer.getVideoHeight();
-        } else {
-            // FIXME Throw exception?
         }
 
         // TODO Include a unique ID for the path?
@@ -531,7 +516,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     moveTouch(x, y, true);
                     invalidate();
 
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(x, y));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y));
 
                     mLastX = x;
                     mLastY = y;
@@ -553,40 +538,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 }
                     break;
             }
-        }
-//        else if (selectedResourceId == R.id.ot_item_text) {
-//            // INFO Per Meeta Dash, omit text for now (include if time)
-//            // TODO Add text input and submit data below as user types
-//
-//            Log.i(TAG, "Adding text...");
-//
-//            Paint paint = new Paint();
-//            paint.setColor(Color.RED);
-//            paint.setTextSize(16);
-//
-//            mLabels.add(new AnnotationText("This is a test", x, y, paint));
-//            invalidate();
-//
-//            JSONArray jsonArray = new JSONArray();
-//            JSONObject jsonObject = new JSONObject();
-//
-//            // TODO Include a unique ID for the path? - this way it can be removed using history
-//            jsonObject.put("id", canvascid);
-//            jsonObject.put("fromId", mycid);
-//            jsonObject.put("x", x);
-//            jsonObject.put("y", y);
-//            jsonObject.put("text", "This is a test");
-//            jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
-//            jsonObject.put("textSize", 16/*userTextSize*/);
-//
-//            // TODO These need to be batched
-//            jsonArray.add(jsonObject);
-//
-//            String update = jsonArray.toJSONString();
-//
-//            sendUpdate(Mode.Text.toString(), update);
-//        }
-        else if (selectedResourceId == R.id.ot_item_capture) {
+        } else if (selectedResourceId == R.id.ot_item_capture) {
             JSONObject data = new JSONObject();
             data.put("action", "Capture");
             data.put("variation", "");
@@ -631,7 +583,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     moveTouch(mX, mY, false);
                     upTouch();
                     Log.i(TAG, "Points: (" + mStartX + ", " + mStartY + "), (" + mX + ", " + mY + ")");
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(mX, mY));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(mX, mY));
                 } else {
                     FloatPoint scale = scaleForPoints(points);
 
@@ -663,7 +615,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                             }
                         }
 
-                        sendUpdate(Mode.Pen.toString(), buildSignalFromPoints(pointX, pointY));
+                        sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(pointX, pointY));
 
                         mLastX = pointX;
                         mLastY = pointY;
@@ -680,7 +632,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 data.put("partnerId", "");
                 data.put("connectionId", mycid);
 
-                //AnnotationAnalytics.logEvent(data);
+                AnnotationAnalytics.logEvent(data);
             }
                 break;
         }
@@ -726,10 +678,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
         this.width = w;
         this.height = h;
-
-        // your Canvas will draw onto the defined Bitmap
-        mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        mCanvas = new Canvas(mBitmap);
     }
 
 	@Override

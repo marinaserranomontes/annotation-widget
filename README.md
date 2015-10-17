@@ -61,7 +61,7 @@ private void attachSubscriberView(Subscriber subscriber) {
     AnnotationView annotationView = new AnnotationView(this);
     mSubscriberViewContainer.addView(annotationView);
     annotationView.attachSubscriber(subscriber);
-    
+
     // Add this line to attach the annotation view to the toolbar
     annotationView.attachToolbar(mToolbar);
 }
@@ -77,7 +77,7 @@ private void attachPublisherView(Publisher publisher) {
     AnnotationView annotationView = new AnnotationView(this);
     mPublisherViewContainer.addView(annotationView);
     annotationView.attachPublisher(publisher);
-    
+
     // Add this line to attach the annotation view to the toolbar
     annotationView.attachToolbar(mToolbar);
 }
@@ -256,7 +256,12 @@ mToolbar.addColorChoice(Color.parseColor("#008080")); /* Teal */
 For best results
 ----------------
 
-In order to ensure that all annotations are visible across devices, it is recommended to use predefined
-aspect ratios for your video frames.
+In order to ensure that all annotations aren't cut off across devices, it is recommended to use predefined
+aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
+(see how to set the aspect ratio for [iOS]() and [JavaScript]()).
 
-[code sample]
+RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
+mSubscriberViewContainer.addView(mSubscriber.getView(), layoutParams);
+
+RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(scale*width, scale*height);
+mPublisherViewContainer.addView(mPublisher.getView(), layoutParams);
