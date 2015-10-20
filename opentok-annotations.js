@@ -863,7 +863,7 @@ OTSolution.Annotations.Toolbar = function(options) {
         options.openEvent = options.openEvent || "click";
         options.style = Object(options.style);
         options.style.display = options.style.display || "block";
-        options.template = options.template || "<div data-col=\"{color}\" style=\"background-color: {color}\"></div>";
+        options.template = options.template || "<div class=\"color-choice\" data-col=\"{color}\" style=\"background-color: {color}\"></div>";
         self.elm = self.getElm(parent);
         self.cbs = [];
         self.colors = colors;
@@ -927,6 +927,24 @@ OTSolution.Annotations.Toolbar = function(options) {
                         canvas.changeColor(color);
                     });
                 });
+
+                var colorChoices = document.querySelectorAll('.color-choice');
+
+                for (var j = 0; j < colorChoices.length; j++) {
+                    colorChoices[j].style.display='inline-block';
+                    colorChoices[j].style.width='30px';
+                    colorChoices[j].style.height='30px';
+                    colorChoices[j].style.margin='5px';
+                    colorChoices[j].style.cursor='pointer';
+                    colorChoices[j].style.borderRadius='100%';
+                    colorChoices[j].style.opacity = 0.7;
+                    colorChoices[j].onmouseover = function() {
+                        this.style.opacity = 1;
+                    };
+                    colorChoices[j].onmouseout = function() {
+                        this.style.opacity = 0.7;
+                    };
+                }
 
                 button.setAttribute('class', 'OT_color');
                 button.style.marginLeft = '10px';
