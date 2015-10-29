@@ -27,6 +27,7 @@ Installing
 4. Choose "Import .JAR or .AAR Package" from the list in the popup.
 5. Locate the AAR file in the zip downloaded in step 1.
 6. Follow the prompts and build your project.
+7. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line "compile project(':opentokAnnotations')" to the app build.gradle.
 
 Using the plugin
 ----------------
