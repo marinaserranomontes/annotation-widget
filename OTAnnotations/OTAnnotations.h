@@ -6,9 +6,9 @@
 //  Copyright © 2015 TokBox, Inc. All rights reserved.
 //
 
-#import "OTAnnotationView.h"
-#import "OTAnnotationToolbar.h"
-#import "OTAnnotationButtonItem.h"
-#import "OTColorButtonItem.h"
-#import "OTShape.h"
-#import "OTPath.h"
+#import <OTAnnotations/OTAnnotationView.h>
+#import <OTAnnotations/OTAnnotationToolbar.h>
+#import <OTAnnotations/OTAnnotationButtonItem.h>
+#import <OTAnnotations/OTColorButtonItem.h>
+#import <OTAnnotations/OTShape.h>
+#import <OTAnnotations/OTPath.h>
