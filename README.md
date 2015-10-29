@@ -23,11 +23,12 @@ Installing
 
 1. Download the OpenTok Annotation [framework files]() and unzip it.
 2. Click your project name in the Project Navigator sidebar.
-3. Choose the Build Phases tab.
-4. Expand the Link Binary With Libraries section.
+3. Choose the General tab.
+4. Expand the Embedded Binaries section.
 5. Click the '+' sign to add a framework.
 6. Select 'Add Other...' from the popup and navigate to folder you unzipped in step 1.
-7. Click on 'OTAnnotations.framework' in the Project navigator window and ensure that your application is checked and set to 'required' under Target Membership in File inspector.
+7. Check "Copy items if needed" and click Finish.
+8. Click on 'OTAnnotations.framework' in the Project navigator window and ensure that your application is checked and set to 'required' under Target Membership in File inspector.
 
 Using the plugin
 ----------------
