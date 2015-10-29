@@ -10,7 +10,6 @@ import android.os.Parcelable;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +49,7 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         initDefaultLineWidths();
 
         if (this.getBackground() == null) {
-            this.setBackgroundColor(Color.parseColor("#CC000000"));
+            this.setBackgroundColor(getResources().getColor(R.color.TransparentBlack));
         }
 
         int[] systemAttrs = new int[] {
@@ -76,14 +75,14 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
     }
 
     private void initDefaultColors() {
-        colors.add(Color.parseColor("#000000"));  // Black
-        colors.add(Color.parseColor("#0000FF"));  // Blue
-        colors.add(Color.parseColor("#FF0000"));  // Red
-        colors.add(Color.parseColor("#00FF00"));  // Green
-        colors.add(Color.parseColor("#FF8C00"));  // Orange
-        colors.add(Color.parseColor("#FFD700"));  // Yellow
-        colors.add(Color.parseColor("#4B0082"));  // Purple
-        colors.add(Color.parseColor("#800000"));  // Brown
+        colors.add(Color.BLACK);
+        colors.add(Color.BLUE);
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+        colors.add(R.color.Orange);
+        colors.add(Color.YELLOW);
+        colors.add(R.color.Purple);
+        colors.add(R.color.Brown);
     }
 
     private void initDefaultLineWidths() {
@@ -256,8 +255,8 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         public void onScreenCapture(Bitmap screenCapture, String connectionId);
     }
 
-    public interface SignalListener {
-        public void signalReceived(Session session, String type, String data, Connection connection);
+    interface SignalListener {
+        void signalReceived(Session session, String type, String data, Connection connection);
     }
 
     void showColorSubmenu() {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="Orange">#FF8C00</color>
+    <color name="Purple">#4B0082</color>
+    <color name="Brown">#800000</color>
+    <color name="TransparentBlack">#CC000000</color>
+</resources>
