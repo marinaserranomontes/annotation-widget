@@ -38,6 +38,8 @@
     
     Boolean _mirrored;
     
+    Boolean _isFirstPoint;
+    
     OTAnnotationButtonItem *_selectedItem;
     
     Boolean _isDrawing;
@@ -106,6 +108,8 @@
 - (void)setupView {
     [self setMultipleTouchEnabled:NO];
     [self setBackgroundColor:[UIColor clearColor]];
+    
+    _isFirstPoint = false;
     
     _paths = [NSMutableArray array];
     
@@ -281,7 +285,7 @@
     _currentPoint = point;
     
     if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
-        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing startPoint:false incoming:false];
         
         NSDictionary* data = @{
                                    @"action" : @"Pen",
@@ -300,7 +304,15 @@
     }
 }
 
-- (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled incoming:(Boolean) incoming {
+- (void)moveTouch:(CGPoint)point {
+    [self moveTouch:point smoothingEnabled:false startPoint:nil incoming:false];
+}
+
+- (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled {
+    [self moveTouch:point smoothingEnabled:smoothingEnabled startPoint:nil incoming:true];
+}
+
+- (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled startPoint:(Boolean)startPoint incoming:(Boolean) incoming {
     if (smoothingEnabled) {
         [[self activePath] addQuadCurveToPoint: CGPointMake((point.x + _lastPoint.x) / 2, (point.y + _lastPoint.y) / 2) controlPoint: _lastPoint];
     } else {
@@ -343,7 +355,9 @@
                                          @"videoHeight" : [NSNumber numberWithFloat:_videoDimensions.height],
                                          @"canvasWidth" : [NSNumber numberWithFloat:self.frame.size.width],
                                          @"canvasHeight" : [NSNumber numberWithFloat:self.frame.size.height],
-                                         @"mirrored" : _mirrored ? @true : @false
+                                         @"mirrored" : _mirrored ? @true : @false,
+                                         @"smoothed" : _selectedItem.enableSmoothing ? @true : @false,
+                                         @"startPoint" : startPoint ? @true : @false
                                      };
         
         NSLog(@"%@", jsonObject);
@@ -376,14 +390,16 @@
         if (_selectedItem.points.count == 2) {
             // We have a line
             [self startTouch: CGPointMake(_startPoint.x, _startPoint.y)];
-            [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing incoming:false];
+            [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing startPoint:true incoming:false];
 //            NSLog("Points: (%f, %f), (%f, %f)", _startPoint.x, _startPoint.y, _currentPoint.x, _currentPoint.y);
-            [self sendUpdate:[self buildSignalFromPoint: _currentPoint] forType:@"otAnnotation_pen"];
+            [self sendUpdate:[self buildSignalFromPoint:_currentPoint startPoint:true] forType:@"otAnnotation_pen"];
         } else {
             CGPoint scale = [self scaleForPoints: _selectedItem.points];
 
             for (int i = 0; i < _selectedItem.points.count; i++) {
                 CGPoint point = [(NSValue*)[_selectedItem.points objectAtIndex:i] CGPointValue];
+                
+                BOOL startPoint = false;
                 
                 // Scale the points according to the difference between the start and end points
                 float pointX = _startPoint.x + (scale.x * point.x);
@@ -391,27 +407,24 @@
 
                 if (_selectedItem.enableSmoothing) {
                     if (i == 0) {
-                        // Do nothing
+                        startPoint = true;
                     } else if (i == 1) {
                         [self startTouch: CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2)];
                     } else {
-                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:true incoming:false];
-
-                        if (i == _selectedItem.points.count == 1) {
-                            [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:true incoming:false];
-                        }
+                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:true startPoint:false incoming:false];
                     }
                 } else {
                     if (i == 0) {
+                        startPoint = true;
                         _lastPoint.x = pointX;
                         _lastPoint.y = pointY;
                         [self startTouch: CGPointMake(pointX, pointY)];
                     } else {
-                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:false incoming:false];
+                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:false startPoint:false incoming:false];
                     }
                 }
 
-                [self sendUpdate:[self buildSignalFromPoint: CGPointMake(pointX, pointY)] forType:@"otAnnotation_pen"];
+                [self sendUpdate:[self buildSignalFromPoint: CGPointMake(pointX, pointY) startPoint:startPoint] forType:@"otAnnotation_pen"];
 
                 _lastPoint.x = pointX;
                 _lastPoint.y = pointY;
@@ -443,7 +456,7 @@
     [self touchesEnded:touches withEvent:event];
 }
 
-- (NSString*)buildSignalFromPoint:(CGPoint)point {
+- (NSString*)buildSignalFromPoint:(CGPoint)point startPoint:(BOOL)startPoint {
     if (_publisher != nil) {
         _canvasId = _publisher.stream.connection.connectionId;
         _videoDimensions = _publisher.stream.videoDimensions;
@@ -466,7 +479,9 @@
                                      @"videoHeight" : [NSNumber numberWithFloat:_videoDimensions.height],
                                      @"canvasWidth" : [NSNumber numberWithFloat:self.frame.size.width],
                                      @"canvasHeight" : [NSNumber numberWithFloat:self.frame.size.height],
-                                     @"mirrored" : _mirrored ? @true : @false
+                                     @"mirrored" : _mirrored ? @true : @false,
+                                     @"smoothed" : _selectedItem.enableSmoothing ? @true : @false,
+                                     @"startPoint" : startPoint ? @true : @false
                                  };
     
     NSArray* jsonArray = [NSArray arrayWithObjects:jsonObject, nil];
@@ -566,15 +581,42 @@
                         fromX = self.frame.size.width - fromX;
                         toX = self.frame.size.width - toX;
                     }
+                    
+                    Boolean firstPoint = [json[@"startPoint"] boolValue];
+                    Boolean secondPoint = false;
                 
-                    OTPath* path = [OTPath bezierPath];
-                    [path setColor:[UIColor colorFromHexString: json[@"color"]]];
-                    [path setLineWidth:[(NSNumber *)json[@"lineWidth"] floatValue]];
-                    [path setCanvasId:connection.connectionId];
-                    [_paths addObject:path];
-                
-                    [self startTouch: CGPointMake(fromX, fromY)];
-                    [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false incoming:true];
+                    if (firstPoint) {
+                        OTPath* path = [OTPath bezierPath];
+                        [path setColor:[UIColor colorFromHexString: json[@"color"]]];
+                        [path setLineWidth:[(NSNumber *)json[@"lineWidth"] floatValue]];
+                        [path setCanvasId:connection.connectionId];
+                        [_paths addObject:path];
+                        
+                        _isFirstPoint = true;
+                    } else {
+                        if (_isFirstPoint) {
+                            secondPoint = true;
+                            _isFirstPoint = false;
+                        }
+                    }
+                    
+                    Boolean smoothingEnabled = [json[@"smoothed"] boolValue];
+                    
+                    if (smoothingEnabled) {
+                        if (firstPoint) {
+                            _lastPoint.x = toX;
+                            _lastPoint.y = toY;
+                        } else if (secondPoint) {
+                            [self startTouch: CGPointMake((toX + _lastPoint.x) / 2, (toY + _lastPoint.y) / 2)];
+                        } else {
+                            _lastPoint.x = fromX;
+                            _lastPoint.y = fromY;
+                            [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:true];
+                        }
+                    } else {
+                        [self startTouch: CGPointMake(fromX, fromY)];
+                        [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false];
+                    }
                 }
             }
         } else if ([type isEqualToString:@"otAnnotation_clear"]) {

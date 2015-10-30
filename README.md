@@ -16,7 +16,7 @@ Installing
 
 ### CocoaPods
 
-1. Add `pod 'OTAnnotation'` to your podfile.
+1. Add `pod 'OpenTokAnnotations'` to your podfile.
 2. Run `pod install` from your Terminal or using an Xcode plugin.
 
 ### Manually add the framework
