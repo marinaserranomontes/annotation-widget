@@ -579,7 +579,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                 if (points.length == 2) {
                     // We have a line
-                    startTouch(mStartX, mStartY);
+                    getActivePath().moveTo(mStartX, mStartY);
                     moveTouch(mX, mY, false);
                     upTouch();
                     Log.i(TAG, "Points: (" + mStartX + ", " + mStartY + "), (" + mX + ", " + mY + ")");
@@ -598,7 +598,6 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                             } else if (i == 1) {
                                 startTouch((pointX + mLastX) / 2, (pointY + mLastY) / 2);
                             } else {
-                                // FIXME I don't like this workaround - moveTouch(pointX, pointY, true) draws line for first segment
                                 moveTouch(mLastX, mLastY, true);
 
                                 if (i == points.length-1) {
