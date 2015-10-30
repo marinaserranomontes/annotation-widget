@@ -53,6 +53,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 	private float mStartX, mStartY;
 	private static final float TOLERANCE = 5;
 
+    boolean isStartPoint = false;
+
     private boolean mMirrored = false;
     private boolean mSignalMirrored = false;
 
@@ -334,8 +336,27 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                     mSignalMirrored = (boolean) json.get("mirrored");
                                 }
 
-                                changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()), cid);
-                                changeStrokeWidth(((Number) json.get("lineWidth")).floatValue(), cid);
+                                boolean initialPoint = false;
+                                boolean secondPoint = false;
+
+                                if (json.get("startPoint") instanceof Long) {
+                                    Long value = (Long) json.get("startPoint");
+                                    initialPoint = value == 1;
+                                } else {
+                                    initialPoint = (boolean) json.get("startPoint");
+                                }
+
+                                if (initialPoint) {
+                                    changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()), cid);
+                                    changeStrokeWidth(((Number) json.get("lineWidth")).floatValue(), cid);
+                                    isStartPoint = true;
+                                } else {
+                                    // If the start point flag was already set, we received the next point in the sequence
+                                    if (isStartPoint) {
+                                        secondPoint = true;
+                                        isStartPoint = false;
+                                    }
+                                }
 
                                 AnnotationVideoRenderer renderer = null;
 
@@ -421,9 +442,32 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                         toX = this.width - toX;
                                     }
 
-                                    startTouch(fromX, fromY);
-                                    moveTouch(toX, toY, true);
-                                    upTouch();
+                                    boolean smoothed = false;
+
+                                    if (json.get("smoothed") instanceof Long) {
+                                        Long value = (Long) json.get("smoothed");
+                                        smoothed = value == 1;
+                                    } else {
+                                        smoothed = (boolean) json.get("smoothed");
+                                    }
+
+                                    if (smoothed) {
+                                        if (isStartPoint) {
+                                            mLastX = toX;
+                                            mLastY = toY;
+                                        } else if (secondPoint) {
+                                            startTouch((toX + mLastX) / 2, (toY + mLastY) / 2);
+                                        } else {
+                                            mX = fromX;
+                                            mY = fromY;
+                                            moveTouch(toX, toY, true);
+                                        }
+                                    } else {
+                                        startTouch(fromX, fromY);
+                                        moveTouch(toX, toY, false);
+                                        upTouch();
+                                    }
+
                                     invalidate(); // Need this to finalize the drawing on the screen
                                 }
                             }
@@ -439,7 +483,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         }
     }
 
-    private String buildSignalFromPoint(float x, float y) {
+    private String buildSignalFromPoint(float x, float y, boolean startPoint) {
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonObject = new JSONObject();
 
@@ -476,6 +520,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         jsonObject.put("canvasWidth", this.width);
         jsonObject.put("canvasHeight", this.height);
         jsonObject.put("mirrored", mirrored);
+        jsonObject.put("smoothed", selectedItem.isSmoothDrawEnabled());
+        jsonObject.put("startPoint", startPoint);
 
         // TODO These need to be batched
         jsonArray.add(jsonObject);
@@ -516,7 +562,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     moveTouch(x, y, true);
                     invalidate();
 
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, false));
 
                     mLastX = x;
                     mLastY = y;
@@ -533,6 +579,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     data.put("sessionId", mSessionId);
                     data.put("partnerId", "");
                     data.put("connectionId", mycid);
+
+//                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, true));
 
                     AnnotationAnalytics.logEvent(data);
                 }
@@ -563,6 +611,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     private void onTouchEvent(MotionEvent event, FloatPoint[] points) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
+                createPath(false, mycid);
+
                 isDrawing = true;
                 // Last x and y for shape paths is the start touch point
                 mStartX = mX;
@@ -580,21 +630,25 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 if (points.length == 2) {
                     // We have a line
                     getActivePath().moveTo(mStartX, mStartY);
+                    mLastX = mStartX;
+                    mLastY = mStartY;
                     moveTouch(mX, mY, false);
                     upTouch();
                     Log.i(TAG, "Points: (" + mStartX + ", " + mStartY + "), (" + mX + ", " + mY + ")");
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(mX, mY));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(mX, mY, true));
                 } else {
                     FloatPoint scale = scaleForPoints(points);
 
                     for (int i = 0; i < points.length; i++) {
+                        boolean startPoint = false;
+
                         // Scale the points according to the difference between the start and end points
                         float pointX = mStartX + (scale.x * points[i].x);
                         float pointY = mStartY + (scale.y * points[i].y);
 
                         if (selectedItem.isSmoothDrawEnabled()) {
                             if (i == 0) {
-                                // Do nothing
+                                startPoint = true;
                             } else if (i == 1) {
                                 startTouch((pointX + mLastX) / 2, (pointY + mLastY) / 2);
                             } else {
@@ -606,6 +660,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                             }
                         } else {
                             if (i == 0) {
+                                startPoint = true;
                                 mLastX = pointX;
                                 mLastY = pointY;
                                 startTouch(pointX, pointY);
@@ -614,7 +669,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                             }
                         }
 
-                        sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(pointX, pointY));
+                        sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(pointX, pointY, startPoint));
 
                         mLastX = pointX;
                         mLastY = pointY;
@@ -633,7 +688,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                 AnnotationAnalytics.logEvent(data);
             }
-                break;
+            break;
         }
     }
 
