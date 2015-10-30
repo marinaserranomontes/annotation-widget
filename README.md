@@ -16,7 +16,7 @@ Installing
 
 ### Gradle
 
-1. Add `compile 'com.opentok.android.plugin:annotations-component:1.0.0'` to `dependencies` in your module's build.gradle file.
+1. Add `compile 'com.tokbox:opentok-android-annotations:1.0.0'` to `dependencies` in your module's build.gradle file.
 2. Sync Gradle and build your project.
 
 ### .AAR in Android Studio
@@ -28,6 +28,14 @@ Installing
 5. Locate the AAR file in the zip downloaded in step 1.
 6. Follow the prompts and build your project.
 7. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line "compile project(':opentokAnnotations')" to the app build.gradle.
+
+### Clone/download this repo
+
+1. Once you've cloned/downloaded the files from this repo, right click on your project module (usually called "app" but may be something else) and choose "Open Module Settings" from the bottom of the menu.
+2. Click the '+' sign in the upper left hand corner.
+3. Choose "Import Existing Project" from the list of options.
+4. Browse to the location of the cloned/downloaded files, select "Ok" and then "Finish".
+5. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line "compile project(':opentokAnnotations')" to the app build.gradle.
 
 Using the plugin
 ----------------
