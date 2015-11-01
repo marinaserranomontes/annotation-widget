@@ -36,6 +36,7 @@ OTSolution.Annotations = function(options) {
         batchUpdates = [],
         drawHistory = [],
         drawHistoryReceivedFrom,
+        isStartPoint = false,
         client = {dragging: false};
 
     // INFO Mirrored feeds contain the OT_mirrored class
@@ -338,7 +339,7 @@ OTSolution.Annotations = function(options) {
 
                             var points = self.selectedItem.points;
 
-                            if (points.length == 2) {
+                            if (points.length === 2) {
                                 update = {
                                     id: self.videoFeed.stream.connection.connectionId,
                                     fromId: self.session.connection.connectionId,
@@ -352,7 +353,9 @@ OTSolution.Annotations = function(options) {
                                     videoHeight: self.videoFeed.videoHeight(),
                                     canvasWidth: canvas.width,
                                     canvasHeight: canvas.height,
-                                    mirrored: mirrored
+                                    mirrored: mirrored,
+                                    smoothed: false,
+                                    startPoint: true
                                 };
 
                                 drawHistory.push(update);
@@ -362,6 +365,8 @@ OTSolution.Annotations = function(options) {
                                 var scale = scaleForPoints(points);
 
                                 for (var i = 0; i < points.length; i++) {
+                                    var firstPoint = false;
+
                                     // Scale the points according to the difference between the start and end points
                                     var pointX = client.startX + (scale.x * points[i][0]);
                                     var pointY = client.startY + (scale.y * points[i][1]);
@@ -369,6 +374,7 @@ OTSolution.Annotations = function(options) {
                                     if (i === 0) {
                                         client.lastX = pointX;
                                         client.lastY = pointY;
+                                        firstPoint = true;
                                     }
 
                                     update = {
@@ -384,7 +390,9 @@ OTSolution.Annotations = function(options) {
                                         videoHeight: self.videoFeed.videoHeight(),
                                         canvasWidth: canvas.width,
                                         canvasHeight: canvas.height,
-                                        mirrored: mirrored
+                                        mirrored: mirrored,
+                                        smoothed: self.selectedItem.enableSmoothing,
+                                        startPoint: firstPoint
                                     };
 
                                     drawHistory.push(update);
@@ -420,11 +428,40 @@ OTSolution.Annotations = function(options) {
             ctx.strokeStyle = history.color;
             ctx.lineWidth = history.lineWidth;
 
-            ctx.beginPath();
-            ctx.moveTo(history.fromX, history.fromY);
-            ctx.lineTo(history.toX, history.toY);
-            ctx.stroke();
-            ctx.closePath();
+            // INFO iOS serializes bools as 0 or 1
+            history.smoothed = !!history.smoothed;
+            history.startPoint = !!history.startPoint;
+
+            var secondPoint = false;
+
+            if (history.smoothed) {
+                if (history.startPoint) {
+                    self.isStartPoint = true;
+                } else {
+                    // If the start point flag was already set, we received the next point in the sequence
+                    if (self.isStartPoint) {
+                        secondPoint = true;
+                        self.isStartPoint = false;
+                    }
+                }
+
+                if (history.startPoint) {
+                    // Close the last path and create a new one
+                    ctx.closePath();
+                    ctx.beginPath();
+                } else if (secondPoint) {
+                    ctx.moveTo((history.fromX + history.toX) / 2, (history.fromY + history.toY) / 2);
+                } else {
+                    ctx.quadraticCurveTo(history.fromX, history.fromY, (history.fromX + history.toX) / 2, (history.fromY + history.toY) / 2);
+                    ctx.stroke();
+                }
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(history.fromX, history.fromY);
+                ctx.lineTo(history.toX, history.toY);
+                ctx.stroke();
+                ctx.closePath();
+            }
         });
 
         if (self.selectedItem && self.selectedItem.title === 'Pen') {
@@ -457,7 +494,7 @@ OTSolution.Annotations = function(options) {
 
         ctx.beginPath();
 
-        if (points.length == 2) {
+        if (points.length === 2) {
             // We have a line
             ctx.moveTo(client.startX, client.startY);
             ctx.lineTo(client.mX, client.mY);
@@ -467,11 +504,28 @@ OTSolution.Annotations = function(options) {
                 var pointX = client.startX + (scale.x * points[i][0]);
                 var pointY = client.startY + (scale.y * points[i][1]);
 
-                if (i == 0) {
-                    ctx.moveTo(pointX, pointY);
+                if (self.selectedItem.enableSmoothing) {
+                    if (i === 0) {
+                        // Do nothing
+                    } else if (i === 1) {
+                        ctx.moveTo((pointX + client.lastX) / 2, (pointY + client.lastY) / 2);
+                        client.lastX = (pointX + client.lastX) / 2;
+                        client.lastX = (pointY + client.lastY) / 2;
+                    } else {
+                        ctx.quadraticCurveTo(client.lastX, client.lastY, (pointX + client.lastX) / 2, (pointY + client.lastY) / 2);
+                        client.lastX = (pointX + client.lastX) / 2;
+                        client.lastY = (pointY + client.lastY) / 2;
+                    }
                 } else {
-                    ctx.lineTo(pointX, pointY);
+                    if (i === 0) {
+                        ctx.moveTo(pointX, pointY);
+                    } else {
+                        ctx.lineTo(pointX, pointY);
+                    }
                 }
+
+                client.lastX = pointX;
+                client.lastY = pointY;
             }
         }
 
@@ -556,9 +610,7 @@ OTSolution.Annotations = function(options) {
         update.toY = centerY - (scale * (iCenterY - update.toY));
 
         // INFO iOS serializes bools as 0 or 1
-        if (update.mirrored % 1 === 0) {
-            update.mirrored = update.mirrored === 1;
-        }
+        update.mirrored = !!update.mirrored;
 
         // Check if the incoming signal was mirrored
         if (update.mirrored) {
@@ -576,7 +628,7 @@ OTSolution.Annotations = function(options) {
         console.log(update);
         drawHistory.push(update);
 
-        draw(update);
+        draw(null);
     };
 
     var drawUpdates = function (updates) {
@@ -620,7 +672,7 @@ OTSolution.Annotations = function(options) {
                     drawText(JSON.parse(event.data));
                 }
             },
-            'signal:otWhiteboard_history': function (event) {
+            'signal:otAnnotation_history': function (event) {
                 // We will receive these from everyone in the room, only listen to the first
                 // person. Also the data is chunked together so we need all of that person's
                 if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
@@ -747,6 +799,7 @@ OTSolution.Annotations.Toolbar = function(options) {
                     id: 'OT_oval',
                     title: 'Oval',
                     icon: '../img/oval.png',
+                    enableSmoothing: true,
                     points: [
                         [0, 0.5],
                         [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
@@ -756,7 +809,8 @@ OTSolution.Annotations.Toolbar = function(options) {
                         [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(Math.PI / 4)],
                         [0.5, 1],
                         [0.5 + 0.5 * Math.cos(3 * Math.PI / 4), 0.5 + 0.5 * Math.sin(3 * Math.PI / 4)],
-                        [0, 0.5]
+                        [0, 0.5],
+                        [0.5 + 0.5 * Math.cos(5 * Math.PI/4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)]
                     ]
                 }
             ]
@@ -1225,6 +1279,7 @@ OTSolution.Annotations.Toolbar = function(options) {
                     [0, 0] // Reconnect point
                 ]
             } else if (item.id === 'OT_oval') {
+                self.selectedItem.enableSmoothing = true;
                 self.selectedItem.points = [
                     [0, 0.5],
                     [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
@@ -1234,7 +1289,8 @@ OTSolution.Annotations.Toolbar = function(options) {
                     [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(Math.PI / 4)],
                     [0.5, 1],
                     [0.5 + 0.5 * Math.cos(3 * Math.PI / 4), 0.5 + 0.5 * Math.sin(3 * Math.PI / 4)],
-                    [0, 0.5]
+                    [0, 0.5],
+                    [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)]
                 ]
             }
         }
