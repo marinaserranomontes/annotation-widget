@@ -339,23 +339,28 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 boolean initialPoint = false;
                                 boolean secondPoint = false;
 
-                                if (json.get("startPoint") instanceof Long) {
-                                    Long value = (Long) json.get("startPoint");
-                                    initialPoint = value == 1;
-                                } else {
-                                    initialPoint = (boolean) json.get("startPoint");
-                                }
+                                if (json.get("startPoint") != null) {
+                                    if (json.get("startPoint") instanceof Long) {
+                                        Long value = (Long) json.get("startPoint");
+                                        initialPoint = value == 1;
+                                    } else {
+                                        initialPoint = (boolean) json.get("startPoint");
+                                    }
 
-                                if (initialPoint) {
+                                    if (initialPoint) {
+                                        changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()), cid);
+                                        changeStrokeWidth(((Number) json.get("lineWidth")).floatValue(), cid);
+                                        isStartPoint = true;
+                                    } else {
+                                        // If the start point flag was already set, we received the next point in the sequence
+                                        if (isStartPoint) {
+                                            secondPoint = true;
+                                            isStartPoint = false;
+                                        }
+                                    }
+                                } else {
                                     changeColor(Color.parseColor(((String) json.get("color")).toLowerCase()), cid);
                                     changeStrokeWidth(((Number) json.get("lineWidth")).floatValue(), cid);
-                                    isStartPoint = true;
-                                } else {
-                                    // If the start point flag was already set, we received the next point in the sequence
-                                    if (isStartPoint) {
-                                        secondPoint = true;
-                                        isStartPoint = false;
-                                    }
                                 }
 
                                 AnnotationVideoRenderer renderer = null;
@@ -444,11 +449,13 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                                     boolean smoothed = false;
 
-                                    if (json.get("smoothed") instanceof Long) {
-                                        Long value = (Long) json.get("smoothed");
-                                        smoothed = value == 1;
-                                    } else {
-                                        smoothed = (boolean) json.get("smoothed");
+                                    if (json.get("smoothed") != null) {
+                                        if (json.get("smoothed") instanceof Long) {
+                                            Long value = (Long) json.get("smoothed");
+                                            smoothed = value == 1;
+                                        } else {
+                                            smoothed = (boolean) json.get("smoothed");
+                                        }
                                     }
 
                                     if (smoothed) {
@@ -650,13 +657,9 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                             if (i == 0) {
                                 startPoint = true;
                             } else if (i == 1) {
-                                startTouch((pointX + mLastX) / 2, (pointY + mLastY) / 2);
+                                getActivePath().moveTo((pointX + mLastX) / 2, (pointY + mLastY) / 2);
                             } else {
-                                moveTouch(mLastX, mLastY, true);
-
-                                if (i == points.length-1) {
-                                    moveTouch(pointX, pointY, true);
-                                }
+                                getActivePath().quadTo(mLastX, mLastY, (pointX + mLastX) / 2, (pointY + mLastY) / 2);
                             }
                         } else {
                             if (i == 0) {
