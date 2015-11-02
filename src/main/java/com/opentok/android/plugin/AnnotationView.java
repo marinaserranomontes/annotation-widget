@@ -569,7 +569,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     moveTouch(x, y, true);
                     invalidate();
 
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, false));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, true));
 
                     mLastX = x;
                     mLastY = y;
