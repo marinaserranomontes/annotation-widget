@@ -285,7 +285,8 @@ OTSolution.Annotations = function(options) {
                                 videoHeight: self.videoFeed.videoHeight(),
                                 canvasWidth: canvas.width,
                                 canvasHeight: canvas.height,
-                                mirrored: mirrored
+                                mirrored: mirrored,
+                                startPoint: true // Each segment is treated as a new set of points
                             };
                             draw(update);
                             client.lastX = x;
@@ -452,6 +453,8 @@ OTSolution.Annotations = function(options) {
                 } else if (secondPoint) {
                     ctx.moveTo((history.fromX + history.toX) / 2, (history.fromY + history.toY) / 2);
                 } else {
+                    console.log("Points: (" + (history.fromX + history.toX) / 2 + ", " + (history.fromY + history.toY) / 2 + ")");
+                    console.log("Control Points: (" + history.fromX + ", " + history.fromY + ")");
                     ctx.quadraticCurveTo(history.fromX, history.fromY, (history.fromX + history.toX) / 2, (history.fromY + history.toY) / 2);
                     ctx.stroke();
                 }
