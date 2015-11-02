@@ -285,7 +285,7 @@
     _currentPoint = point;
     
     if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
-        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing startPoint:false incoming:false];
+        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing startPoint:true incoming:false];
         
         NSDictionary* data = @{
                                    @"action" : @"Pen",
@@ -409,9 +409,9 @@
                     if (i == 0) {
                         startPoint = true;
                     } else if (i == 1) {
-                        [self startTouch: CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2)];
+                        [[self activePath] moveToPoint:CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2)];
                     } else {
-                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:true startPoint:false incoming:false];
+                        [[self activePath] addQuadCurveToPoint:CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2) controlPoint:CGPointMake(_lastPoint.x, _lastPoint.y)];
                     }
                 } else {
                     if (i == 0) {
@@ -584,7 +584,7 @@
                     
                     Boolean firstPoint = [json[@"startPoint"] boolValue];
                     Boolean secondPoint = false;
-                
+                    
                     if (firstPoint) {
                         OTPath* path = [OTPath bezierPath];
                         [path setColor:[UIColor colorFromHexString: json[@"color"]]];
