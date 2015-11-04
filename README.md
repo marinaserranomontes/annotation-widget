@@ -35,7 +35,25 @@ Installing
 2. Click the '+' sign in the upper left hand corner.
 3. Choose "Import Existing Project" from the list of options.
 4. Browse to the location of the cloned/downloaded files, select "Ok" and then "Finish".
-5. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line "compile project(':opentokAnnotations')" to the app build.gradle.
+
+Important Notes
+---------------
+
+The Annotation plugin requires a custom video renderer to function. If you are using your own custom renderer, simply change it to extend `AnnotationVideoRenderer` instead of `BaseVideoRenderer`. If you are not using a custom renderer, make sure you add
+
+```java
+AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
+mPublisher.setRenderer(renderer);
+```
+
+The best place to add it is to `onConnected(Session session)` after you create a new publisher object and
+
+```java
+AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
+mSubscriber.setRenderer(renderer);
+```
+
+to your subscriber. `onStreamCreated(...)` is a good place to add this (or `subscribeToStream(Stream stream)` if you're working with our sample), after you create your subscriber object.
 
 Using the plugin
 ----------------

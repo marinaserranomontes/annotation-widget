@@ -1,6 +1,7 @@
 package com.opentok.android.plugin;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,7 +29,7 @@ class AnnotationAnalytics {
 
                     OutputStream os = conn.getOutputStream();
                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(data.toJSONString());
+                    writer.write(data.toString());
                     writer.flush();
                     writer.close();
                     os.close();

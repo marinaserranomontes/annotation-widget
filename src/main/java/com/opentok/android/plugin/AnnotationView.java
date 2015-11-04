@@ -23,10 +23,10 @@ import com.opentok.android.Publisher;
 import com.opentok.android.Session;
 import com.opentok.android.Subscriber;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -315,17 +315,13 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
             if (type.contains("otAnnotation")) {
                 if (type.equalsIgnoreCase(Mode.Pen.toString())) {
                     Log.i(TAG, data);
+
                     // Build object from JSON array
-                    JSONParser parser = new JSONParser();
-
                     try {
-                        JSONArray updates = (JSONArray) parser.parse(data);
+                        JSONArray updates = new JSONArray(data);
 
-                        Iterator<String> iterator = updates.iterator();
-                        // The data will be batched
-                        while (iterator.hasNext()) {
-                            Object obj = iterator.next();
-                            JSONObject json = (JSONObject) obj;
+                        for(int i = 0; i < updates.length(); i++) {
+                            JSONObject json = updates.getJSONObject(i);
 
                             String id = (String) json.get("id");
                             if (canvascid.equals(id)) {
@@ -479,7 +475,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 }
                             }
                         }
-                    } catch (ParseException e) {
+                    } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());
                     }
                 } else if (type.equalsIgnoreCase(Mode.Clear.toString())) {
@@ -514,26 +510,30 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         }
 
         // TODO Include a unique ID for the path?
-        jsonObject.put("id", canvascid);
-        jsonObject.put("fromId", mycid);
-        jsonObject.put("fromX", mLastX);
-        jsonObject.put("fromY", mLastY);
-        jsonObject.put("toX", x);
-        jsonObject.put("toY", y);
-        jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
-        jsonObject.put("lineWidth", userStrokeWidth);
-        jsonObject.put("videoWidth", videoWidth);
-        jsonObject.put("videoHeight", videoHeight);
-        jsonObject.put("canvasWidth", this.width);
-        jsonObject.put("canvasHeight", this.height);
-        jsonObject.put("mirrored", mirrored);
-        jsonObject.put("smoothed", selectedItem.isSmoothDrawEnabled());
-        jsonObject.put("startPoint", startPoint);
+        try {
+            jsonObject.put("id", canvascid);
+            jsonObject.put("fromId", mycid);
+            jsonObject.put("fromX", mLastX);
+            jsonObject.put("fromY", mLastY);
+            jsonObject.put("toX", x);
+            jsonObject.put("toY", y);
+            jsonObject.put("color", String.format("#%06X", (0xFFFFFF & userColor)));
+            jsonObject.put("lineWidth", userStrokeWidth);
+            jsonObject.put("videoWidth", videoWidth);
+            jsonObject.put("videoHeight", videoHeight);
+            jsonObject.put("canvasWidth", this.width);
+            jsonObject.put("canvasHeight", this.height);
+            jsonObject.put("mirrored", mirrored);
+            jsonObject.put("smoothed", selectedItem.isSmoothDrawEnabled());
+            jsonObject.put("startPoint", startPoint);
 
-        // TODO These need to be batched
-        jsonArray.add(jsonObject);
+            // TODO These need to be batched
+            jsonArray.put(jsonObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        return jsonArray.toJSONString();
+        return jsonArray.toString();
     }
 
     private void sendUpdate(String type, String update) {
@@ -579,30 +579,38 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     upTouch();
                     invalidate();
 
-                    JSONObject data = new JSONObject();
-                    data.put("action", "Pen");
-                    data.put("variation", "Draw");
-                    data.put("payload", "");
-                    data.put("sessionId", mSessionId);
-                    data.put("partnerId", "");
-                    data.put("connectionId", mycid);
+                    try {
+                        JSONObject data = new JSONObject();
 
-//                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, true));
+                        data.put("action", "Pen");
+                        data.put("variation", "Draw");
+                        data.put("payload", "");
+                        data.put("sessionId", mSessionId);
+                        data.put("partnerId", "");
+                        data.put("connectionId", mycid);
 
-                    AnnotationAnalytics.logEvent(data);
+                        AnnotationAnalytics.logEvent(data);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
                     break;
             }
         } else if (selectedResourceId == R.id.ot_item_capture) {
-            JSONObject data = new JSONObject();
-            data.put("action", "Capture");
-            data.put("variation", "");
-            data.put("payload", "");
-            data.put("sessionId", mSessionId);
-            data.put("partnerId", "");
-            data.put("connectionId", mycid);
 
-            AnnotationAnalytics.logEvent(data);
+            try {
+                JSONObject data = new JSONObject();
+                data.put("action", "Capture");
+                data.put("variation", "");
+                data.put("payload", "");
+                data.put("sessionId", mSessionId);
+                data.put("partnerId", "");
+                data.put("connectionId", mycid);
+
+                AnnotationAnalytics.logEvent(data);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             captureView();
         } else {
@@ -681,15 +689,20 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                 invalidate();
 
-                JSONObject data = new JSONObject();
-                data.put("action", "Shape");
-                data.put("variation", "Draw");
-                data.put("payload", "");
-                data.put("sessionId", mSessionId);
-                data.put("partnerId", "");
-                data.put("connectionId", mycid);
+                try {
+                    JSONObject data = new JSONObject();
 
-                AnnotationAnalytics.logEvent(data);
+                    data.put("action", "Shape");
+                    data.put("variation", "Draw");
+                    data.put("payload", "");
+                    data.put("sessionId", mSessionId);
+                    data.put("partnerId", "");
+                    data.put("connectionId", mycid);
+
+                    AnnotationAnalytics.logEvent(data);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
             break;
         }
