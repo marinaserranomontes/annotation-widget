@@ -35,7 +35,6 @@ Installing
 2. Click the '+' sign in the upper left hand corner.
 3. Choose "Import Existing Project" from the list of options.
 4. Browse to the location of the cloned/downloaded files, select "Ok" and then "Finish".
-5. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line "compile project(':opentokAnnotations')" to the app build.gradle.
 
 Using the plugin
 ----------------
