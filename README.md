@@ -16,19 +16,19 @@ Installing
 
 ### CocoaPods
 
-1. Add `pod 'OpenTokAnnotations'` to your podfile.
+1. Add `pod 'OpenTokAnnotations', :git => 'https://github.com/opentok/annotation-component-ios.git'` to your podfile.
 2. Run `pod install` from your Terminal or using an Xcode plugin.
 
 ### Manually add the framework
 
-1. Download the OpenTok Annotation [framework files]() and unzip it.
+1. Download the latest OpenTok Annotation [framework file](https://github.com/opentok/annotation-component-ios/releases) and unzip it.
 2. Click your project name in the Project Navigator sidebar.
 3. Choose the General tab.
 4. Expand the Embedded Binaries section.
 5. Click the '+' sign to add a framework.
 6. Select 'Add Other...' from the popup and navigate to folder you unzipped in step 1.
 7. Check "Copy items if needed" and click Finish.
-8. Click on 'OTAnnotations.framework' in the Project navigator window and ensure that your application is checked and set to 'required' under Target Membership in File inspector.
+8. Click on 'OpenTokAnnotations.framework' in the Project navigator window and ensure that your application is checked and set to 'required' under Target Membership in File inspector.
 
 Using the plugin
 ----------------
@@ -38,7 +38,7 @@ the steps below should help you incorporate the annotations plugin.
 
 Open `Main.storyboard` and drag a `UIView` component into the main view. With the view selected, click on the 'Identity inspector' tab (part of Utilities) and change the class to 'OTAnnotationToolbar'. You should see the view update to the default toolbar layout. 
 
-![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/set_custom_class.png?token=AGVWgIN0GNdaXEt7kHjDYEalIK6UJVoEks5WIqDwwA%3D%3D)
+![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/set_custom_class.png)
 
 To use the toolbar in your code, add the following line to your `ViewController.m` file and link the OpenTok toolbar you just created in Interface Builder:
 
@@ -131,10 +131,10 @@ Below is a list of default `OTAnnotationButtonItem` identifiers and their corres
 OTAnnotations provides Interface Builder support to add custom toolbars and button items. 
 
 ##### Link a main toolbar
-![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/link_main_toolbar.gif?token=AGVWgFS3VLgI-Sx5rEAxxb_sUqQd9rbtks5WIqDIwA%3D%3D)
+![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/link_main_toolbar.gif)
 
 ##### Link a sub toolbar to an `OTAnnotationButtonItem`
-![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/link_sub_toolbar.gif?token=AGVWgNMJTde9NniI3rlpIE8_3XlH80wLks5WIqDlwA%3D%3D)
+![image](https://raw.githubusercontent.com/opentok/annotation-component-ios/master/Images/link_sub_toolbar.gif)
 
 #### Handling custom items
 
@@ -195,7 +195,7 @@ For best results
 
 In order to ensure that all annotations aren't cut off across devices, it is recommended to use predefined
 aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
-(see how to set the aspect ratio for [Android]() and [JavaScript]()).
+(see how to set the aspect ratio for [Android](https://github.com/opentok/annotation-component-android#for-best-results) and [JavaScript](https://github.com/opentok/annotation-component-web#for-best-results)).
 
 ```objective-c
 ...
