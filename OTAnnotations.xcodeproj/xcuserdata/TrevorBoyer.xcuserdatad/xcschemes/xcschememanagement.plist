@@ -4,14 +4,24 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>Build Framework.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
 		<key>OTAnnotations.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>852A2E661BEBA200000FE1E2</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>85E127061B8227BC0015B1A3</key>
 		<dict>
 			<key>primary</key>

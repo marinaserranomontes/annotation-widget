@@ -6,33 +6,47 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		852A2E661BEBA200000FE1E2 /* Build Framework */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 852A2E691BEBA200000FE1E2 /* Build configuration list for PBXAggregateTarget "Build Framework" */;
+			buildPhases = (
+				852A2E6A1BEBA22F000FE1E2 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Build Framework";
+			productName = "Build Framework";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
-		851784531BC99D6300ED1CE2 /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 851784521BC99D6300ED1CE2 /* Images */; settings = {ASSET_TAGS = (); }; };
-		852D5C161BB2E95400A564CC /* OTAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */; settings = {ASSET_TAGS = (); }; };
+		851784531BC99D6300ED1CE2 /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 851784521BC99D6300ED1CE2 /* Images */; };
+		852D5C161BB2E95400A564CC /* OTAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */; };
 		852D5C171BB2E95400A564CC /* OTAnnotationToolbar.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C0E1BB2E95400A564CC /* OTAnnotationToolbar.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		852D5C181BB2E95400A564CC /* OTAnnotationToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C0F1BB2E95400A564CC /* OTAnnotationToolbar.m */; settings = {ASSET_TAGS = (); }; };
-		852D5C191BB2E95400A564CC /* OTAnnotationToolbar.xib in Resources */ = {isa = PBXBuildFile; fileRef = 852D5C101BB2E95400A564CC /* OTAnnotationToolbar.xib */; settings = {ASSET_TAGS = (); }; };
+		852D5C181BB2E95400A564CC /* OTAnnotationToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C0F1BB2E95400A564CC /* OTAnnotationToolbar.m */; };
+		852D5C191BB2E95400A564CC /* OTAnnotationToolbar.xib in Resources */ = {isa = PBXBuildFile; fileRef = 852D5C101BB2E95400A564CC /* OTAnnotationToolbar.xib */; };
 		852D5C1A1BB2E95400A564CC /* OTAnnotationButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C111BB2E95400A564CC /* OTAnnotationButtonItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		852D5C1B1BB2E95400A564CC /* OTAnnotationButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C121BB2E95400A564CC /* OTAnnotationButtonItem.m */; settings = {ASSET_TAGS = (); }; };
+		852D5C1B1BB2E95400A564CC /* OTAnnotationButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C121BB2E95400A564CC /* OTAnnotationButtonItem.m */; };
 		852D5C1C1BB2E95400A564CC /* OTColorButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C131BB2E95400A564CC /* OTColorButtonItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		852D5C1D1BB2E95400A564CC /* OTColorButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C141BB2E95400A564CC /* OTColorButtonItem.m */; settings = {ASSET_TAGS = (); }; };
+		852D5C1D1BB2E95400A564CC /* OTColorButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C141BB2E95400A564CC /* OTColorButtonItem.m */; };
 		852D5C221BB2EA7E00A564CC /* OTAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C0C1BB2E95400A564CC /* OTAnnotationView.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		852D5C241BB2EBA300A564CC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 852D5C231BB2EBA300A564CC /* Images.xcassets */; settings = {ASSET_TAGS = (); }; };
-		854CB3531BCBF68F002861E9 /* OTAnnotation.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 854CB3521BCBF68F002861E9 /* OTAnnotation.podspec */; settings = {ASSET_TAGS = (); }; };
+		852D5C241BB2EBA300A564CC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 852D5C231BB2EBA300A564CC /* Images.xcassets */; };
+		854CB3531BCBF68F002861E9 /* OTAnnotation.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 854CB3521BCBF68F002861E9 /* OTAnnotation.podspec */; };
 		855B24EC1BB70DAC0082791D /* OTPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EA1BB70DAC0082791D /* OTPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		855B24ED1BB70DAC0082791D /* OTPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EB1BB70DAC0082791D /* OTPath.m */; settings = {ASSET_TAGS = (); }; };
-		855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EE1BB9B5C00082791D /* UIColor+HexString.h */; settings = {ASSET_TAGS = (); }; };
-		855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EF1BB9B5C00082791D /* UIColor+HexString.m */; settings = {ASSET_TAGS = (); }; };
-		855B24F41BB9C8AE0082791D /* UIBezierPath+Image.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24F21BB9C8AE0082791D /* UIBezierPath+Image.h */; settings = {ASSET_TAGS = (); }; };
-		855B24F51BB9C8AE0082791D /* UIBezierPath+Image.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24F31BB9C8AE0082791D /* UIBezierPath+Image.m */; settings = {ASSET_TAGS = (); }; };
+		855B24ED1BB70DAC0082791D /* OTPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EB1BB70DAC0082791D /* OTPath.m */; };
+		855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EE1BB9B5C00082791D /* UIColor+HexString.h */; };
+		855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EF1BB9B5C00082791D /* UIColor+HexString.m */; };
+		855B24F41BB9C8AE0082791D /* UIBezierPath+Image.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24F21BB9C8AE0082791D /* UIBezierPath+Image.h */; };
+		855B24F51BB9C8AE0082791D /* UIBezierPath+Image.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24F31BB9C8AE0082791D /* UIBezierPath+Image.m */; };
 		855B24F81BBB07BB0082791D /* OTShape.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24F61BBB07BB0082791D /* OTShape.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		855B24F91BBB07BB0082791D /* OTShape.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24F71BBB07BB0082791D /* OTShape.m */; settings = {ASSET_TAGS = (); }; };
+		855B24F91BBB07BB0082791D /* OTShape.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24F71BBB07BB0082791D /* OTShape.m */; };
 		85D394811BB2F73300D64B84 /* OTAnnotations.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C251BB2F0A000A564CC /* OTAnnotations.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		85E127131B8227BD0015B1A3 /* OTAnnotations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E127071B8227BC0015B1A3 /* OTAnnotations.framework */; };
 		85E1271A1B8227BD0015B1A3 /* OTAnnotationsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */; };
 		85E1272E1B822C420015B1A3 /* OpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E1272D1B822C420015B1A3 /* OpenTok.framework */; };
-		85FD15FF1BBD7EB000F847A0 /* OTAnnotationAnalytics.h in Headers */ = {isa = PBXBuildFile; fileRef = 85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */; settings = {ASSET_TAGS = (); }; };
-		85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */; settings = {ASSET_TAGS = (); }; };
+		85FD15FF1BBD7EB000F847A0 /* OTAnnotationAnalytics.h in Headers */ = {isa = PBXBuildFile; fileRef = 85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */; };
+		85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -244,6 +258,9 @@
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "TokBox, Inc.";
 				TargetAttributes = {
+					852A2E661BEBA200000FE1E2 = {
+						CreatedOnToolsVersion = 7.1;
+					};
 					85E127061B8227BC0015B1A3 = {
 						CreatedOnToolsVersion = 6.4;
 					};
@@ -266,6 +283,7 @@
 			targets = (
 				85E127061B8227BC0015B1A3 /* OTAnnotations */,
 				85E127111B8227BD0015B1A3 /* OTAnnotationsTests */,
+				852A2E661BEBA200000FE1E2 /* Build Framework */,
 			);
 		};
 /* End PBXProject section */
@@ -290,6 +308,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		852A2E6A1BEBA22F000FE1E2 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Merge Script\n\nset -e\n\nFRAMEWORK_NAME=\"OTAnnotations\"\n\nif [ -d \"${SRCROOT}/build\" ]; then\nrm -rf \"${SRCROOT}/build\"\nfi\n\nxcodebuild -target \"${FRAMEWORK_NAME}\" -configuration Release -arch arm64 -arch armv7 -arch armv7s only_active_arch=no defines_module=yes -sdk \"iphoneos\"\nxcodebuild -target \"${FRAMEWORK_NAME}\" -configuration Release -arch x86_64 -arch i386 only_active_arch=no defines_module=yes -sdk \"iphonesimulator\"\n\nif [ -d \"${HOME}/Desktop/${FRAMEWORK_NAME}.framework\" ]; then\nrm -rf \"${HOME}/Desktop/${FRAMEWORK_NAME}.framework\"\nfi\n\nmkdir \"${SRCROOT}/Frameworks\"\ncp -r \"${SRCROOT}/build/Release-iphoneos/${FRAMEWORK_NAME}.framework\" \"${SRCROOT}/Frameworks/${FRAMEWORK_NAME}.framework\"\n\nlipo -create -output \"${SRCROOT}/Frameworks/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${SRCROOT}/build/Release-iphoneos/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${SRCROOT}/build/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\"\n\nif [ -d \"${SRCROOT}/build\" ]; then\nrm -rf \"${SRCROOT}/build\"\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		85E127021B8227BC0015B1A3 /* Sources */ = {
@@ -327,6 +361,20 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		852A2E671BEBA200000FE1E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		852A2E681BEBA200000FE1E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		85E1271B1B8227BD0015B1A3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -499,6 +547,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		852A2E691BEBA200000FE1E2 /* Build configuration list for PBXAggregateTarget "Build Framework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				852A2E671BEBA200000FE1E2 /* Debug */,
+				852A2E681BEBA200000FE1E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		85E127011B8227BB0015B1A3 /* Build configuration list for PBXProject "OTAnnotations" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
