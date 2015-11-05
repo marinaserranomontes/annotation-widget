@@ -1,0 +1,589 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		852A2E661BEBA200000FE1E2 /* Build Framework */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 852A2E691BEBA200000FE1E2 /* Build configuration list for PBXAggregateTarget "Build Framework" */;
+			buildPhases = (
+				852A2E6A1BEBA22F000FE1E2 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Build Framework";
+			productName = "Build Framework";
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		851784531BC99D6300ED1CE2 /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 851784521BC99D6300ED1CE2 /* Images */; };
+		852D5C161BB2E95400A564CC /* OTAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */; };
+		852D5C171BB2E95400A564CC /* OTAnnotationToolbar.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C0E1BB2E95400A564CC /* OTAnnotationToolbar.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		852D5C181BB2E95400A564CC /* OTAnnotationToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C0F1BB2E95400A564CC /* OTAnnotationToolbar.m */; };
+		852D5C191BB2E95400A564CC /* OTAnnotationToolbar.xib in Resources */ = {isa = PBXBuildFile; fileRef = 852D5C101BB2E95400A564CC /* OTAnnotationToolbar.xib */; };
+		852D5C1A1BB2E95400A564CC /* OTAnnotationButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C111BB2E95400A564CC /* OTAnnotationButtonItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		852D5C1B1BB2E95400A564CC /* OTAnnotationButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C121BB2E95400A564CC /* OTAnnotationButtonItem.m */; };
+		852D5C1C1BB2E95400A564CC /* OTColorButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C131BB2E95400A564CC /* OTColorButtonItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		852D5C1D1BB2E95400A564CC /* OTColorButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 852D5C141BB2E95400A564CC /* OTColorButtonItem.m */; };
+		852D5C221BB2EA7E00A564CC /* OTAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C0C1BB2E95400A564CC /* OTAnnotationView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		852D5C241BB2EBA300A564CC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 852D5C231BB2EBA300A564CC /* Images.xcassets */; };
+		854CB3531BCBF68F002861E9 /* OpenTokAnnotation.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 854CB3521BCBF68F002861E9 /* OpenTokAnnotation.podspec */; };
+		855B24EC1BB70DAC0082791D /* OTPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EA1BB70DAC0082791D /* OTPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		855B24ED1BB70DAC0082791D /* OTPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EB1BB70DAC0082791D /* OTPath.m */; };
+		855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24EE1BB9B5C00082791D /* UIColor+HexString.h */; };
+		855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24EF1BB9B5C00082791D /* UIColor+HexString.m */; };
+		855B24F41BB9C8AE0082791D /* UIBezierPath+Image.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24F21BB9C8AE0082791D /* UIBezierPath+Image.h */; };
+		855B24F51BB9C8AE0082791D /* UIBezierPath+Image.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24F31BB9C8AE0082791D /* UIBezierPath+Image.m */; };
+		855B24F81BBB07BB0082791D /* OTShape.h in Headers */ = {isa = PBXBuildFile; fileRef = 855B24F61BBB07BB0082791D /* OTShape.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		855B24F91BBB07BB0082791D /* OTShape.m in Sources */ = {isa = PBXBuildFile; fileRef = 855B24F71BBB07BB0082791D /* OTShape.m */; };
+		85D394811BB2F73300D64B84 /* OpenTokAnnotations.h in Headers */ = {isa = PBXBuildFile; fileRef = 852D5C251BB2F0A000A564CC /* OpenTokAnnotations.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		85E127131B8227BD0015B1A3 /* OpenTokAnnotations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E127071B8227BC0015B1A3 /* OpenTokAnnotations.framework */; };
+		85E1271A1B8227BD0015B1A3 /* OTAnnotationsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */; };
+		85E1272E1B822C420015B1A3 /* OpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85E1272D1B822C420015B1A3 /* OpenTok.framework */; };
+		85FD15FF1BBD7EB000F847A0 /* OTAnnotationAnalytics.h in Headers */ = {isa = PBXBuildFile; fileRef = 85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */; };
+		85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		85E127141B8227BD0015B1A3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 85E126FE1B8227BB0015B1A3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 85E127061B8227BC0015B1A3;
+			remoteInfo = OTAnnotations;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		851784521BC99D6300ED1CE2 /* Images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Images; sourceTree = SOURCE_ROOT; };
+		852D5C0C1BB2E95400A564CC /* OTAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationView.h; sourceTree = "<group>"; };
+		852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationView.m; sourceTree = "<group>"; };
+		852D5C0E1BB2E95400A564CC /* OTAnnotationToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationToolbar.h; sourceTree = "<group>"; };
+		852D5C0F1BB2E95400A564CC /* OTAnnotationToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationToolbar.m; sourceTree = "<group>"; };
+		852D5C101BB2E95400A564CC /* OTAnnotationToolbar.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = OTAnnotationToolbar.xib; path = ../Resources/OTAnnotationToolbar.xib; sourceTree = "<group>"; };
+		852D5C111BB2E95400A564CC /* OTAnnotationButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationButtonItem.h; sourceTree = "<group>"; };
+		852D5C121BB2E95400A564CC /* OTAnnotationButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationButtonItem.m; sourceTree = "<group>"; };
+		852D5C131BB2E95400A564CC /* OTColorButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTColorButtonItem.h; sourceTree = "<group>"; };
+		852D5C141BB2E95400A564CC /* OTColorButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTColorButtonItem.m; sourceTree = "<group>"; };
+		852D5C231BB2EBA300A564CC /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = ../Resources/Images.xcassets; sourceTree = "<group>"; };
+		852D5C251BB2F0A000A564CC /* OpenTokAnnotations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenTokAnnotations.h; sourceTree = "<group>"; };
+		854CB3521BCBF68F002861E9 /* OpenTokAnnotation.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OpenTokAnnotation.podspec; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		854CB3561BCFE612002861E9 /* OTAnnotationVideoRender.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OTAnnotationVideoRender.h; sourceTree = "<group>"; };
+		855B24EA1BB70DAC0082791D /* OTPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTPath.h; sourceTree = "<group>"; };
+		855B24EB1BB70DAC0082791D /* OTPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTPath.m; sourceTree = "<group>"; };
+		855B24EE1BB9B5C00082791D /* UIColor+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+HexString.h"; sourceTree = "<group>"; };
+		855B24EF1BB9B5C00082791D /* UIColor+HexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+HexString.m"; sourceTree = "<group>"; };
+		855B24F21BB9C8AE0082791D /* UIBezierPath+Image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIBezierPath+Image.h"; sourceTree = "<group>"; };
+		855B24F31BB9C8AE0082791D /* UIBezierPath+Image.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIBezierPath+Image.m"; sourceTree = "<group>"; };
+		855B24F61BBB07BB0082791D /* OTShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTShape.h; sourceTree = "<group>"; };
+		855B24F71BBB07BB0082791D /* OTShape.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTShape.m; sourceTree = "<group>"; };
+		85E127071B8227BC0015B1A3 /* OpenTokAnnotations.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OpenTokAnnotations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		85E1270B1B8227BC0015B1A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		85E127121B8227BD0015B1A3 /* OpenTokAnnotations.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenTokAnnotations.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		85E127181B8227BD0015B1A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationsTests.m; sourceTree = "<group>"; };
+		85E1272D1B822C420015B1A3 /* OpenTok.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenTok.framework; path = "../../../../../../../../Downloads/OpenTok-iOS-2.6.0/OpenTok.framework"; sourceTree = "<group>"; };
+		85E1272F1B822C950015B1A3 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+		85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTAnnotationAnalytics.h; sourceTree = "<group>"; };
+		85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTAnnotationAnalytics.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		85E127031B8227BC0015B1A3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				85E1272E1B822C420015B1A3 /* OpenTok.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		85E1270F1B8227BD0015B1A3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				85E127131B8227BD0015B1A3 /* OpenTokAnnotations.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		85E126FD1B8227BB0015B1A3 = {
+			isa = PBXGroup;
+			children = (
+				85E1272D1B822C420015B1A3 /* OpenTok.framework */,
+				85E127091B8227BC0015B1A3 /* OpenTokAnnotations */,
+				85E127161B8227BD0015B1A3 /* OpenTokAnnotationsTests */,
+				85E127081B8227BC0015B1A3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		85E127081B8227BC0015B1A3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				85E127071B8227BC0015B1A3 /* OpenTokAnnotations.framework */,
+				85E127121B8227BD0015B1A3 /* OpenTokAnnotations.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		85E127091B8227BC0015B1A3 /* OpenTokAnnotations */ = {
+			isa = PBXGroup;
+			children = (
+				852D5C231BB2EBA300A564CC /* Images.xcassets */,
+				85FD15FD1BBD7EB000F847A0 /* OTAnnotationAnalytics.h */,
+				85FD15FE1BBD7EB000F847A0 /* OTAnnotationAnalytics.m */,
+				852D5C111BB2E95400A564CC /* OTAnnotationButtonItem.h */,
+				852D5C121BB2E95400A564CC /* OTAnnotationButtonItem.m */,
+				852D5C251BB2F0A000A564CC /* OpenTokAnnotations.h */,
+				852D5C0E1BB2E95400A564CC /* OTAnnotationToolbar.h */,
+				852D5C0F1BB2E95400A564CC /* OTAnnotationToolbar.m */,
+				854CB3561BCFE612002861E9 /* OTAnnotationVideoRender.h */,
+				852D5C101BB2E95400A564CC /* OTAnnotationToolbar.xib */,
+				852D5C0C1BB2E95400A564CC /* OTAnnotationView.h */,
+				852D5C0D1BB2E95400A564CC /* OTAnnotationView.m */,
+				852D5C131BB2E95400A564CC /* OTColorButtonItem.h */,
+				852D5C141BB2E95400A564CC /* OTColorButtonItem.m */,
+				855B24EA1BB70DAC0082791D /* OTPath.h */,
+				855B24EB1BB70DAC0082791D /* OTPath.m */,
+				855B24F61BBB07BB0082791D /* OTShape.h */,
+				855B24F71BBB07BB0082791D /* OTShape.m */,
+				85E1270A1B8227BC0015B1A3 /* Supporting Files */,
+				855B24F21BB9C8AE0082791D /* UIBezierPath+Image.h */,
+				855B24F31BB9C8AE0082791D /* UIBezierPath+Image.m */,
+				855B24EE1BB9B5C00082791D /* UIColor+HexString.h */,
+				855B24EF1BB9B5C00082791D /* UIColor+HexString.m */,
+			);
+			path = OpenTokAnnotations;
+			sourceTree = "<group>";
+		};
+		85E1270A1B8227BC0015B1A3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				854CB3521BCBF68F002861E9 /* OpenTokAnnotation.podspec */,
+				851784521BC99D6300ED1CE2 /* Images */,
+				85E1272F1B822C950015B1A3 /* README.md */,
+				85E1270B1B8227BC0015B1A3 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		85E127161B8227BD0015B1A3 /* OpenTokAnnotationsTests */ = {
+			isa = PBXGroup;
+			children = (
+				85E127191B8227BD0015B1A3 /* OTAnnotationsTests.m */,
+				85E127171B8227BD0015B1A3 /* Supporting Files */,
+			);
+			path = OpenTokAnnotationsTests;
+			sourceTree = "<group>";
+		};
+		85E127171B8227BD0015B1A3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				85E127181B8227BD0015B1A3 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		85E127041B8227BC0015B1A3 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				85D394811BB2F73300D64B84 /* OpenTokAnnotations.h in Headers */,
+				852D5C221BB2EA7E00A564CC /* OTAnnotationView.h in Headers */,
+				852D5C171BB2E95400A564CC /* OTAnnotationToolbar.h in Headers */,
+				855B24F01BB9B5C00082791D /* UIColor+HexString.h in Headers */,
+				855B24F81BBB07BB0082791D /* OTShape.h in Headers */,
+				855B24F41BB9C8AE0082791D /* UIBezierPath+Image.h in Headers */,
+				855B24EC1BB70DAC0082791D /* OTPath.h in Headers */,
+				852D5C1A1BB2E95400A564CC /* OTAnnotationButtonItem.h in Headers */,
+				852D5C1C1BB2E95400A564CC /* OTColorButtonItem.h in Headers */,
+				85FD15FF1BBD7EB000F847A0 /* OTAnnotationAnalytics.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		85E127061B8227BC0015B1A3 /* OpenTokAnnotations */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85E1271D1B8227BD0015B1A3 /* Build configuration list for PBXNativeTarget "OpenTokAnnotations" */;
+			buildPhases = (
+				85E127021B8227BC0015B1A3 /* Sources */,
+				85E127031B8227BC0015B1A3 /* Frameworks */,
+				85E127041B8227BC0015B1A3 /* Headers */,
+				85E127051B8227BC0015B1A3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenTokAnnotations;
+			productName = OTAnnotations;
+			productReference = 85E127071B8227BC0015B1A3 /* OpenTokAnnotations.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		85E127111B8227BD0015B1A3 /* OpenTokAnnotationsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85E127201B8227BD0015B1A3 /* Build configuration list for PBXNativeTarget "OpenTokAnnotationsTests" */;
+			buildPhases = (
+				85E1270E1B8227BD0015B1A3 /* Sources */,
+				85E1270F1B8227BD0015B1A3 /* Frameworks */,
+				85E127101B8227BD0015B1A3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				85E127151B8227BD0015B1A3 /* PBXTargetDependency */,
+			);
+			name = OpenTokAnnotationsTests;
+			productName = OTAnnotationsTests;
+			productReference = 85E127121B8227BD0015B1A3 /* OpenTokAnnotations.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		85E126FE1B8227BB0015B1A3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0700;
+				ORGANIZATIONNAME = "TokBox, Inc.";
+				TargetAttributes = {
+					852A2E661BEBA200000FE1E2 = {
+						CreatedOnToolsVersion = 7.1;
+					};
+					85E127061B8227BC0015B1A3 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+					85E127111B8227BD0015B1A3 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+				};
+			};
+			buildConfigurationList = 85E127011B8227BB0015B1A3 /* Build configuration list for PBXProject "OpenTokAnnotations" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 85E126FD1B8227BB0015B1A3;
+			productRefGroup = 85E127081B8227BC0015B1A3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				85E127061B8227BC0015B1A3 /* OpenTokAnnotations */,
+				85E127111B8227BD0015B1A3 /* OpenTokAnnotationsTests */,
+				852A2E661BEBA200000FE1E2 /* Build Framework */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		85E127051B8227BC0015B1A3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				852D5C191BB2E95400A564CC /* OTAnnotationToolbar.xib in Resources */,
+				851784531BC99D6300ED1CE2 /* Images in Resources */,
+				854CB3531BCBF68F002861E9 /* OpenTokAnnotation.podspec in Resources */,
+				852D5C241BB2EBA300A564CC /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		85E127101B8227BD0015B1A3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		852A2E6A1BEBA22F000FE1E2 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Merge Script\n\nset -e\n\nFRAMEWORK_NAME=\"OpenTokAnnotations\"\n\nif [ -d \"${SRCROOT}/build\" ]; then\nrm -rf \"${SRCROOT}/build\"\nfi\n\nxcodebuild -target \"${FRAMEWORK_NAME}\" -configuration Release -arch arm64 -arch armv7 -arch armv7s only_active_arch=no defines_module=yes -sdk \"iphoneos\"\nxcodebuild -target \"${FRAMEWORK_NAME}\" -configuration Release -arch x86_64 -arch i386 only_active_arch=no defines_module=yes -sdk \"iphonesimulator\"\n\nif [ -d \"${SRCROOT}/Frameworks/${FRAMEWORK_NAME}.framework\" ]; then\nrm -rf \"${SRCROOT}/Frameworks/${FRAMEWORK_NAME}.framework\"\nfi\n\nif [ ! -d \"${SRCROOT}/Frameworks\" ]; then\nmkdir \"${SRCROOT}/Frameworks\"\nfi\n\ncp -r \"${SRCROOT}/build/Release-iphoneos/${FRAMEWORK_NAME}.framework\" \"${SRCROOT}/Frameworks/${FRAMEWORK_NAME}.framework\"\n\nlipo -create -output \"${SRCROOT}/Frameworks/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${SRCROOT}/build/Release-iphoneos/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${SRCROOT}/build/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\"\n\nif [ -d \"${SRCROOT}/build\" ]; then\nrm -rf \"${SRCROOT}/build\"\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		85E127021B8227BC0015B1A3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				855B24F91BBB07BB0082791D /* OTShape.m in Sources */,
+				855B24F11BB9B5C00082791D /* UIColor+HexString.m in Sources */,
+				85FD16001BBD7EB000F847A0 /* OTAnnotationAnalytics.m in Sources */,
+				855B24F51BB9C8AE0082791D /* UIBezierPath+Image.m in Sources */,
+				852D5C1B1BB2E95400A564CC /* OTAnnotationButtonItem.m in Sources */,
+				852D5C181BB2E95400A564CC /* OTAnnotationToolbar.m in Sources */,
+				852D5C1D1BB2E95400A564CC /* OTColorButtonItem.m in Sources */,
+				852D5C161BB2E95400A564CC /* OTAnnotationView.m in Sources */,
+				855B24ED1BB70DAC0082791D /* OTPath.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		85E1270E1B8227BD0015B1A3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				85E1271A1B8227BD0015B1A3 /* OTAnnotationsTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		85E127151B8227BD0015B1A3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 85E127061B8227BC0015B1A3 /* OpenTokAnnotations */;
+			targetProxy = 85E127141B8227BD0015B1A3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		852A2E671BEBA200000FE1E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		852A2E681BEBA200000FE1E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		85E1271B1B8227BD0015B1A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		85E1271C1B8227BD0015B1A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		85E1271E1B8227BD0015B1A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@executable_path/Frameworks";
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/TrevorBoyer/Downloads/OpenTok-iOS-2.6.0",
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/OpenTokAnnotations/Info.plist";
+				INSTALL_PATH = "@executable_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				LD_DYLIB_INSTALL_NAME = "@executable_path/Frameworks/$(EXECUTABLE_PATH)";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tokbok.OpenTokAnnotations-ios";
+				PRODUCT_NAME = OpenTokAnnotations;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		85E1271F1B8227BD0015B1A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@executable_path/Frameworks";
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/TrevorBoyer/Downloads/OpenTok-iOS-2.6.0",
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/OpenTokAnnotations/Info.plist";
+				INSTALL_PATH = "@executable_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				LD_DYLIB_INSTALL_NAME = "@executable_path/Frameworks/$(EXECUTABLE_PATH)";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tokbok.OpenTokAnnotations-ios";
+				PRODUCT_NAME = OpenTokAnnotations;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		85E127211B8227BD0015B1A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = OTAnnotationsTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.optentok.plugin.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = OpenTokAnnotations;
+			};
+			name = Debug;
+		};
+		85E127221B8227BD0015B1A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = OTAnnotationsTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.optentok.plugin.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = OpenTokAnnotations;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		852A2E691BEBA200000FE1E2 /* Build configuration list for PBXAggregateTarget "Build Framework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				852A2E671BEBA200000FE1E2 /* Debug */,
+				852A2E681BEBA200000FE1E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		85E127011B8227BB0015B1A3 /* Build configuration list for PBXProject "OpenTokAnnotations" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85E1271B1B8227BD0015B1A3 /* Debug */,
+				85E1271C1B8227BD0015B1A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		85E1271D1B8227BD0015B1A3 /* Build configuration list for PBXNativeTarget "OpenTokAnnotations" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85E1271E1B8227BD0015B1A3 /* Debug */,
+				85E1271F1B8227BD0015B1A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		85E127201B8227BD0015B1A3 /* Build configuration list for PBXNativeTarget "OpenTokAnnotationsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85E127211B8227BD0015B1A3 /* Debug */,
+				85E127221B8227BD0015B1A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 85E126FE1B8227BB0015B1A3 /* Project object */;
+}

@@ -1,0 +1,6 @@
+framework module OpenTokAnnotations {
+  umbrella header "OpenTokAnnotations.h"
+
+  export *
+  module * { export * }
+}
