@@ -334,6 +334,16 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                                 boolean initialPoint = false;
                                 boolean secondPoint = false;
+                                boolean endPoint = false;
+
+                                if (json.get("endPoint") != null) {
+                                    if (json.get("endPoint") instanceof Number) {
+                                        Number value = (Number) json.get("endPoint");
+                                        endPoint = value.intValue() == 1;
+                                    } else {
+                                        endPoint = (boolean) json.get("endPoint");
+                                    }
+                                }
 
                                 if (json.get("startPoint") != null) {
                                     if (json.get("startPoint") instanceof Number) {
@@ -466,9 +476,14 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                             moveTouch(toX, toY, true);
                                         }
                                     } else {
-                                        startTouch(fromX, fromY);
-                                        moveTouch(toX, toY, false);
-                                        upTouch();
+                                        if (isStartPoint) {
+                                            startTouch(fromX, fromY);
+                                        } else if (endPoint) {
+                                            getActivePath().close();
+                                        } else {
+                                            moveTouch(toX, toY, false);
+                                            upTouch();
+                                        }
                                     }
 
                                     invalidate(); // Need this to finalize the drawing on the screen
@@ -486,7 +501,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         }
     }
 
-    private String buildSignalFromPoint(float x, float y, boolean startPoint) {
+    private String buildSignalFromPoint(float x, float y, boolean startPoint, boolean endPoint) {
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonObject = new JSONObject();
 
@@ -526,6 +541,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
             jsonObject.put("mirrored", mirrored);
             jsonObject.put("smoothed", selectedItem.isSmoothDrawEnabled());
             jsonObject.put("startPoint", startPoint);
+            jsonObject.put("endPoint", endPoint);
 
             // TODO These need to be batched
             jsonArray.put(jsonObject);
@@ -569,7 +585,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     moveTouch(x, y, true);
                     invalidate();
 
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, true));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, true, false));
 
                     mLastX = x;
                     mLastY = y;
@@ -650,12 +666,13 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     moveTouch(mX, mY, false);
                     upTouch();
                     Log.i(TAG, "Points: (" + mStartX + ", " + mStartY + "), (" + mX + ", " + mY + ")");
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(mX, mY, true));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(mX, mY, true, false));
                 } else {
                     FloatPoint scale = scaleForPoints(points);
 
                     for (int i = 0; i < points.length; i++) {
                         boolean startPoint = false;
+                        boolean endPoint = false;
 
                         // Scale the points according to the difference between the start and end points
                         float pointX = mStartX + (scale.x * points[i].x);
@@ -668,6 +685,11 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 getActivePath().moveTo((pointX + mLastX) / 2, (pointY + mLastY) / 2);
                             } else {
                                 getActivePath().quadTo(mLastX, mLastY, (pointX + mLastX) / 2, (pointY + mLastY) / 2);
+
+                                if (i == points.length-1) {
+                                    getActivePath().close();
+                                    endPoint = true;
+                                }
                             }
                         } else {
                             if (i == 0) {
@@ -677,10 +699,15 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 startTouch(pointX, pointY);
                             } else {
                                 moveTouch(pointX, pointY, false);
+
+                                if (i == points.length-1) {
+                                    getActivePath().close();
+                                    endPoint = true;
+                                }
                             }
                         }
 
-                        sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(pointX, pointY, startPoint));
+                        sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(pointX, pointY, startPoint, endPoint));
 
                         mLastX = pointX;
                         mLastY = pointY;
@@ -795,12 +822,20 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                             path.moveTo((pointX + lastX) / 2, (pointY + lastY) / 2);
                         } else {
                             path.quadTo(lastX, lastY, (pointX + lastX) / 2, (pointY + lastY) / 2);
+
+                            if (i == points.length-1) {
+                                path.close();
+                            }
                         }
                     } else {
                         if (i == 0) {
                             path.moveTo(pointX, pointY);
                         } else {
                             path.lineTo(pointX, pointY);
+
+                            if (i == points.length-1) {
+                                path.close();
+                            }
                         }
                     }
 
