@@ -169,12 +169,20 @@
                         [path.bezierPath moveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2)];
                     } else {
                         [path.bezierPath addQuadCurveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2) controlPoint: CGPointMake(lastX, lastY)];
+                        
+                        if (i == _selectedItem.points.count-1) {
+                            [path.bezierPath closePath];
+                        }
                     }
                 } else {
                     if (i == 0) {
                         [path.bezierPath moveToPoint: CGPointMake(pointX, pointY)];
                     } else {
                         [path.bezierPath addLineToPoint: CGPointMake(pointX, pointY)];
+                        
+                        if (i == _selectedItem.points.count-1) {
+                            [path.bezierPath closePath];
+                        }
                     }
                 }
                 
@@ -285,7 +293,7 @@
     _currentPoint = point;
     
     if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
-        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing startPoint:true incoming:false];
+        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing startPoint:true endPoint:false incoming:false];
         
         NSDictionary* data = @{
                                    @"action" : @"Pen",
@@ -305,14 +313,14 @@
 }
 
 - (void)moveTouch:(CGPoint)point {
-    [self moveTouch:point smoothingEnabled:false startPoint:nil incoming:false];
+    [self moveTouch:point smoothingEnabled:false startPoint:nil endPoint:nil incoming:false];
 }
 
 - (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled {
-    [self moveTouch:point smoothingEnabled:smoothingEnabled startPoint:nil incoming:true];
+    [self moveTouch:point smoothingEnabled:smoothingEnabled startPoint:nil endPoint:nil incoming:true];
 }
 
-- (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled startPoint:(Boolean)startPoint incoming:(Boolean) incoming {
+- (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled startPoint:(Boolean)startPoint endPoint:(Boolean)endPoint incoming:(Boolean) incoming {
     if (smoothingEnabled) {
         [[self activePath].bezierPath addQuadCurveToPoint: CGPointMake((point.x + _lastPoint.x) / 2, (point.y + _lastPoint.y) / 2) controlPoint: _lastPoint];
     } else {
@@ -357,7 +365,8 @@
                                          @"canvasHeight" : [NSNumber numberWithFloat:self.frame.size.height],
                                          @"mirrored" : _mirrored ? @true : @false,
                                          @"smoothed" : _selectedItem.enableSmoothing ? @true : @false,
-                                         @"startPoint" : startPoint ? @true : @false
+                                         @"startPoint" : startPoint ? @true : @false,
+                                         @"endPoint" : endPoint ? @true : @false
                                      };
         
         NSLog(@"%@", jsonObject);
@@ -390,9 +399,9 @@
         if (_selectedItem.points.count == 2) {
             // We have a line
             [self startTouch: CGPointMake(_startPoint.x, _startPoint.y)];
-            [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing startPoint:true incoming:false];
+            [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing startPoint:true endPoint:false incoming:false];
 //            NSLog("Points: (%f, %f), (%f, %f)", _startPoint.x, _startPoint.y, _currentPoint.x, _currentPoint.y);
-            [self sendUpdate:[self buildSignalFromPoint:_currentPoint startPoint:true] forType:@"otAnnotation_pen"];
+            [self sendUpdate:[self buildSignalFromPoint:_currentPoint startPoint:true endPoint:false] forType:@"otAnnotation_pen"];
         } else {
             CGPoint scale = [self scaleForPoints: _selectedItem.points];
 
@@ -400,6 +409,7 @@
                 CGPoint point = [(NSValue*)[_selectedItem.points objectAtIndex:i] CGPointValue];
                 
                 BOOL startPoint = false;
+                BOOL endPoint = false;
                 
                 // Scale the points according to the difference between the start and end points
                 float pointX = _startPoint.x + (scale.x * point.x);
@@ -412,6 +422,11 @@
                         [[self activePath].bezierPath moveToPoint:CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2)];
                     } else {
                         [[self activePath].bezierPath addQuadCurveToPoint:CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2) controlPoint:CGPointMake(_lastPoint.x, _lastPoint.y)];
+                        
+                        if (i == _selectedItem.points.count-1) {
+                            [[self activePath].bezierPath closePath];
+                            endPoint = true;
+                        }
                     }
                 } else {
                     if (i == 0) {
@@ -420,11 +435,16 @@
                         _lastPoint.y = pointY;
                         [self startTouch: CGPointMake(pointX, pointY)];
                     } else {
-                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:false startPoint:false incoming:false];
+                        [self moveTouch: CGPointMake(pointX, pointY) smoothingEnabled:false startPoint:false endPoint:false incoming:false];
+                        
+                        if (i == _selectedItem.points.count-1) {
+                            [[self activePath].bezierPath closePath];
+                            endPoint = true;
+                        }
                     }
                 }
 
-                [self sendUpdate:[self buildSignalFromPoint: CGPointMake(pointX, pointY) startPoint:startPoint] forType:@"otAnnotation_pen"];
+                [self sendUpdate:[self buildSignalFromPoint: CGPointMake(pointX, pointY) startPoint:startPoint endPoint:endPoint] forType:@"otAnnotation_pen"];
 
                 _lastPoint.x = pointX;
                 _lastPoint.y = pointY;
@@ -456,7 +476,7 @@
     [self touchesEnded:touches withEvent:event];
 }
 
-- (NSString*)buildSignalFromPoint:(CGPoint)point startPoint:(BOOL)startPoint {
+- (NSString*)buildSignalFromPoint:(CGPoint)point startPoint:(BOOL)startPoint endPoint:(Boolean)endPoint {
     if (_publisher != nil) {
         _canvasId = _publisher.stream.connection.connectionId;
         _videoDimensions = _publisher.stream.videoDimensions;
@@ -481,7 +501,8 @@
                                      @"canvasHeight" : [NSNumber numberWithFloat:self.frame.size.height],
                                      @"mirrored" : _mirrored ? @true : @false,
                                      @"smoothed" : _selectedItem.enableSmoothing ? @true : @false,
-                                     @"startPoint" : startPoint ? @true : @false
+                                     @"startPoint" : startPoint ? @true : @false,
+                                     @"endPoint" : endPoint ? @true : @false
                                  };
     
     NSArray* jsonArray = [NSArray arrayWithObjects:jsonObject, nil];
@@ -584,6 +605,7 @@
                     
                     Boolean firstPoint = [json[@"startPoint"] boolValue];
                     Boolean secondPoint = false;
+                    Boolean endPoint = [json[@"endPoint"] boolValue];
                     
                     if (firstPoint) {
                         OTPath* path = [[OTPath alloc] init];
@@ -614,8 +636,16 @@
                             [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:true];
                         }
                     } else {
-                        [self startTouch: CGPointMake(fromX, fromY)];
-                        [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false];
+                        if (firstPoint) {
+                            [self startTouch: CGPointMake(fromX, fromY)];
+                        } else if (endPoint) {
+                            [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false];
+                            [[self activePath].bezierPath closePath];
+                        } else {
+                            [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false];
+                        }
+                        
+                        // FIXME: Need to know if we have an end point so we can close the path
                     }
                 }
             }
