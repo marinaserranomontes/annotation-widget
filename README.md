@@ -16,16 +16,17 @@ Installing
 
 ### Gradle
 
-1. Add `compile 'com.tokbox:opentok-android-annotations:1.0.0'` to `dependencies` in your module's build.gradle file.
-2. Sync Gradle and build your project.
+1. Include the JitPack repository in your root `build.gradle` file by adding `maven { url "https://jitpack.io" }` to the `repositories` section.
+2. Add `compile 'com.github.opentok:annotation-component-android:1.0.0'` to `dependencies` in your module's `build.gradle` file.
+3. Sync Gradle and build your project.
 
 ### .AAR in Android Studio
 
-1. Download the [latest version]() of the plugin.
+1. Download the [latest version](https://github.com/opentok/annotation-component-android/releases) of the plugin.
 2. Right click on your project module (usually called "app" but may be something else) and choose "Open Module Settings" from the bottom of the menu.
 3. Click the '+' sign in the upper left hand corner.
 4. Choose "Import .JAR or .AAR Package" from the list in the popup.
-5. Locate the AAR file in the zip downloaded in step 1.
+5. Locate the AAR file in the zip downloaded in step 1. You can set the module name to `:opentokAnnotations` or similar.
 6. Follow the prompts and build your project.
 7. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line "compile project(':opentokAnnotations')" to the app build.gradle.
 
@@ -36,25 +37,6 @@ Installing
 3. Choose "Import Existing Project" from the list of options.
 4. Browse to the location of the cloned/downloaded files, select "Ok" and then "Finish".
 
-Important Notes
----------------
-
-The Annotation plugin requires a custom video renderer to function. If you are using your own custom renderer, simply change it to extend `AnnotationVideoRenderer` instead of `BaseVideoRenderer`. If you are not using a custom renderer, make sure you add
-
-```java
-AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
-mPublisher.setRenderer(renderer);
-```
-
-The best place to add it is to `onConnected(Session session)` after you create a new publisher object and
-
-```java
-AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
-mSubscriber.setRenderer(renderer);
-```
-
-to your subscriber. `onStreamCreated(...)` is a good place to add this (or `subscribeToStream(Stream stream)` if you're working with our sample), after you create your subscriber object.
-
 Using the plugin
 ----------------
 
@@ -62,6 +44,8 @@ For a quick start, download the [OpenTok Android samples](https://github.com/ope
 the steps below should help you incorporate the annotations plugin.
 
 We'll use the `HelloWorldActivity` from the samples to demonstrate how the plugin works.
+
+#### Include the annotation toolbar in your layout
 
 Add the `AnnotationToolbar` to your view. The easiest way is to include in in your layout resource file:
 
@@ -77,6 +61,18 @@ In `HelloWorldActivity.java`, add the following to the onCreate method:
 ```java
 mToolbar = (AnnotationToolbar) findViewById(R.id.toolbar);
 ```
+
+#### Add custom annotation renderer
+
+The Annotation plugin requires a custom video renderer to function. If you are using your own custom renderer, simply change it to extend `AnnotationVideoRenderer` instead of `BaseVideoRenderer`. If you are not using a custom renderer, you can create one using:
+
+```java
+AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
+```
+
+You can then attach this to a publisher/subscriber using the `setRenderer(...)` method.
+
+#### Attaching an annotation canvas to a publisher/subscriber view
 
 Add the following lines to the end of the `attachSubscriberView` method (Note: the annotation view should be added to the `mSubscriberViewContainer` after the subscriber view).
 
@@ -110,6 +106,8 @@ private void attachPublisherView(Publisher publisher) {
 }
 ```
 
+#### Hook in signals
+
 Last, pass signals through the `AnnotationToolbar` object in the `onSignalReceived` method.
 
 ```java
@@ -120,7 +118,7 @@ public void onSignalReceived(Session session, String type, String data, Connecti
 }
 ```
 
-Note: Make sure that your class implements `Session.SignalListener`. See the [docs]() for more details.
+Note: Make sure that your class implements `Session.SignalListener`. See the [docs](https://tokbox.com/developer/sdks/android/reference/) for more details.
 
 #### Capturing frames
 
@@ -285,7 +283,7 @@ For best results
 
 In order to ensure that all annotations aren't cut off across devices, it is recommended to use predefined
 aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
-(see how to set the aspect ratio for [iOS]() and [JavaScript]()).
+(see how to set the aspect ratio for [iOS](https://github.com/opentok/annotation-component-ios#for-best-results) and [JavaScript](https://github.com/opentok/annotation-component-web#for-best-results)).
 
 ```java
 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
