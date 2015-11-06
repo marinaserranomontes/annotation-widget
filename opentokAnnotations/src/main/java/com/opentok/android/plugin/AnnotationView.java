@@ -325,9 +325,9 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                             String id = (String) json.get("id");
                             if (canvascid.equals(id)) {
-                                if (json.get("mirrored") instanceof Long) {
-                                    Long value = (Long) json.get("mirrored");
-                                    mSignalMirrored = value == 1;
+                                if (json.get("mirrored") instanceof Number) {
+                                    Number value = (Number) json.get("mirrored");
+                                    mSignalMirrored = value.intValue() == 1;
                                 } else {
                                     mSignalMirrored = (boolean) json.get("mirrored");
                                 }
@@ -336,9 +336,9 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                 boolean secondPoint = false;
 
                                 if (json.get("startPoint") != null) {
-                                    if (json.get("startPoint") instanceof Long) {
-                                        Long value = (Long) json.get("startPoint");
-                                        initialPoint = value == 1;
+                                    if (json.get("startPoint") instanceof Number) {
+                                        Number value = (Number) json.get("startPoint");
+                                        initialPoint = value.intValue() == 1;
                                     } else {
                                         initialPoint = (boolean) json.get("startPoint");
                                     }
@@ -446,9 +446,9 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                     boolean smoothed = false;
 
                                     if (json.get("smoothed") != null) {
-                                        if (json.get("smoothed") instanceof Long) {
-                                            Long value = (Long) json.get("smoothed");
-                                            smoothed = value == 1;
+                                        if (json.get("smoothed") instanceof Number) {
+                                            Number value = (Number) json.get("smoothed");
+                                            smoothed = value.intValue() == 1;
                                         } else {
                                             smoothed = (boolean) json.get("smoothed");
                                         }

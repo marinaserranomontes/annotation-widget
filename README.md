@@ -16,7 +16,7 @@ Installing
 
 ### Gradle
 
-1. Include the JitPack repository in your root `build.gradle` file by adding `maven { url "https://jitpack.io" }` to the `repositories` section.
+1. Include the JitPack repository in your module's `build.gradle` file by adding `maven { url "https://jitpack.io" }` to the `repositories` section.
 2. Add `compile 'com.github.opentok:annotation-component-android:1.0.0'` to `dependencies` in your module's `build.gradle` file.
 3. Sync Gradle and build your project.
 
@@ -118,7 +118,8 @@ public void onSignalReceived(Session session, String type, String data, Connecti
 }
 ```
 
-Note: Make sure that your class implements `Session.SignalListener`. See the [docs](https://tokbox.com/developer/sdks/android/reference/) for more details.
+Note: Make sure that your class implements `Session.SignalListener`. You will also need to make sure you have set the session's signal listener using `mSession.setSignalListener(this);`
+See the [docs](https://tokbox.com/developer/sdks/android/reference/) for more details.
 
 #### Capturing frames
 
