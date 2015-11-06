@@ -6,7 +6,7 @@ Plugin to add annotation support to OpenTok.
 Installation
 -----
 
-Add [opentok-annotations.js]() to your source.
+Add [opentok-annotations.js](opentok-annotations.js) to your source.
 
 Using the plugin
 -----
@@ -199,4 +199,4 @@ For best results
 
 In order to ensure that all annotations aren't cut off across devices, it is recommended to use predefined
 aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
-(see how to set the aspect ratio for [iOS]() and [Android]()).
+(see how to set the aspect ratio for [iOS](https://github.com/opentok/annotation-component-ios#for-best-results) and [Android](https://github.com/opentok/annotation-component-android#for-best-results)).
