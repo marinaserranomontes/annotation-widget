@@ -129,7 +129,7 @@
 - (void)drawRect:(CGRect)rect {
     for (OTPath* path in _paths) {
         [path.color setStroke];
-        [path stroke];
+        [path.bezierPath stroke];
     }
     
     if (_isDrawing) {
@@ -146,14 +146,14 @@
     if (dx >= kTolerance || dy >= kTolerance) {
         CGPoint scale = [self scaleForPoints: points];
         
-        OTPath* path = [OTPath bezierPath];
+        OTPath* path = [[OTPath alloc] init];
         [path setColor:_color];
-        [path setLineWidth:_lineWidth];
+        [path.bezierPath setLineWidth:_lineWidth];
         
         if (_selectedItem.points.count == 2) {
             // We have a line
-            [path moveToPoint: _startPoint];
-            [path addLineToPoint: _currentPoint];
+            [path.bezierPath moveToPoint: _startPoint];
+            [path.bezierPath addLineToPoint: _currentPoint];
         } else {
             float lastX = -1;
             float lastY = -1;
@@ -166,15 +166,15 @@
                     if (i == 0) {
                         // Do nothing
                     } else if (i == 1) {
-                        [path moveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2)];
+                        [path.bezierPath moveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2)];
                     } else {
-                        [path addQuadCurveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2) controlPoint: CGPointMake(lastX, lastY)];
+                        [path.bezierPath addQuadCurveToPoint: CGPointMake((pointX + lastX) / 2, (pointY + lastY) / 2) controlPoint: CGPointMake(lastX, lastY)];
                     }
                 } else {
                     if (i == 0) {
-                        [path moveToPoint: CGPointMake(pointX, pointY)];
+                        [path.bezierPath moveToPoint: CGPointMake(pointX, pointY)];
                     } else {
-                        [path addLineToPoint: CGPointMake(pointX, pointY)];
+                        [path.bezierPath addLineToPoint: CGPointMake(pointX, pointY)];
                     }
                 }
                 
@@ -185,7 +185,7 @@
         
         // Only drawn temporarily
         [path.color setStroke];
-        [path stroke];
+        [path.bezierPath stroke];
     }
 }
 
@@ -221,9 +221,9 @@
 }
 
 - (void)createPath:(NSString*)canvasId {
-    OTPath* path = [OTPath bezierPath];
+    OTPath* path = [[OTPath alloc] init];
     [path setColor:_color];
-    [path setLineWidth:_lineWidth];
+    [path.bezierPath setLineWidth:_lineWidth];
     [path setCanvasId:_mycid];
     [_paths addObject:path];
 }
@@ -249,9 +249,9 @@
     [self setNeedsDisplay];
     
     // Initialize a new path so that we can still draw
-    OTPath* path = [OTPath bezierPath];
+    OTPath* path = [[OTPath alloc] init];
     [path setColor:_color];
-    [path setLineWidth:_lineWidth];
+    [path.bezierPath setLineWidth:_lineWidth];
     [path setCanvasId:_mycid];
     [_paths addObject:path];
     
@@ -275,7 +275,7 @@
 }
 
 - (void)startTouch:(CGPoint)point {
-    [[self activePath] moveToPoint:point];
+    [[self activePath].bezierPath moveToPoint:point];
     _lastPoint = point;
 }
 
@@ -314,9 +314,9 @@
 
 - (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled startPoint:(Boolean)startPoint incoming:(Boolean) incoming {
     if (smoothingEnabled) {
-        [[self activePath] addQuadCurveToPoint: CGPointMake((point.x + _lastPoint.x) / 2, (point.y + _lastPoint.y) / 2) controlPoint: _lastPoint];
+        [[self activePath].bezierPath addQuadCurveToPoint: CGPointMake((point.x + _lastPoint.x) / 2, (point.y + _lastPoint.y) / 2) controlPoint: _lastPoint];
     } else {
-        [[self activePath] addLineToPoint:point];
+        [[self activePath].bezierPath addLineToPoint:point];
     }
     [self setNeedsDisplay];
     
@@ -409,9 +409,9 @@
                     if (i == 0) {
                         startPoint = true;
                     } else if (i == 1) {
-                        [[self activePath] moveToPoint:CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2)];
+                        [[self activePath].bezierPath moveToPoint:CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2)];
                     } else {
-                        [[self activePath] addQuadCurveToPoint:CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2) controlPoint:CGPointMake(_lastPoint.x, _lastPoint.y)];
+                        [[self activePath].bezierPath addQuadCurveToPoint:CGPointMake((pointX + _lastPoint.x) / 2, (pointY + _lastPoint.y) / 2) controlPoint:CGPointMake(_lastPoint.x, _lastPoint.y)];
                     }
                 } else {
                     if (i == 0) {
@@ -586,9 +586,9 @@
                     Boolean secondPoint = false;
                     
                     if (firstPoint) {
-                        OTPath* path = [OTPath bezierPath];
+                        OTPath* path = [[OTPath alloc] init];
                         [path setColor:[UIColor colorFromHexString: json[@"color"]]];
-                        [path setLineWidth:[(NSNumber *)json[@"lineWidth"] floatValue]];
+                        [path.bezierPath setLineWidth:[(NSNumber *)json[@"lineWidth"] floatValue]];
                         [path setCanvasId:connection.connectionId];
                         [_paths addObject:path];
                         

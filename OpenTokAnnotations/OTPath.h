@@ -8,8 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface OTPath : UIBezierPath
+@interface OTPath : NSObject
 
+@property (nonatomic) UIBezierPath* bezierPath;
 @property (nonatomic) UIColor* color;
 @property (nonatomic) NSString* canvasId;
 

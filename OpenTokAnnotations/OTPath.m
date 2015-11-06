@@ -10,6 +10,11 @@
 
 @implementation OTPath
 
-
+-(instancetype)init {
+    if (self = [super init]) {
+        _bezierPath = [UIBezierPath bezierPath];
+    }
+    return self;
+}
 
 @end
