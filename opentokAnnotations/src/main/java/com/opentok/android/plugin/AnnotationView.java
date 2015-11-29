@@ -42,16 +42,16 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
     private String mSessionId;
 
-	public int width;
-	public int height;
-	private Bitmap mBitmap;
+    public int width;
+    public int height;
+    private Bitmap mBitmap;
     // TODO Merge these lists so that they can be used for history (undo)
-	private List<AnnotationPath> mPaths;
-	private List<AnnotationText> mLabels;
-	private float mX, mY;
-	private float mLastX, mLastY;
-	private float mStartX, mStartY;
-	private static final float TOLERANCE = 5;
+    private List<AnnotationPath> mPaths;
+    private List<AnnotationText> mLabels;
+    private float mX, mY;
+    private float mLastX, mLastY;
+    private float mStartX, mStartY;
+    private static final float TOLERANCE = 5;
 
     boolean isStartPoint = false;
 
@@ -141,16 +141,16 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         this(c, null);
     }
 
-	public AnnotationView(Context c, AttributeSet attrs) {
-		super(c, attrs);
+    public AnnotationView(Context c, AttributeSet attrs) {
+        super(c, attrs);
 
-		mPaths = new ArrayList<AnnotationPath>();
-		mLabels = new ArrayList<AnnotationText>();
+        mPaths = new ArrayList<AnnotationPath>();
+        mLabels = new ArrayList<AnnotationText>();
 
         // Default stroke and color
         userColor = activeColor = Color.RED;
         userStrokeWidth = activeStrokeWidth = 6f;
-	}
+    }
 
     /** ==== Linkers ==== **/
 
@@ -455,6 +455,8 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
                                     boolean smoothed = false;
 
+                                    Log.i("CanvasOffset", isStartPoint ? "Start point found" : "Other point found");
+
                                     if (json.get("smoothed") != null) {
                                         if (json.get("smoothed") instanceof Number) {
                                             Number value = (Number) json.get("smoothed");
@@ -476,7 +478,12 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                             moveTouch(toX, toY, true);
                                         }
                                     } else {
-                                        if (isStartPoint) {
+                                        if (isStartPoint && endPoint) {
+                                            // We have a straight line
+                                            startTouch(fromX, fromY);
+                                            moveTouch(toX, toY, false);
+                                            getActivePath().close();
+                                        } else if (isStartPoint) {
                                             startTouch(fromX, fromY);
                                         } else if (endPoint) {
                                             getActivePath().close();
@@ -578,19 +585,24 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     startTouch(x, y);
                     mLastX = x;
                     mLastY = y;
+
+                    isStartPoint = true;
+
                     invalidate();
                 }
-                    break;
+                break;
                 case MotionEvent.ACTION_MOVE: {
                     moveTouch(x, y, true);
                     invalidate();
 
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, true, false));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(x, y, isStartPoint, false));
+
+                    isStartPoint = false;
 
                     mLastX = x;
                     mLastY = y;
                 }
-                    break;
+                break;
                 case MotionEvent.ACTION_UP: {
                     upTouch();
                     invalidate();
@@ -610,7 +622,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                         e.printStackTrace();
                     }
                 }
-                    break;
+                break;
             }
         } else if (selectedResourceId == R.id.ot_item_capture) {
 
@@ -650,11 +662,11 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 mStartY = mY;
                 invalidate();
             }
-                break;
+            break;
             case MotionEvent.ACTION_MOVE: {
                 invalidate();
             }
-                break;
+            break;
             case MotionEvent.ACTION_UP: {
                 isDrawing = false;
 
@@ -666,7 +678,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     moveTouch(mX, mY, false);
                     upTouch();
                     Log.i(TAG, "Points: (" + mStartX + ", " + mStartY + "), (" + mX + ", " + mY + ")");
-                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(mX, mY, true, false));
+                    sendUpdate(Mode.Pen.toString(), buildSignalFromPoint(mX, mY, true, true));
                 } else {
                     FloatPoint scale = scaleForPoints(points);
 
@@ -777,9 +789,9 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         this.height = h;
     }
 
-	@Override
-	protected void onDraw(Canvas canvas) {
-		super.onDraw(canvas);
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
 
         for (AnnotationPath drawing : mPaths) {
             canvas.drawPath(drawing.path, drawing.paint);
@@ -794,7 +806,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 onDrawPoints(canvas, selectedItem.getPoints(), selectedItem.isSmoothDrawEnabled());
             }
         }
-	}
+    }
 
     private void onDrawPoints(Canvas canvas, FloatPoint[] points, boolean curved) {
         float dx = Math.abs(mX - mLastX);
@@ -885,7 +897,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         return new FloatPoint(scaleX, scaleY);
     }
 
-	public void clearCanvas(boolean incoming, String cid) {
+    public void clearCanvas(boolean incoming, String cid) {
         Iterator<AnnotationPath> iter = mPaths.iterator();
 
         while (iter.hasNext()) {
@@ -901,9 +913,9 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
             sendUpdate(Mode.Clear.toString(), null);
         }
 
-		invalidate();
+        invalidate();
         createPath(false, mycid);
-	}
+    }
 
     private void createPath(boolean incoming, String cid) {
         Paint paint = new Paint();
