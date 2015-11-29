@@ -273,6 +273,8 @@
     CGPoint point = [touch locationInView:self];
     _startPoint = point;
     
+    _isFirstPoint = true;
+    
     [self createPath:_mycid];
     
     if (_selectedItem.points != nil) {
@@ -293,7 +295,7 @@
     _currentPoint = point;
     
     if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
-        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing startPoint:true endPoint:false incoming:false];
+        [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing startPoint:_isFirstPoint endPoint:false incoming:false];
         
         NSDictionary* data = @{
                                    @"action" : @"Pen",
@@ -310,14 +312,16 @@
             [self setNeedsDisplay];
         }
     }
+    
+    _isFirstPoint = false;
 }
 
 - (void)moveTouch:(CGPoint)point {
-    [self moveTouch:point smoothingEnabled:false startPoint:nil endPoint:nil incoming:false];
+    [self moveTouch:point smoothingEnabled:false startPoint:_isFirstPoint endPoint:nil incoming:false];
 }
 
 - (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled {
-    [self moveTouch:point smoothingEnabled:smoothingEnabled startPoint:nil endPoint:nil incoming:true];
+    [self moveTouch:point smoothingEnabled:smoothingEnabled startPoint:_isFirstPoint endPoint:nil incoming:true];
 }
 
 - (void)moveTouch:(CGPoint)point smoothingEnabled:(Boolean)smoothingEnabled startPoint:(Boolean)startPoint endPoint:(Boolean)endPoint incoming:(Boolean) incoming {
@@ -399,9 +403,7 @@
         if (_selectedItem.points.count == 2) {
             // We have a line
             [self startTouch: CGPointMake(_startPoint.x, _startPoint.y)];
-            [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing startPoint:true endPoint:false incoming:false];
-//            NSLog("Points: (%f, %f), (%f, %f)", _startPoint.x, _startPoint.y, _currentPoint.x, _currentPoint.y);
-            [self sendUpdate:[self buildSignalFromPoint:_currentPoint startPoint:true endPoint:false] forType:@"otAnnotation_pen"];
+            [self moveTouch: CGPointMake(_currentPoint.x, _currentPoint.y) smoothingEnabled:_selectedItem.enableSmoothing startPoint:true endPoint:true incoming:false];
         } else {
             CGPoint scale = [self scaleForPoints: _selectedItem.points];
 
@@ -636,7 +638,11 @@
                             [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:true];
                         }
                     } else {
-                        if (firstPoint) {
+                        if (firstPoint && endPoint) {
+                            [self startTouch: CGPointMake(fromX, fromY)];
+                            [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false];
+                            [[self activePath].bezierPath closePath];
+                        } else if (firstPoint) {
                             [self startTouch: CGPointMake(fromX, fromY)];
                         } else if (endPoint) {
                             [self moveTouch: CGPointMake(toX, toY) smoothingEnabled:false];
