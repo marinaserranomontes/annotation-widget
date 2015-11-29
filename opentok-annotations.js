@@ -268,6 +268,7 @@ OTSolution.Annotations = function(options) {
                         client.dragging = true;
                         client.lastX = x;
                         client.lastY = y;
+                        self.isStartPoint = true;
                         break;
                     case 'mousemove':
                     case 'touchmove':
@@ -286,12 +287,14 @@ OTSolution.Annotations = function(options) {
                                 canvasWidth: canvas.width,
                                 canvasHeight: canvas.height,
                                 mirrored: mirrored,
-                                startPoint: true // Each segment is treated as a new set of points
+                                startPoint: self.isStartPoint, // Each segment is treated as a new set of points
+                                endPoint: false
                             };
                             draw(update);
                             client.lastX = x;
                             client.lastY = y;
                             sendUpdate(update);
+                            self.isStartPoint = false;
                         }
                         break;
                     case 'mouseup':
@@ -356,7 +359,8 @@ OTSolution.Annotations = function(options) {
                                     canvasHeight: canvas.height,
                                     mirrored: mirrored,
                                     smoothed: false,
-                                    startPoint: true
+                                    startPoint: true,
+                                    endPoint: true
                                 };
 
                                 drawHistory.push(update);
@@ -367,6 +371,7 @@ OTSolution.Annotations = function(options) {
 
                                 for (var i = 0; i < points.length; i++) {
                                     var firstPoint = false;
+                                    var endPoint = false;
 
                                     // Scale the points according to the difference between the start and end points
                                     var pointX = client.startX + (scale.x * points[i][0]);
@@ -376,6 +381,8 @@ OTSolution.Annotations = function(options) {
                                         client.lastX = pointX;
                                         client.lastY = pointY;
                                         firstPoint = true;
+                                    } else if (i === points.length-1) {
+                                        endPoint = true;
                                     }
 
                                     update = {
@@ -393,7 +400,8 @@ OTSolution.Annotations = function(options) {
                                         canvasHeight: canvas.height,
                                         mirrored: mirrored,
                                         smoothed: self.selectedItem.enableSmoothing,
-                                        startPoint: firstPoint
+                                        startPoint: firstPoint,
+                                        endPoint: endPoint
                                     };
 
                                     drawHistory.push(update);
@@ -1086,17 +1094,20 @@ OTSolution.Annotations.Toolbar = function(options) {
                     if (item.title !== 'Clear' && item.title === itemName) {
                         if (self.selectedItem) {
                             var lastBtn = document.getElementById(self.selectedItem.id);
-                            lastBtn.style.background = 'url("' + self.selectedItem.icon + '") no-repeat';
-                            lastBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
-                            lastBtn.style.backgroundPosition = 'center';
+                            if (lastBtn) {
+                                lastBtn.style.background = 'url("' + self.selectedItem.icon + '") no-repeat';
+                                lastBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                                lastBtn.style.backgroundPosition = 'center';
+                            }
                         }
 
                         if (item.selectedIcon) {
                             var selBtn = document.getElementById(item.id);
-                            console.log(selBtn);
-                            selBtn.style.background = 'url("' + item.selectedIcon + '") no-repeat';
-                            selBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
-                            selBtn.style.backgroundPosition = 'center';
+                            if (selBtn) {
+                                selBtn.style.background = 'url("' + item.selectedIcon + '") no-repeat';
+                                selBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                                selBtn.style.backgroundPosition = 'center';
+                            }
                         }
 
                         self.selectedItem = item;
@@ -1216,17 +1227,20 @@ OTSolution.Annotations.Toolbar = function(options) {
                     if (item.id !== 'OT_clear' && item.id === id) {
                         if (self.selectedItem) {
                             var lastBtn = document.getElementById(self.selectedItem.id);
-                            lastBtn.style.background = 'url("' + self.selectedItem.icon + '") no-repeat';
-                            lastBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
-                            lastBtn.style.backgroundPosition = 'center';
+                            if (lastBtn) {
+                                lastBtn.style.background = 'url("' + self.selectedItem.icon + '") no-repeat';
+                                lastBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                                lastBtn.style.backgroundPosition = 'center';
+                            }
                         }
 
                         if (item.selectedIcon) {
                             var selBtn = document.getElementById(item.id);
-                            console.log(selBtn);
-                            selBtn.style.background = 'url("' + item.selectedIcon + '") no-repeat';
-                            selBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
-                            selBtn.style.backgroundPosition = 'center';
+                            if (lastBtn) {
+                                selBtn.style.background = 'url("' + item.selectedIcon + '") no-repeat';
+                                selBtn.style.backgroundSize = self.iconWidth + ' ' + self.iconHeight;
+                                selBtn.style.backgroundPosition = 'center';
+                            }
                         }
 
                         self.selectedItem = item;
