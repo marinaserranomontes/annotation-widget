@@ -16,6 +16,7 @@ Prerequisites
 
 * Version 2.7, 2.6, or 2.5 of [OpenTok iOS SDK](https://tokbox.com/developer/sdks/ios/): latest version is preferred
 * An Xcode project that uses the OpenTok iOS SDK
+
 PRO TIP: If you don't already have a project, grab the [OpenTok iOS SDK samples](https://github.com/opentok/opentok-ios-sdk-samples) for a quick start.
 
 Adding the plugin to your project
