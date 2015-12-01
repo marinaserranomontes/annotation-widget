@@ -36,7 +36,7 @@ You can add the plugin using CocoaPods or manually.
 3. Choose the General tab.
 4. Expand the Embedded Binaries section.
 5. Click the '+' sign to add a framework.
-6. Select 'Add Other...' from the popup and navigate to folder you unzipped in step 1.
+6. Select 'Add Other...' from the popup and navigate to the file you unzipped in step 1.
 7. Check "Copy items if needed" and click Finish.
 8. Click on 'OpenTokAnnotations.framework' in the Project navigator window and ensure that your application is checked and set to 'required' under Target Membership in File inspector.
 
