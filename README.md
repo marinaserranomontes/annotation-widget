@@ -31,7 +31,7 @@ You can add the plugin using CocoaPods or manually.
 
 ### Manually add the framework
 
-1. Download or clone the latest [Annotations plugin source](https://github.com/opentok/annotation-component-ios/releases).
+1. Download and unzip the latest [OpenTokAnnotations.framework.zip file](https://github.com/opentok/annotation-component-ios/releases).
 2. Click your project name in the Project Navigator sidebar.
 3. Choose the General tab.
 4. Expand the Embedded Binaries section.
