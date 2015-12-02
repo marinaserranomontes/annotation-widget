@@ -79,10 +79,10 @@ public class AnnotationToolbar extends ViewGroup implements AnnotationMenuInflat
         colors.add(Color.BLUE);
         colors.add(Color.RED);
         colors.add(Color.GREEN);
-        colors.add(R.color.Orange);
+        colors.add(getResources().getColor(R.color.Orange));
         colors.add(Color.YELLOW);
-        colors.add(R.color.Purple);
-        colors.add(R.color.Brown);
+        colors.add(getResources().getColor(R.color.Purple));
+        colors.add(getResources().getColor(R.color.Brown));
     }
 
     private void initDefaultLineWidths() {
