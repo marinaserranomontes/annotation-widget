@@ -172,8 +172,11 @@
         if (!publisher) {
             var parentDiv = document.getElementById('myCamera');
             var publisherDiv = document.createElement('div'); // Create a div for the publisher to replace
-            var publisherProperties = {};
-            publisherProperties.name = 'A web-based OpenTok client';
+            var publisherProperties = {
+                name: 'A web-based OpenTok client',
+                width: '360px',
+                height: '480px'
+            };
             publisherDiv.setAttribute('id', 'opentok_publisher');
             parentDiv.appendChild(publisherDiv);
             publisher = OT.initPublisher(publisherDiv.id, publisherProperties);
@@ -186,7 +189,7 @@
 
             var canvas = new OTSolution.Annotations({
                 feed: publisher,
-                container: parentDiv
+                container: publisherDiv
             });
             toolbar.addCanvas(canvas);
 
@@ -329,8 +332,6 @@
 
     #opentok_publisher, .publisherContainer {
         display: block;
-        width: 100% !important;
-        height: 100% !important;
         background-color: transparent;
         position: absolute;
         left: 0;
