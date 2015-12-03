@@ -1,17 +1,40 @@
-OpenTok Annotations
+OpenTok JavaScript Annotations Widget -- Beta
 ==================
 
-Plugin to add annotation support to OpenTok.
+The JavaScript Annotations widget adds annotation and frame grab capabilities to [OpenTok.js](https://tokbox.com/developer/sdks/js/). While TokBox hosts OpenTok.js, you must host the JavaScript Annotations widget yourself. This allows you to modify the widget as desired. The widget consists of:
+* **[opentok-annotations.js](https://github.com/opentok/annotation-component-web/blob/master/opentok-annotations.js)**: this JavaScript file also includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
+* **[Image files](https://github.com/opentok/annotation-component-web/tree/master/img)**: these are used for the toolbar icons. 
+* **[demo.html](https://github.com/opentok/annotation-component-web/blob/master/sample/demo.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. **PRO TIP**: You should at least look at this file to see how to implement the toolbar in your own page.
+
+As a beta, this code is subject to change. You can email feedback to collaboration-tools-beta-program@tokbox.com.
+
+Requirements
+-----
+
+Review the basic requirements for [OpenTok](https://tokbox.com/developer/requirements/) and [OpenTok.js](https://tokbox.com/developer/sdks/js/#browsers).
+
+
+Prerequisites
+-----
+
+* **OpenTok JavaScript client SDK**: your web page must load [OpenTok.js](https://tokbox.com/developer/sdks/js/) first, then opentok-annotations.js.  
+* **An API key**: obtained when you sign up for a [developer account](https://dashboard.tokbox.com/users/sign_up).
+* **Session ID and token**: during testing and development phases, you can generate these inside the [Dashboard](https://dashboard.tokbox.com/). Before going live, you will need to deploy a [server SDK](https://tokbox.com/developer/sdks/server/) which generates these values automatically.
+
 
 Installation
 -----
 
-Add [opentok-annotations.js](opentok-annotations.js) to your source.
+[Download](https://github.com/opentok/annotation-component-web/releases) the latest release.
 
-Using the plugin
+**PRO TIP**: Pull requests are welcome! If you think you may want to contribute back to this project, please feel free to fork or clone the repo. 
+
+
+Using the widget
 -----
 
-Link the active OpenTok session to the annotation toolbar and add it to a parent container
+###Linking and adding the toolbar
+Link the active OpenTok session to the annotation toolbar and add the toolbar to a parent container.
 
 ```javascript
 toolbar = new OTSolution.Annotations.Toolbar({
@@ -20,7 +43,8 @@ toolbar = new OTSolution.Annotations.Toolbar({
 });
 ```
 
-When the publisher is created, attach the annotation canvas and link it to the toolbar
+### Attaching the toolbar to a publisher
+When the publisher is created, attach the annotation canvas and link it to the toolbar.
 
 ```javascript
 var canvas = new OTSolution.Annotations({
@@ -30,7 +54,8 @@ var canvas = new OTSolution.Annotations({
 toolbar.addCanvas(canvas);
 ```
 
-When new streams are created, you can attach the annotation canvases to each subscriber using the same code as above:
+### Attaching the toolbar to a subscriber
+When new streams are created, you can attach the annotation canvases to each subscriber.
 
 ```javascript
 var subscriber = session.subscribe(stream, subscriberDiv.id);
@@ -44,10 +69,49 @@ var canvas = new OTSolution.Annotations({
 toolbar.addCanvas(canvas);
 ```
 
-Customization
+### Cleaning up
+
+To remove a single annotation canvas, call the following:
+
+```javascript
+toolbar.removeCanvas(canvasId);
+```
+
+For example, `canvasId = publisher.stream.connection.connectionId`
+
+**Note**: `canvasId` is not the ID of the canvas element.
+
+To remove all annotation canvases and the annotation toolbar, call `remove`.
+
+```javascript
+toolbar.remove();
+```
+
+
+
+Customizing the toolbar
 -----
 
-#### Adding menu items
+### Default menu items
+
+Below is a list of default menu items that can be used in your custom menu. These come pre-built with the action specified.
+If no custom items are added to the toolbar initializer, these will be automatically added to your toolbar.
+
+| id            | Action        |
+| ------------- | ------------- |
+| OT_pen | Freehand/Pen tool |
+| OT_line | Line tool |
+| OT_shapes | Shapes group/submenu |
+| OT_arrow | Arrow tool |
+| OT_rect | Rectangle tool |
+| OT_oval | Oval tool |
+| OT_colors | Color picker submenu |
+| OT_line_width | Line width picker submenu |
+| OT_clear | Clears active user annotations |
+| OT_capture | Tap a video frame to capture a screenshot |
+
+
+### Adding menu items
 
 ```javascript
 toolbar = new OTSolution.Annotations.Toolbar({
@@ -130,25 +194,8 @@ toolbar = new OTSolution.Annotations.Toolbar({
 });
 ```
 
-##### Default menu items
 
-Below is a list of default menu items that can be used in your custom menu. These come pre-built with the action specified. 
-If no custom items are added to the toolbar initializer, these will be automatically added to your toolbar.
-
-| id            | Action        |
-| ------------- | ------------- |
-| OT_pen | Freehand/Pen tool |
-| OT_line | Line tool |
-| OT_shapes | Shapes group/submenu |
-| OT_arrow | Arrow tool |
-| OT_rect | Rectangle tool |
-| OT_oval | Oval tool |
-| OT_colors | Color picker submenu |
-| OT_line_width | Line width picker submenu |
-| OT_clear | Clears active user annotations |
-| OT_capture | Tap a video frame to capture a screenshot |
-
-#### Adding a custom color palette
+### Adding a custom color palette
 
 A set of custom color choices can be added when the toolbar is initialized:
 
@@ -166,7 +213,8 @@ toolbar = new OTSolution.Annotations.Toolbar({
 });
 ```
 
-#### Handling menu click events
+### Handling menu click events
+
 
 ```javascript
 toolbar.itemClicked(function (id) {
@@ -174,29 +222,15 @@ toolbar.itemClicked(function (id) {
 });
 ```
 
-#### Cleaning up
 
-To remove a single annotation canvas, call the following:
-
-```javascript
-toolbar.removeCanvas(canvasId); 
-```
-
-For example, canvasId = publisher.stream.connection.connectionId
-
-`Note: This is not the ID of the canvas element`
-
-To remove all annotation canvases and the annotation toolbar, call:
-
-```javascript
-toolbar.remove();
-```
-
-See [demo.html](sample/demo.html)
-
-For best results
+Cross-platform compatibility notes
 ----------------
 
-In order to ensure that all annotations aren't cut off across devices, it is recommended to use predefined
-aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
-(see how to set the aspect ratio for [iOS](https://github.com/opentok/annotation-component-ios#for-best-results) and [Android](https://github.com/opentok/annotation-component-android#for-best-results)).
+To ensure that all annotations aren't cut off across devices, we recommend:
+
+* Using predefined aspect ratios for your video frames.
+* Using the same aspect ratio across device platforms.
+
+<to be written how to do this on JS>
+
+See the repos for the [iOS](https://github.com/opentok/annotation-component-ios#cross-platform-compatibility-notes) and [Android](https://github.com/opentok/annotation-component-android#cross-platform-compatibility-notes) Annotation widgets for information specific to these platforms.
