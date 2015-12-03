@@ -49,7 +49,7 @@ When the publisher is created, attach the annotation canvas and link it to the t
 ```javascript
 var canvas = new OTSolution.Annotations({
     feed: publisher,
-    container: parentDiv
+    container: publisherDiv
 });
 toolbar.addCanvas(canvas);
 ```
