@@ -2,9 +2,9 @@ OpenTok JavaScript Annotations Widget -- Beta
 ==================
 
 The JavaScript Annotations widget adds annotation and frame grab capabilities to [OpenTok.js](https://tokbox.com/developer/sdks/js/). While TokBox hosts OpenTok.js, you must host the JavaScript Annotations widget yourself. This allows you to modify the widget as desired. The widget consists of:
-* **[opentok-annotations.js](https://github.com/opentok/annotation-component-web/blob/master/opentok-annotations.js)**: this JavaScript file also includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
-* **[Image files](https://github.com/opentok/annotation-component-web/tree/master/img)**: these are used for the toolbar icons. 
-* **[demo.html](https://github.com/opentok/annotation-component-web/blob/master/sample/demo.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. **PRO TIP**: You should at least look at this file to see how to implement the toolbar in your own page.
+* **[opentok-annotations.js](https://github.com/opentok/annotation-component-web/blob/master/opentok-annotations.js)**: includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
+* **[Image files](https://github.com/opentok/annotation-component-web/tree/master/img)**: used for the toolbar icons. 
+* **[demo.html](https://github.com/opentok/annotation-component-web/blob/master/sample/demo.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. You can also look at this file to see how to implement the toolbar in your own page.
 
 As a beta, this code is subject to change. You can email feedback to collaboration-tools-beta-program@tokbox.com.
 
@@ -17,9 +17,9 @@ Review the basic requirements for [OpenTok](https://tokbox.com/developer/require
 Prerequisites
 -----
 
-* **OpenTok JavaScript client SDK**: your web page must load [OpenTok.js](https://tokbox.com/developer/sdks/js/) first, then opentok-annotations.js.  
+* **OpenTok JavaScript client SDK**: your web page must load [OpenTok.js](https://tokbox.com/developer/sdks/js/) first, then [opentok-annotations.js](https://github.com/opentok/annotation-component-web/blob/master/opentok-annotations.js).  
 * **An API key**: obtained when you sign up for a [developer account](https://dashboard.tokbox.com/users/sign_up).
-* **Session ID and token**: during testing and development phases, you can generate these inside the [Dashboard](https://dashboard.tokbox.com/). Before going live, you will need to deploy a [server SDK](https://tokbox.com/developer/sdks/server/) which generates these values automatically.
+* **Session ID and token**: during testing and development phases, you can generate these inside the [Dashboard](https://dashboard.tokbox.com/). Before going live, you will need to deploy a [server SDK](https://tokbox.com/developer/sdks/server/) and generate these values automatically.
 
 
 Installation
@@ -231,6 +231,18 @@ To ensure that all annotations aren't cut off across devices, we recommend:
 * Using predefined aspect ratios for your video frames.
 * Using the same aspect ratio across device platforms.
 
-<to be written how to do this on JS>
+The following sample illustrates one way to do this in JavaScript.
+
+```javascript
+    function startPublishing() {
+        if (!publisher) {
+            var parentDiv = document.getElementById('myCamera');
+            var publisherDiv = document.createElement('div'); // Create a div for the publisher to replace
+            var publisherProperties = {
+                name: 'A web-based OpenTok client',
+                width: '360px',
+                height: '480px'
+            };
+```
 
 See the repos for the [iOS](https://github.com/opentok/annotation-component-ios#cross-platform-compatibility-notes) and [Android](https://github.com/opentok/annotation-component-android#cross-platform-compatibility-notes) Annotation widgets for information specific to these platforms.
