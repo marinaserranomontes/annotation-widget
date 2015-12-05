@@ -1,7 +1,7 @@
 OpenTok iOS Annotations Plugin -- Beta
 ===========================
 
-The Annotations plugin adds annotation and frame grab capabilities to OpenTok for iOS. It's written in Objective C but also offers Interface Builder support. 
+The Annotations plugin adds annotation and frame grab capabilities to OpenTok for iOS. It's written in Objective-C but also offers Interface Builder support. 
 
 As a beta, this code is subject to change. Pull requests are welcome. You can also email feedback to collaboration-tools-beta-program@tokbox.com.
 
@@ -31,7 +31,7 @@ You can add the plugin using CocoaPods or manually.
 
 ### Manually add the framework
 
-1. Download and unzip the latest [OpenTokAnnotations.framework.zip file](https://github.com/opentok/annotation-component-ios/releases).
+1. Download and unzip the latest [OpenTokAnnotations.framework.zip file](https://github.com/opentok/annotation-widget/releases).
 2. Click your project name in the Project Navigator sidebar.
 3. Choose the General tab.
 4. Expand the Embedded Binaries section.
@@ -222,4 +222,4 @@ The following code samples illustrate how to set the aspect ratios within an iOS
 [_publisher.view setFrame:CGRectMake(x, y, scale*width, scale*height)];
 ```
 
-See the repos for the [Android](https://github.com/opentok/annotation-component-android#for-best-results) and [JavaScript](https://github.com/opentok/annotation-component-web#for-best-results) annotation plugins for information specific to these platforms.
+See the repos for the [Android](https://github.com/opentok/annotation-widget/tree/android#for-best-results) and [JavaScript](https://github.com/opentok/annotation-widget/tree/js#for-best-results) annotation plugins for information specific to these platforms.
