@@ -1,7 +1,7 @@
 OpenTok Android Annotations Widget -- Beta
 ===========================
 
-The JavaScript Annotations widget adds annotation and frame grab capabilities to the [OpenTok Android SDK](https://tokbox.com/developer/sdks/android/).
+The Android Annotations widget adds annotation and frame grab capabilities to the [OpenTok Android SDK](https://tokbox.com/developer/sdks/android/).
 
 As a beta, this code is subject to change. Pull requests are welcome. You can also email feedback to collaboration-tools-beta-program@tokbox.com.
 
@@ -33,13 +33,13 @@ Installing
 
 ### .AAR in Android Studio
 
-1. Download the [latest version](https://github.com/opentok/annotation-component-android/releases) of the widget.
+1. Download the [latest version](https://github.com/opentok/annotation-widget/releases) of the widget.
 2. Right click on your project module (usually called "app" but may be something else) and choose "Open Module Settings" from the bottom of the menu.
 3. Click the '+' sign in the upper left hand corner.
 4. Choose "Import .JAR or .AAR Package" from the list in the popup.
 5. Locate the AAR file in the zip downloaded in step 1. You can set the module name to `:opentokAnnotations` or similar.
 6. Follow the prompts and build your project.
-7. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line "compile project(':opentokAnnotations')" to the app build.gradle.
+7. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line `compile project(':opentokAnnotations')` to the app build.gradle.
 
 ### Clone/download this repo
 
@@ -321,5 +321,5 @@ mSubscriberViewContainer.addView(mSubscriber.getView(), layoutParams);
 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(scale*width, scale*height);
 mPublisherViewContainer.addView(mPublisher.getView(), layoutParams);
 ```
-See the [iOS](https://github.com/opentok/annotation-component-ios#cross-platform-compatibility-notes) and [JavaScript](https://github.com/opentok/annotation-component-web#cross-platform-compatibility-notes) Annotations widget repos for code samples specific to these platforms.
+See the [iOS](https://github.com/opentok/annotation-widget/tree/ios#cross-platform-compatibility-notes) and [JavaScript](https://github.com/opentok/annotation-widget/tree/js#cross-platform-compatibility-notes) Annotations widget repos for code samples specific to these platforms.
 
