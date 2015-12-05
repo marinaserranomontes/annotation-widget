@@ -21,6 +21,7 @@ Prerequisites
 * **An API key**: obtained when you sign up for a [developer account](https://dashboard.tokbox.com/users/sign_up).
 * **Session ID and token**: during testing and development phases, you can generate these inside the [Dashboard](https://dashboard.tokbox.com/). Before going live, you will need to deploy a [server SDK](https://tokbox.com/developer/sdks/server/) and generate these values automatically.
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/opentok/annotation-widget/tree/js)
 
 Installation
 -----

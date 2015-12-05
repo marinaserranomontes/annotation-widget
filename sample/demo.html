@@ -9,12 +9,9 @@
 
 <script type="text/javascript" charset="utf-8">
 
-    // *** Fill the following variables using your own Project info from the Dashboard  ***
-    // ***                  (https://dashboard.tokbox.com/projects)                     ***
-
-    var apiKey = '';    // Replace with your own API key.
-    var sessionId = ''; // Replace with your generated Session ID.
-    var token = '';     // Replace with your generated Token (use Project Tools or from a server-side library)
+    var apiKey,
+        sessionId,
+        token;
 
     var toolbar;
     var session;
@@ -25,8 +22,6 @@
     // See the exceptionHandler() method below.
     // TB.setLogLevel(TB.DEBUG);
     // TB.addEventListener('exception', exceptionHandler);
-
-    session = TB.initSession(sessionId);	// Initialize session
 
     var palette = [
         "#1abc9c",
@@ -51,110 +46,126 @@
         "#7f8c8d"
     ];
 
-    // Add event listeners to the session
-    session.addEventListener('sessionConnected', sessionConnectedHandler);
-    session.addEventListener('sessionDisconnected', sessionDisconnectedHandler);
-    session.addEventListener('connectionCreated', connectionCreatedHandler);
-    session.addEventListener('connectionDestroyed', connectionDestroyedHandler);
-    session.addEventListener('streamCreated', streamCreatedHandler);
-    session.addEventListener('streamDestroyed', streamDestroyedHandler);
-    session.addEventListener('signal', signalHandler);
-
     //--------------------------------------
     //  LINK CLICK HANDLERS
     //--------------------------------------
 
     function connect() {
-        session.connect(apiKey, token);
+        // Make an HTTP request to get the OpenTok API key, session ID, and token from the server
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                var res = JSON.parse(xmlHttp.responseText);
 
-        // Initialize a toolbar for controlling annotation canvases
-        toolbar = new OTSolution.Annotations.Toolbar({
-            session: session,
-            container: document.getElementById('toolbar'),
-            colors: palette,
-            items: [
-                {
-                    id: 'OT_pen',
-                    title: 'Pen',
-                    icon: '../img/freehand.png',
-                    selectedIcon: '../img/freehand_selected.png'
-                },
-                {
-                    id: 'OT_line',
-                    title: 'Line',
-                    icon: '../img/line.png',
-                    selectedIcon: '../img/line_selected.png'
-                },
-                {
-                    id: 'OT_shapes',
-                    title: 'Shapes',
-                    icon: '../img/shapes.png',
+                apiKey = res.key;
+                sessionId = res.sessionId;
+                token = res.token;
+
+                session = TB.initSession(sessionId);	// Initialize session
+
+                // Add event listeners to the session
+                session.addEventListener('sessionConnected', sessionConnectedHandler);
+                session.addEventListener('sessionDisconnected', sessionDisconnectedHandler);
+                session.addEventListener('connectionCreated', connectionCreatedHandler);
+                session.addEventListener('connectionDestroyed', connectionDestroyedHandler);
+                session.addEventListener('streamCreated', streamCreatedHandler);
+                session.addEventListener('streamDestroyed', streamDestroyedHandler);
+                session.addEventListener('signal', signalHandler);
+
+                session.connect(apiKey, token);
+
+                // Initialize a toolbar for controlling annotation canvases
+                toolbar = new OTSolution.Annotations.Toolbar({
+                    session: session,
+                    container: document.getElementById('toolbar'),
+                    colors: palette,
                     items: [
                         {
-                            id: 'OT_arrow',
-                            title: 'Arrow',
-                            icon: '../img/arrow.png'
+                            id: 'OT_pen',
+                            title: 'Pen',
+                            icon: '../img/freehand.png',
+                            selectedIcon: '../img/freehand_selected.png'
                         },
                         {
-                            id: 'OT_rect',
-                            title: 'Rectangle',
-                            icon: '../img/rectangle.png'
+                            id: 'OT_line',
+                            title: 'Line',
+                            icon: '../img/line.png',
+                            selectedIcon: '../img/line_selected.png'
                         },
                         {
-                            id: 'OT_oval',
-                            title: 'Oval',
-                            icon: '../img/oval.png'
-                        },
-                        {
-                            id: 'OT_star',
-                            title: 'Star',
-                            icon: '../img/star.png',
-                            points: [
-                                [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
-                                [0.5 + 0.25 * Math.cos(126 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(126 * (Math.PI / 180))],
-                                [0.5 + 0.5 * Math.cos(162 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(162 * (Math.PI / 180))],
-                                [0.5 + 0.25 * Math.cos(198 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(198 * (Math.PI / 180))],
-                                [0.5 + 0.5 * Math.cos(234 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(234 * (Math.PI / 180))],
-                                [0.5 + 0.25 * Math.cos(270 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(270 * (Math.PI / 180))],
-                                [0.5 + 0.5 * Math.cos(306 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(306 * (Math.PI / 180))],
-                                [0.5 + 0.25 * Math.cos(342 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(342 * (Math.PI / 180))],
-                                [0.5 + 0.5 * Math.cos(18 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(18 * (Math.PI / 180))],
-                                [0.5 + 0.25 * Math.cos(54 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(54 * (Math.PI / 180))],
-                                [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))]
+                            id: 'OT_shapes',
+                            title: 'Shapes',
+                            icon: '../img/shapes.png',
+                            items: [
+                                {
+                                    id: 'OT_arrow',
+                                    title: 'Arrow',
+                                    icon: '../img/arrow.png'
+                                },
+                                {
+                                    id: 'OT_rect',
+                                    title: 'Rectangle',
+                                    icon: '../img/rectangle.png'
+                                },
+                                {
+                                    id: 'OT_oval',
+                                    title: 'Oval',
+                                    icon: '../img/oval.png'
+                                },
+                                {
+                                    id: 'OT_star',
+                                    title: 'Star',
+                                    icon: '../img/star.png',
+                                    points: [
+                                        [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
+                                        [0.5 + 0.25 * Math.cos(126 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(126 * (Math.PI / 180))],
+                                        [0.5 + 0.5 * Math.cos(162 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(162 * (Math.PI / 180))],
+                                        [0.5 + 0.25 * Math.cos(198 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(198 * (Math.PI / 180))],
+                                        [0.5 + 0.5 * Math.cos(234 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(234 * (Math.PI / 180))],
+                                        [0.5 + 0.25 * Math.cos(270 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(270 * (Math.PI / 180))],
+                                        [0.5 + 0.5 * Math.cos(306 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(306 * (Math.PI / 180))],
+                                        [0.5 + 0.25 * Math.cos(342 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(342 * (Math.PI / 180))],
+                                        [0.5 + 0.5 * Math.cos(18 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(18 * (Math.PI / 180))],
+                                        [0.5 + 0.25 * Math.cos(54 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(54 * (Math.PI / 180))],
+                                        [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))]
+                                    ]
+                                }
                             ]
+                        },
+                        {
+                            id: 'OT_colors',
+                            title: 'Colors',
+                            icon: '',
+                            items: { /* Built dynamically */ }
+                        },
+                        {
+                            id: 'OT_line_width',
+                            title: 'Line Width',
+                            icon: '../img/line_width.png',
+                            items: { /* Built dynamically */ }
+                        },
+                        {
+                            id: 'OT_clear',
+                            title: 'Clear',
+                            icon: '../img/clear.png'
+                        },
+                        {
+                            id: 'OT_capture',
+                            title: 'Capture',
+                            icon: '../img/camera.png',
+                            selectedIcon: '../img/camera_selected.png'
                         }
                     ]
-                },
-                {
-                    id: 'OT_colors',
-                    title: 'Colors',
-                    icon: '',
-                    items: { /* Built dynamically */ }
-                },
-                {
-                    id: 'OT_line_width',
-                    title: 'Line Width',
-                    icon: '../img/line_width.png',
-                    items: { /* Built dynamically */ }
-                },
-                {
-                    id: 'OT_clear',
-                    title: 'Clear',
-                    icon: '../img/clear.png'
-                },
-                {
-                    id: 'OT_capture',
-                    title: 'Capture',
-                    icon: '../img/camera.png',
-                    selectedIcon: '../img/camera_selected.png'
-                }
-            ]
-        });
+                });
 
-        // Callback for handling menu actions
-        toolbar.itemClicked(function (id) {
-            console.log("Callback item id: " + id);
-        });
+                // Callback for handling menu actions
+                toolbar.itemClicked(function (id) {
+                    console.log("Callback item id: " + id);
+                });
+            }
+        };
+        xmlHttp.open( "GET", "config.php", true );
+        xmlHttp.send( null );
     }
 
     function disconnect() {
