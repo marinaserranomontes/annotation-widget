@@ -88,7 +88,7 @@ OTSolution.Annotations = function(options) {
             self.overlay.style.position = 'absolute';
             self.overlay.style.width = self.parent.clientWidth + 'px';
             self.overlay.style.height = self.parent.clientHeight + 'px';
-            self.overlay.style.background = 'rgba(0,0,0,0.4) url("../img/camera.png") no-repeat center';
+            self.overlay.style.background = 'rgba(0,0,0,0.4) url("image/camera.png") no-repeat center';
             self.overlay.style.backgroundSize = "50px 50px";
             self.overlay.style.cursor = 'pointer';
             self.overlay.style.opacity = 0;
@@ -761,14 +761,14 @@ OTSolution.Annotations.Toolbar = function(options) {
         {
             id: 'OT_pen',
             title: 'Pen',
-            icon: '../img/freehand.png',
-            selectedIcon: '../img/freehand_selected.png'
+            icon: 'image/freehand.png',
+            selectedIcon: 'image/freehand_selected.png'
         },
         {
             id: 'OT_line',
             title: 'Line',
-            icon: '../img/line.png',
-            selectedIcon: '../img/line_selected.png',
+            icon: 'image/line.png',
+            selectedIcon: 'image/line_selected.png',
             points: [
                 [0, 0],
                 [0, 1]
@@ -777,12 +777,12 @@ OTSolution.Annotations.Toolbar = function(options) {
         {
             id: 'OT_shapes',
             title: 'Shapes',
-            icon: '../img/shapes.png',
+            icon: 'image/shapes.png',
             items: [
                 {
                     id: 'OT_arrow',
                     title: 'Arrow',
-                    icon: '../img/arrow.png',
+                    icon: 'image/arrow.png',
                     points: [
                         [0, 1],
                         [3, 1],
@@ -797,7 +797,7 @@ OTSolution.Annotations.Toolbar = function(options) {
                 {
                     id: 'OT_rect',
                     title: 'Rectangle',
-                    icon: '../img/rectangle.png',
+                    icon: 'image/rectangle.png',
                     points: [
                         [0, 0],
                         [1, 0],
@@ -809,7 +809,7 @@ OTSolution.Annotations.Toolbar = function(options) {
                 {
                     id: 'OT_oval',
                     title: 'Oval',
-                    icon: '../img/oval.png',
+                    icon: 'image/oval.png',
                     enableSmoothing: true,
                     points: [
                         [0, 0.5],
@@ -835,19 +835,19 @@ OTSolution.Annotations.Toolbar = function(options) {
         {
             id: 'OT_line_width',
             title: 'Line Width',
-            icon: '../img/line_width.png',
+            icon: 'image/line_width.png',
             items: { /* Built dynamically */ }
         },
         {
             id: 'OT_clear',
             title: 'Clear',
-            icon: '../img/clear.png'
+            icon: 'image/clear.png'
         },
         {
             id: 'OT_capture',
             title: 'Capture',
-            icon: '../img/camera.png',
-            selectedIcon: '../img/camera_selected.png'
+            icon: 'image/camera.png',
+            selectedIcon: 'image/camera_selected.png'
         }
     ];
     this.colors = options.colors || [

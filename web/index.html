@@ -5,7 +5,7 @@
 <title>OpenTok Annotations Demo</title>
 
 <script src='http://static.opentok.com/webrtc/v2.2/js/opentok.min.js'></script>
-<script src="../opentok-annotations.js" type="text/javascript" charset="utf-8"></script>
+<script src="script/opentok-annotations.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript" charset="utf-8">
 
@@ -83,39 +83,39 @@
                         {
                             id: 'OT_pen',
                             title: 'Pen',
-                            icon: '../img/freehand.png',
-                            selectedIcon: '../img/freehand_selected.png'
+                            icon: 'image/freehand.png',
+                            selectedIcon: 'image/freehand_selected.png'
                         },
                         {
                             id: 'OT_line',
                             title: 'Line',
-                            icon: '../img/line.png',
-                            selectedIcon: '../img/line_selected.png'
+                            icon: 'image/line.png',
+                            selectedIcon: 'image/line_selected.png'
                         },
                         {
                             id: 'OT_shapes',
                             title: 'Shapes',
-                            icon: '../img/shapes.png',
+                            icon: 'image/shapes.png',
                             items: [
                                 {
                                     id: 'OT_arrow',
                                     title: 'Arrow',
-                                    icon: '../img/arrow.png'
+                                    icon: 'image/arrow.png'
                                 },
                                 {
                                     id: 'OT_rect',
                                     title: 'Rectangle',
-                                    icon: '../img/rectangle.png'
+                                    icon: 'image/rectangle.png'
                                 },
                                 {
                                     id: 'OT_oval',
                                     title: 'Oval',
-                                    icon: '../img/oval.png'
+                                    icon: 'image/oval.png'
                                 },
                                 {
                                     id: 'OT_star',
                                     title: 'Star',
-                                    icon: '../img/star.png',
+                                    icon: 'image/star.png',
                                     points: [
                                         [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
                                         [0.5 + 0.25 * Math.cos(126 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(126 * (Math.PI / 180))],
@@ -141,19 +141,19 @@
                         {
                             id: 'OT_line_width',
                             title: 'Line Width',
-                            icon: '../img/line_width.png',
+                            icon: 'image/line_width.png',
                             items: { /* Built dynamically */ }
                         },
                         {
                             id: 'OT_clear',
                             title: 'Clear',
-                            icon: '../img/clear.png'
+                            icon: 'image/clear.png'
                         },
                         {
                             id: 'OT_capture',
                             title: 'Capture',
-                            icon: '../img/camera.png',
-                            selectedIcon: '../img/camera_selected.png'
+                            icon: 'image/camera.png',
+                            selectedIcon: 'image/camera_selected.png'
                         }
                     ]
                 });
