@@ -977,6 +977,8 @@ OTSolution.Annotations.Toolbar = function(options) {
             button.style.transform = 'translateY(-50%)';
 
             if (item.id === 'OT_colors') {
+                button.style.webkitTransform = 'translateY(-85%)';
+
                 var colorPicker = document.createElement("div");
                 colorPicker.setAttribute('class', 'color-picker');
                 colorPicker.style.backgroundColor = this.backgroundColor;
