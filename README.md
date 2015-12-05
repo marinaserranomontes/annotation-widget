@@ -2,9 +2,9 @@ OpenTok JavaScript Annotations Widget -- Beta
 ==================
 
 The JavaScript Annotations widget adds annotation and frame grab capabilities to [OpenTok.js](https://tokbox.com/developer/sdks/js/). While TokBox hosts OpenTok.js, you must host the JavaScript Annotations widget yourself. This allows you to modify the widget as desired. The widget consists of:
-* **[opentok-annotations.js](https://github.com/opentok/annotation-component-web/blob/master/opentok-annotations.js)**: includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
-* **[Image files](https://github.com/opentok/annotation-component-web/tree/master/img)**: used for the toolbar icons. 
-* **[demo.html](https://github.com/opentok/annotation-component-web/blob/master/sample/demo.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. You can also look at this file to see how to implement the toolbar in your own page.
+* **[opentok-annotations.js](https://github.com/opentok/annotation-widget/blob/js/web/script/opentok-annotations.js)**: includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
+* **[Image files](https://github.com/opentok/annotation-component-web/tree/js/web/image)**: used for the toolbar icons. 
+* **[demo.html](https://github.com/opentok/annotation-widget/blob/js/web/index.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. You can also look at this file to see how to implement the toolbar in your own page.
 
 As a beta, this code is subject to change. You can email feedback to collaboration-tools-beta-program@tokbox.com.
 
@@ -17,7 +17,7 @@ Review the basic requirements for [OpenTok](https://tokbox.com/developer/require
 Prerequisites
 -----
 
-* **OpenTok JavaScript client SDK**: your web page must load [OpenTok.js](https://tokbox.com/developer/sdks/js/) first, then [opentok-annotations.js](https://github.com/opentok/annotation-component-web/blob/master/opentok-annotations.js).  
+* **OpenTok JavaScript client SDK**: your web page must load [OpenTok.js](https://tokbox.com/developer/sdks/js/) first, then [opentok-annotations.js](https://github.com/opentok/annotation-widget/blob/js/web/script/opentok-annotations.js).  
 * **An API key**: obtained when you sign up for a [developer account](https://dashboard.tokbox.com/users/sign_up).
 * **Session ID and token**: during testing and development phases, you can generate these inside the [Dashboard](https://dashboard.tokbox.com/). Before going live, you will need to deploy a [server SDK](https://tokbox.com/developer/sdks/server/) and generate these values automatically.
 
@@ -26,7 +26,7 @@ Prerequisites
 Installation
 -----
 
-[Download](https://github.com/opentok/annotation-component-web/releases) the latest release.
+[Download](https://github.com/opentok/annotation-widget/releases) the latest release.
 
 **PRO TIP**: Pull requests are welcome! If you think you may want to contribute back to this project, please feel free to fork or clone the repo. 
 
@@ -121,38 +121,38 @@ toolbar = new OTSolution.Annotations.Toolbar({
         {
             id: 'OT_pen',
             title: 'Pen',
-            icon: '../img/freehand.png',
-            selectedIcon: '../img/freehand_selected.png'
+            icon: 'image/freehand.png',
+            selectedIcon: 'image/freehand_selected.png'
         },
         {
             id: 'OT_line',
             title: 'Line',
-            icon: '../img/line.png'
+            icon: 'image/line.png'
         },
         {
             id: 'OT_shapes',
             title: 'Shapes',
-            icon: '../img/shapes.png',
+            icon: 'image/shapes.png',
             items: [
                 {
                     id: 'OT_arrow',
                     title: 'Arrow',
-                    icon: '../img/arrow.png'
+                    icon: 'image/arrow.png'
                 },
                 {
                     id: 'OT_rect',
                     title: 'Rectangle',
-                    icon: '../img/rectangle.png'
+                    icon: 'image/rectangle.png'
                 },
                 {
                     id: 'OT_oval',
                     title: 'Oval',
-                    icon: '../img/oval.png'
+                    icon: 'image/oval.png'
                 },
                 {
                     id: 'custom_star',
                     title: 'Star',
-                    icon: '../img/star.png',
+                    icon: 'image/star.png',
                     // points specify the base points that define a shape or object that can be drawn through the annotations
                     points: [
                         [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
@@ -178,18 +178,18 @@ toolbar = new OTSolution.Annotations.Toolbar({
         {
             id: 'OT_line_width',
             title: 'Line Width',
-            icon: '../img/line_width.png',
+            icon: 'image/line_width.png',
             items: { /* Built dynamically */ }
         },
         {
             id: 'OT_clear',
             title: 'Clear',
-            icon: '../img/clear.png'
+            icon: 'image/clear.png'
         },
         {
             id: 'OT_capture',
             title: 'Capture',
-            icon: '../img/camera.png'
+            icon: 'image/camera.png'
         }
     ]
 });
@@ -246,4 +246,4 @@ The following sample illustrates one way to do this in JavaScript.
             };
 ```
 
-See the repos for the [iOS](https://github.com/opentok/annotation-component-ios#cross-platform-compatibility-notes) and [Android](https://github.com/opentok/annotation-component-android#cross-platform-compatibility-notes) Annotation widgets for information specific to these platforms.
+See the repos for the [iOS](https://github.com/opentok/annotation-widget/tree/ios#cross-platform-compatibility-notes) and [Android](https://github.com/opentok/annotation-widget/tree/android#cross-platform-compatibility-notes) Annotation widgets for information specific to these platforms.
