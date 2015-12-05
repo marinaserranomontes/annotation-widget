@@ -1,15 +1,26 @@
-OpenTok Android Annotations Plugin
+OpenTok Android Annotations Widget -- Beta
 ===========================
 
-This plugin adds annotation and screen capture capabilities to OpenTok for Android.
+The JavaScript Annotations widget adds annotation and frame grab capabilities to the [OpenTok Android SDK](https://tokbox.com/developer/sdks/android/).
 
-Notes
+As a beta, this code is subject to change. Pull requests are welcome. You can also email feedback to collaboration-tools-beta-program@tokbox.com.
+
+
+Requirements
 -----
 
-* See [OpenTok Android SDK developer and client requirements](http://tokbox.com/opentok/libraries/client/android/#developerandclientrequirements) for a list of system requirements and supported devices.
+Review the requirements for [OpenTok](https://tokbox.com/developer/requirements/) and the [OpenTok Android SDK](https://tokbox.com/developer/sdks/android/#developer-and-client-requirements).
 
-* See the [OpenTok Android SDK Reference](http://tokbox.com/opentok/libraries/client/android/reference/index.html)
-for details on the API.
+
+Prerequisites
+-----
+
+* [OpenTok Android SDK](https://tokbox.com/developer/sdks/android/) version 2.7, 2.6, or 2.5: *latest version is preferred*
+
+* A project that uses the OpenTok Android SDK
+
+**PRO TIP**: If you don't already have a project, grab [OpenTok Android SDK Samples](https://github.com/opentok/opentok-android-sdk-samples) for a quick start.
+
 
 Installing
 ----------
@@ -22,7 +33,7 @@ Installing
 
 ### .AAR in Android Studio
 
-1. Download the [latest version](https://github.com/opentok/annotation-component-android/releases) of the plugin.
+1. Download the [latest version](https://github.com/opentok/annotation-component-android/releases) of the widget.
 2. Right click on your project module (usually called "app" but may be something else) and choose "Open Module Settings" from the bottom of the menu.
 3. Click the '+' sign in the upper left hand corner.
 4. Choose "Import .JAR or .AAR Package" from the list in the popup.
@@ -37,17 +48,14 @@ Installing
 3. Choose "Import Existing Project" from the list of options.
 4. Browse to the location of the cloned/downloaded files, select "Ok" and then "Finish".
 
-Using the plugin
+Using the widget
 ----------------
 
-For a quick start, download the [OpenTok Android samples](https://github.com/opentok/opentok-android-sdk-samples). If you already have your own project to work with,
-the steps below should help you incorporate the annotations plugin.
+We'll use the `HelloWorldActivity` from the [OpenTok Android samples](https://github.com/opentok/opentok-android-sdk-samples) to illustrate how to use the Android Annotations widget.
 
-We'll use the `HelloWorldActivity` from the samples to demonstrate how the plugin works.
+### Including the annotation toolbar in your layout
 
-#### Include the annotation toolbar in your layout
-
-Add the `AnnotationToolbar` to your view. The easiest way is to include in in your layout resource file:
+Add `AnnotationToolbar` to your view. The easiest way is to include in in your layout resource file:
 
 ```xml
 <com.opentok.android.plugin.AnnotationToolbar
@@ -56,15 +64,15 @@ Add the `AnnotationToolbar` to your view. The easiest way is to include in in yo
     android:layout_height="?android:attr/actionBarSize"/>
 ```
 
-In `HelloWorldActivity.java`, add the following to the onCreate method:
+In `HelloWorldActivity.java`, add the following to the `onCreate` method:
 
 ```java
 mToolbar = (AnnotationToolbar) findViewById(R.id.toolbar);
 ```
 
-#### Add custom annotation renderer
+### Adding a custom annotation renderer
 
-The Annotation plugin requires a custom video renderer to function. If you are using your own custom renderer, simply change it to extend `AnnotationVideoRenderer` instead of `BaseVideoRenderer`. If you are not using a custom renderer, you can create one using:
+The Android Annotation widget includes a `AnnotationVideoRenderer` class which extends the `BaseVideoRenderer` class in the OpenTok Android SDK. Instantiate `AnnotationVideoRenderer` using the following sample code.
 
 ```java
 AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
@@ -72,9 +80,14 @@ AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
 
 You can then attach this to a publisher/subscriber using the `setRenderer(...)` method.
 
-#### Attaching an annotation canvas to a publisher/subscriber view
+**PRO TIP**: If you have already developed your own custom video renderer simply modify it so that it extends `AnnotationVideoRenderer` instead of `BaseVideoRenderer`.
 
-Add the following lines to the end of the `attachSubscriberView` method (Note: the annotation view should be added to the `mSubscriberViewContainer` after the subscriber view).
+
+### Attaching an annotation canvas to a subscriber view
+
+Add the following lines to the end of the `attachSubscriberView` method.
+
+**PRO TIP**: Add the annotation view to the `mSubscriberViewContainer` *after* the subscriber view.
 
 ```java
 private void attachSubscriberView(Subscriber subscriber) {
@@ -90,7 +103,11 @@ private void attachSubscriberView(Subscriber subscriber) {
 }
 ```
 
-Add the following lines to the ends of the `attachPublisherView` method (Note: the annotation view should be added to the `mPublisherViewContainer` after the publisher view).
+### Attaching an annotation canvas to a publisher view
+
+Add the following lines to the end of the `attachPublisherView` method.
+
+**PRO TIP**: Add the annotation view to the `mPublisherViewContainer` *after* the publisher view.
 
 ```java
 private void attachPublisherView(Publisher publisher) {
@@ -106,9 +123,9 @@ private void attachPublisherView(Publisher publisher) {
 }
 ```
 
-#### Hook in signals
+### Hooking in signals
 
-Last, pass signals through the `AnnotationToolbar` object in the `onSignalReceived` method.
+Lastly, pass signals through the `AnnotationToolbar` object in the `onSignalReceived` method.
 
 ```java
 @Override
@@ -118,10 +135,9 @@ public void onSignalReceived(Session session, String type, String data, Connecti
 }
 ```
 
-Note: Make sure that your class implements `Session.SignalListener`. You will also need to make sure you have set the session's signal listener using `mSession.setSignalListener(this);`
-See the [docs](https://tokbox.com/developer/sdks/android/reference/) for more details.
+**IMPORTANT**: Make sure that your class implements `Session.SignalListener`. You will also need to make sure you have set the session's signal listener using `mSession.setSignalListener(this);` See the [OpenTok Android SDK docs](https://tokbox.com/developer/sdks/android/reference/) for more details.
 
-#### Capturing frames
+### Grabbing frames
 
 Frames and their annotations can be captured when using the 'ot_item_capture' menu item. The `Bitmap` for
  these captures can be handled using the following callback:
@@ -139,10 +155,29 @@ mToolbar.addScreenCaptureListener(new AnnotationToolbar.ScreenCaptureListener() 
 Customizing the toolbar
 ----------------
 
-#### <a name="menu-xml"></a>Create menu items through XML
+### <a name="menu-defaults"></a>Default menu items
+
+Below is a list of default menu items that can be used in your custom menu. These come pre-built with the action specified. If no custom menu is inflated
+in the `onCreateAnnotationMenu` listener method, these will be automatically added to your toolbar.
+
+| id            | Action        |
+| ------------- | ------------- |
+| R.id.ot_item_pen | Freehand/Pen tool |
+| R.id.ot_item_line | Line tool |
+| R.id.ot_menu_shape | Shapes group/submenu |
+| R.id.ot_item_arrow | Arrow tool |
+| R.id.ot_item_rectangle | Rectangle tool |
+| R.id.ot_item_oval | Oval tool |
+| R.id.ot_menu_colors | Color picker submenu |
+| R.id.ot_menu_line_width | Line width picker submenu |
+| R.id.ot_item_clear | Clears active user annotations |
+| R.id.ot_item_capture | Tap a video frame to capture a screenshot |
+
+### <a name="menu-xml"></a>Create menu items through XML
 
 Below is an example of a custom annotation menu, located in <var>res/xml</var>. Here, we create a custom `item_star` menu item in the `ot_menu_shape` group.
-See a list of [default menu items](#menu-defaults) below to find out what actions come built into the plugin.
+
+**PRO TIP**: Refer to the list of [default menu items](#menu-defaults) to find out what actions come built into the widget.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -187,8 +222,10 @@ See a list of [default menu items](#menu-defaults) below to find out what action
 </ot-menu>
 ```
 
-To inflate the custom menu in the toolbar, make sure you add an action listener to the toolbar object using `mToolbar.addActionListener(this);`
-(make sure your class implements `AnnotationToolbar.ActionListener`) and add the following to the `onCreateAnnotationMenu` method.
+To inflate the custom menu in the toolbar:
+1. Make sure your class implements `AnnotationToolbar.ActionListener`
+2. Make sure you add an action listener to the toolbar object using `mToolbar.addActionListener(this);`
+Add the following to the `onCreateAnnotationMenu` method.
 
 ```java
 @Override
@@ -200,28 +237,10 @@ public boolean onCreateAnnotationMenu(AnnotationMenuView menu) {
 }
 ```
 
-Note: The annotation toolbar only supports a single submenu. For additional group/menu options, you can use the `onAnnotationMenuItemSelected`
+**PRO TIP**: The annotation toolbar only supports a single submenu. For additional group/menu options, you can use the `onAnnotationMenuItemSelected`
 listener method to add a popover, dropdown, dialog, or any other view to allow more options.
 
-#### <a name="menu-defaults"></a>Default menu items
-
-Below is a list of default menu items that can be used in your custom menu. These come pre-built with the action specified. If no custom menu is inflated
-in the `onCreateAnnotationMenu` listener method, these will be automatically added to your toolbar.
-
-| id            | Action        |
-| ------------- | ------------- |
-| R.id.ot_item_pen | Freehand/Pen tool |
-| R.id.ot_item_line | Line tool |
-| R.id.ot_menu_shape | Shapes group/submenu |
-| R.id.ot_item_arrow | Arrow tool |
-| R.id.ot_item_rectangle | Rectangle tool |
-| R.id.ot_item_oval | Oval tool |
-| R.id.ot_menu_colors | Color picker submenu |
-| R.id.ot_menu_line_width | Line width picker submenu |
-| R.id.ot_item_clear | Clears active user annotations |
-| R.id.ot_item_capture | Tap a video frame to capture a screenshot |
-
-#### Handling custom items
+### Handling custom items
 
 First, make sure you add an action listener (`mToolbar.addActionListener(this);`) to the toolbar (implement `AnnotationToolbar.ActionListener`).
 
@@ -256,8 +275,9 @@ public void onAnnotationItemSelected(AnnotationToolbarItem item) {
 }
 ```
 
-#### Custom annotation colors
+### Customizing the palette
 
+#### Adding a entire palette
 To add a completely new custom palette, create an array of colors and pass it into the toolbar object.
 
 ```java
@@ -273,25 +293,33 @@ int[] colors = {
 mToolbar.setColorChoices(colors);
 ```
 
+#### Adding a color to the existing palette
+
 To add a new color to the existing palette, pass the <var>int</var> value for the color into the toolbar object.
 
 ```java
 mToolbar.addColorChoice(Color.parseColor("#008080")); /* Teal */
 ```
 
-For best results
+Cross-platform compatibility notes
 ----------------
 
-In order to ensure that all annotations aren't cut off across devices, it is recommended to use predefined
-aspect ratios for your video frames. It's a good idea to use the same aspect ratio across device platforms
-(see how to set the aspect ratio for [iOS](https://github.com/opentok/annotation-component-ios#for-best-results) and [JavaScript](https://github.com/opentok/annotation-component-web#for-best-results)).
+To ensure that annotations don't get cut off across devices, we recommend:
 
+* Using predefined aspect ratios for your video frames. 
+* Using the same aspect ratio across device platforms.
+
+The following Java code illustrates how to accomplish this for an Android app.
+
+**Subscriber view**
 ```java
 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
 mSubscriberViewContainer.addView(mSubscriber.getView(), layoutParams);
 ```
-
+**Publisher view**
 ```java
 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(scale*width, scale*height);
 mPublisherViewContainer.addView(mPublisher.getView(), layoutParams);
 ```
+See the [iOS](https://github.com/opentok/annotation-component-ios#cross-platform-compatibility-notes) and [JavaScript](https://github.com/opentok/annotation-component-web#cross-platform-compatibility-notes) Annotations widget repos for code samples specific to these platforms.
+
