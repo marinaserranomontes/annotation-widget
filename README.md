@@ -222,4 +222,4 @@ The following code samples illustrate how to set the aspect ratios within an iOS
 [_publisher.view setFrame:CGRectMake(x, y, scale*width, scale*height)];
 ```
 
-See the repos for the [Android](https://github.com/opentok/annotation-widget/tree/android#for-best-results) and [JavaScript](https://github.com/opentok/annotation-widget/tree/js#for-best-results) annotation plugins for information specific to these platforms.
+See the repos for the [Android](https://github.com/opentok/annotation-widget/tree/android#cross-platform-compatibility-notes) and [JavaScript](https://github.com/opentok/annotation-widget/tree/js#cross-platform-compatibility-notes) annotation plugins for information specific to these platforms.
