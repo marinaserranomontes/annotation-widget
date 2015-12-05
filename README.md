@@ -4,7 +4,7 @@ OpenTok JavaScript Annotations Widget -- Beta
 The JavaScript Annotations widget adds annotation and frame grab capabilities to [OpenTok.js](https://tokbox.com/developer/sdks/js/). While TokBox hosts OpenTok.js, you must host the JavaScript Annotations widget yourself. This allows you to modify the widget as desired. The widget consists of:
 * **[opentok-annotations.js](https://github.com/opentok/annotation-widget/blob/js/web/script/opentok-annotations.js)**: includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
 * **[Image files](https://github.com/opentok/annotation-component-web/tree/js/web/image)**: used for the toolbar icons. 
-* **[demo.html](https://github.com/opentok/annotation-widget/blob/js/web/index.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. You can also look at this file to see how to implement the toolbar in your own page.
+* **[index.html](https://github.com/opentok/annotation-widget/blob/js/web/index.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. You can also look at this file to see how to implement the toolbar in your own page.
 
 As a beta, this code is subject to change. You can email feedback to collaboration-tools-beta-program@tokbox.com.
 
