@@ -81,42 +81,46 @@ OTSolution.Annotations = function(options) {
      * @param item The menu item to set as selected.
      */
     this.selectItem = function (item) {
+        if (self.overlay) {
+            self.overlay.style.display = 'none';
+            self.overlay = null;
+        }
+
         if (item.id === 'OT_capture') {
             self.selectedItem = item;
 
-            self.overlay = document.createElement("div");
-            self.overlay.style.position = 'absolute';
-            self.overlay.style.width = self.parent.clientWidth + 'px';
-            self.overlay.style.height = self.parent.clientHeight + 'px';
-            self.overlay.style.background = 'rgba(0,0,0,0.4) url("image/camera.png") no-repeat center';
-            self.overlay.style.backgroundSize = "50px 50px";
-            self.overlay.style.cursor = 'pointer';
-            self.overlay.style.opacity = 0;
-
-            self.parent.appendChild(self.overlay);
-
-            self.parent.onmouseover = function () {
-                self.overlay.style.opacity = 1;
-            };
-
-            self.parent.onmouseout = function () {
+            if (!self.overlay) {
+                self.overlay = document.createElement("div");
+                self.overlay.style.position = 'absolute';
+                self.overlay.style.width = self.parent.clientWidth + 'px';
+                self.overlay.style.height = self.parent.clientHeight + 'px';
+                self.overlay.style.background = 'rgba(0,0,0,0.4) url("image/camera.png") no-repeat center';
+                self.overlay.style.backgroundSize = "50px 50px";
+                self.overlay.style.cursor = 'pointer';
                 self.overlay.style.opacity = 0;
-            };
 
-            self.overlay.onclick = function () {
-                self.captureScreenshot();
-            };
+                self.parent.appendChild(self.overlay);
+
+                self.parent.onmouseover = function () {
+                    self.overlay.style.opacity = 1;
+                };
+
+                self.parent.onmouseout = function () {
+                    self.overlay.style.opacity = 0;
+                };
+
+                self.overlay.onclick = function () {
+                    self.captureScreenshot();
+                };
+            } else {
+                self.overlay.style = 'inline';
+            }
         } else if (item.id.indexOf('OT_line_width') !== -1) {
             if (item.size) {
                 self.changeLineWidth(item.size);
             }
         } else {
             self.selectedItem = item;
-
-            if (self.overlay) {
-                self.parent.removeChild(self.overlay);
-                self.overlay = null;
-            }
         }
     };
 
@@ -166,23 +170,33 @@ OTSolution.Annotations = function(options) {
 
         var scale = 1;
 
-        if (width > height) {
-            scale = canvas.width / width;
-            width = canvas.width;
-            height = height * scale;
-        } else {
-            scale = canvas.height / height;
-            height = canvas.height;
-            width = width * scale;
-        }
-
         var offsetX = 0;
         var offsetY = 0;
 
         if (scaledToFill) {
+            if (width < height) {
+                scale = canvas.width / width;
+                width = canvas.width;
+                height = height * scale;
+            } else {
+                scale = canvas.height / height;
+                height = canvas.height;
+                width = width * scale;
+            }
+
             // If stretched to fill, we need an offset to center the image
-            offsetX = (canvas.width - width) / 2;
-            offsetY = (canvas.height - height) / 2;
+            offsetX = (width - canvas.width) / 2;
+            offsetY = (height - canvas.height) / 2;
+        } else {
+            if (width > height) {
+                scale = canvas.width / width;
+                width = canvas.width;
+                height = height * scale;
+            } else {
+                scale = canvas.height / height;
+                height = canvas.height;
+                width = width * scale;
+            }
         }
 
         // Combine the video and annotation images
