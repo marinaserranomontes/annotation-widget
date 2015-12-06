@@ -426,6 +426,7 @@ OTSolution.Annotations = function(options) {
         if (!ctx) {
             ctx = canvas.getContext("2d");
             ctx.lineCap = "round";
+            ctx.lineJoin = "round";
             ctx.fillStyle = "solid";
         }
 
