@@ -26,7 +26,7 @@ You can add the plugin using CocoaPods or manually.
 
 ### CocoaPods
 
-1. Add `pod 'OpenTokAnnotations', :git => 'https://github.com/opentok/annotation-component-ios.git'` to your podfile.
+1. Add `pod 'OpenTokAnnotations', :git => 'https://github.com/opentok/annotation-widget.git', :branch => 'ios'` to your podfile.
 2. Run `pod install` from a terminal prompt or using an Xcode plugin.
 
 ### Manually add the framework
