@@ -1,7 +1,7 @@
-OpenTok iOS Annotations Plugin -- Beta
+OpenTok iOS Annotations Widget -- Beta
 ===========================
 
-The Annotations plugin adds annotation and frame grab capabilities to OpenTok for iOS. It's written in Objective-C but also offers Interface Builder support. 
+The Annotations widget adds annotation and frame grab capabilities to OpenTok for iOS. It's written in Objective-C but also offers Interface Builder support. 
 
 As a beta, this code is subject to change. Pull requests are welcome. You can also email feedback to collaboration-tools-beta-program@tokbox.com.
 
@@ -14,15 +14,15 @@ Review the basic requirements for [OpenTok](https://tokbox.com/developer/require
 Prerequisites
 -----
 
-* Version 2.7, 2.6, or 2.5 of [OpenTok iOS SDK](https://tokbox.com/developer/sdks/ios/): latest version is preferred
+* Version 2.7, 2.6, or 2.5 of [OpenTok iOS SDK](https://tokbox.com/developer/sdks/ios/): *latest version is preferred*
 * An Xcode project that uses the OpenTok iOS SDK
 
-PRO TIP: If you don't already have a project, grab the [OpenTok iOS SDK samples](https://github.com/opentok/opentok-ios-sdk-samples) for a quick start.
+**PRO TIP**: If you don't already have a project, grab the [OpenTok iOS SDK samples](https://github.com/opentok/opentok-ios-sdk-samples) for a quick start.
 
-Adding the plugin to your project
+Adding the widget to your project
 ----------
 
-You can add the plugin using CocoaPods or manually.
+You can add the widget using CocoaPods or manually.
 
 ### CocoaPods
 
@@ -48,7 +48,7 @@ Open `Main.storyboard` and drag a `UIView` component into the main view. With th
 
 ![image](Images/set_custom_class.png)
 
-### In Objective C
+### In Objective-C
 To use the toolbar in your code, add the following line to your `ViewController.m` file and link the OpenTok toolbar you just created in Interface Builder:
 
 ```objective-c
@@ -94,7 +94,7 @@ Similarly, an annotation view can be added to an incoming subscriber feed in the
 Grabbing frames
 ------------
 
-The 'ot_capture' toolbar button allows an individual frame to be captured, including any annotations. The frame image could be a screenshare or a video image: whatever is being streamed at the time of capture. The `UIImage` for these captures can be handled using the following callback from the `OTScreenCaptureDelegate`:
+The `ot_capture` toolbar button allows an individual frame to be captured, including any annotations. The frame image could be a screenshare or a video image: whatever is being streamed at the time of capture. The `UIImage` for these captures can be handled using the following callback from the `OTScreenCaptureDelegate`:
 
 ```objective-c
 -(void)didCaptureImage:(UIImage *)image forConnection:(NSString *)connectionId {
@@ -113,16 +113,16 @@ Below is a list of default `OTAnnotationButtonItem` identifiers and their corres
 
 | id            | Action        |
 | ------------- | ------------- |
-| ot_pen | Freehand/Pen tool |
-| ot_line | Line tool |
-| ot_shape | Shapes group/submenu |
-| ot_arrow | Arrow tool |
-| ot_rectangle | Rectangle tool |
-| ot_oval | Oval tool |
-| ot_colors | Color picker submenu |
-| ot_line_width | Line width picker submenu |
-| ot_clear | Clears active user annotations |
-| ot_capture | Tap a video frame to capture a screenshot |
+| `ot_pen` | Freehand/Pen tool |
+| `ot_line` | Line tool |
+| `ot_shape` | Shapes group/submenu |
+| `ot_arrow` | Arrow tool |
+| `ot_rectangle` | Rectangle tool |
+| `ot_oval` | Oval tool |
+| `ot_colors` | Color picker submenu |
+| `ot_line_width` | Line width picker submenu |
+| `ot_clear` | Clears active user annotations |
+| `ot_capture` | Tap a video frame to capture a screenshot |
 
 
 ### Adding/removing menu items
@@ -137,21 +137,21 @@ See [Add menu items using Interface Builder](#ib-menu) to create static menu ite
 
 The `OTAnnotationButtonItem` class provides an `identifier` property that allows a string to be associated with the button for use on delegate callback (or you can use the `tag` property associated with all `UIView`s.
 
-*Info: You may want to add* `[self.view bringSubviewToFront:_toolbar];` *to ensure the toolbar is always drawn on top.*
+**PRO TIP**: You may want to add `[self.view bringSubviewToFront:_toolbar];` to ensure the toolbar is always drawn on top.
 
 ### <a name="ib-menu"></a>Add menu items using Interface Builder
 
-OTAnnotations provides Interface Builder support to add custom toolbars and button items. 
+`OTAnnotations` provides Interface Builder support to add custom toolbars and button items. 
 
-#### Link a main toolbar
+#### Linking a main toolbar
 ![image](Images/link_main_toolbar.gif)
 
-#### Link a sub toolbar to an `OTAnnotationButtonItem`
+#### Linking a sub toolbar to an `OTAnnotationButtonItem`
 ![image](Images/link_sub_toolbar.gif)
 
 ### Handling custom items
 
-Custom added toolbar items will fire the `didTapItem` callback if the `OTAnnotationToolbarDelegate` is configured in your view controller. Add `<OTAnnotationToolbarDelegate>` to your ViewController.h file and be sure to set `_toolbar.delegate = self;`. Then, add the method below to your view controller implementation file:
+Custom added toolbar items will fire the `didTapItem` callback if the `OTAnnotationToolbarDelegate` is configured in your view controller. Add `<OTAnnotationToolbarDelegate>` to your ViewController.h file and be sure to set `_toolbar.delegate = self;`. Then add the method below to your view controller implementation file:
 
 ```objective-c
 -(void)didTapItem:(UIBarButtonItem *)item {
@@ -179,8 +179,9 @@ Custom added toolbar items will fire the `didTapItem` callback if the `OTAnnotat
 
 The example above tests for an `OTAnnotationButtonItem`, which allows a set of points to be defined as the action and will draw the result of those points on the screen as the user interacts with it.
 
-### Custom colors
+### Customizing the palette
 
+#### Adding an entire palette
 To add a new color palette to be used with annotations, call `setColors:` on the toolbar instance.
 
 ```objective-c
@@ -197,6 +198,8 @@ NSArray* colors = [NSArray arrayWithObjects:
 [_toolbar setColors:colors];
 ```
 
+#### Adding a color to an existing palette
+
 To add a new color to the existing palette, call `addColor:` on the toolbar instance.
 
 ```objective-c
@@ -212,13 +215,13 @@ In order to ensure that all annotations aren't cut off across devices, we recomm
 
 The following code samples illustrate how to set the aspect ratios within an iOS app. 
 
+**Subscriber view**
 ```objective-c
-...
-
 [_subscriber.view setFrame:CGRectMake(x, y, width, height)];
+```
 
-...
-
+**Publisher view**
+```objective-c
 [_publisher.view setFrame:CGRectMake(x, y, scale*width, scale*height)];
 ```
 
