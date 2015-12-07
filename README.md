@@ -1,7 +1,7 @@
-OpenTok iOS Annotations Widget -- Beta
+OpenTok Annotations Widget for iOS -- Beta
 ===========================
 
-The Annotations widget adds annotation and frame grab capabilities to OpenTok for iOS. It's written in Objective-C but also offers Interface Builder support. 
+The OpenTok Annotations Widget for iOS is written in Objective-C but also offers Interface Builder support. 
 
 As a beta, this code is subject to change. Pull requests are welcome. You can also email feedback to collaboration-tools-beta-program@tokbox.com.
 
@@ -225,4 +225,4 @@ The following code samples illustrate how to set the aspect ratios within an iOS
 [_publisher.view setFrame:CGRectMake(x, y, scale*width, scale*height)];
 ```
 
-See the repos for the [Android](https://github.com/opentok/annotation-widget/tree/android#cross-platform-compatibility-notes) and [JavaScript](https://github.com/opentok/annotation-widget/tree/js#cross-platform-compatibility-notes) annotation plugins for information specific to these platforms.
+See the [Android](https://github.com/opentok/annotation-widget/tree/android#cross-platform-compatibility-notes) and [JavaScript](https://github.com/opentok/annotation-widget/tree/js#cross-platform-compatibility-notes) branches for information specific to these platforms.
