@@ -1,9 +1,10 @@
-OpenTok JavaScript Annotations Widget -- Beta
+OpenTok Annotations Widget for JavaScript -- Beta
 ==================
 
-The JavaScript Annotations widget adds annotation and frame grab capabilities to [OpenTok.js](https://tokbox.com/developer/sdks/js/). While TokBox hosts OpenTok.js, you must host the JavaScript Annotations widget yourself. This allows you to modify the widget as desired. The widget consists of:
-* **[opentok-annotations.js](https://github.com/opentok/annotation-widget/blob/js/web/script/opentok-annotations.js)**: includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
-* **[Image files](https://github.com/opentok/annotation-component-web/tree/js/web/image)**: used for the toolbar icons. 
+While TokBox hosts [OpenTok.js](https://tokbox.com/developer/sdks/js/), you must host the JavaScript Annotations widget yourself. This allows you to modify the widget as desired. 
+
+* **[opentok-annotations.js](https://github.com/opentok/annotation-widget/tree/js/web/script)**: includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
+* **[Image files](https://github.com/opentok/annotation-widget/tree/js/web/image)**: used for the toolbar icons. 
 * **[index.html](https://github.com/opentok/annotation-widget/blob/js/web/index.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. You can also look at this file to see how to implement the toolbar in your own page.
 
 As a beta, this code is subject to change. You can email feedback to collaboration-tools-beta-program@tokbox.com.
@@ -17,19 +18,26 @@ Review the basic requirements for [OpenTok](https://tokbox.com/developer/require
 Prerequisites
 -----
 
-* **OpenTok JavaScript client SDK**: your web page must load [OpenTok.js](https://tokbox.com/developer/sdks/js/) first, then [opentok-annotations.js](https://github.com/opentok/annotation-widget/blob/js/web/script/opentok-annotations.js).  
+* **OpenTok JavaScript client SDK**: your web page must load [OpenTok.js](https://tokbox.com/developer/sdks/js/) first, then [opentok-annotations.js](https://github.com/opentok/annotation-widg
+et/tree/js/web/script).  
 * **An API key**: obtained when you sign up for a [developer account](https://dashboard.tokbox.com/users/sign_up).
 * **Session ID and token**: during testing and development phases, you can generate these inside the [Dashboard](https://dashboard.tokbox.com/). Before going live, you will need to deploy a [server SDK](https://tokbox.com/developer/sdks/server/) and generate these values automatically.
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/opentok/annotation-widget/tree/js)
 
-Installation
+Downloading the widget
 -----
 
-[Download](https://github.com/opentok/annotation-widget/releases) the latest release.
+[Download](https://github.com/opentok/annotation-widget/releases/tag/1.0.0-js-beta) the latest release.
 
 **PRO TIP**: Pull requests are welcome! If you think you may want to contribute back to this project, please feel free to fork or clone the repo. 
 
+
+Deploying the widget
+-----
+
+The web page that loads the Annotations Widget for JavaScript must be served over HTTP/HTTPS. Browser security limitations prevent you from publishing video using a `file://` path, as discussed in the OpenTok.js [Release Notes](https://www-tbrel.tokbox.com/developer/sdks/js/release-notes.html#knownIssues). A web server such as [MAMP](https://www.mamp.info/) or [Apache](https://httpd.apache.org/) will work, or else you can use a cloud service such as [Heroku](https://www.heroku.com/) to host the widget. Click the following button for a very quick deploy to Heroku.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/opentok/annotation-widget/tree/js)
 
 Using the widget
 -----
@@ -246,4 +254,4 @@ The following sample illustrates one way to do this in JavaScript.
             };
 ```
 
-See the repos for the [iOS](https://github.com/opentok/annotation-widget/tree/ios#cross-platform-compatibility-notes) and [Android](https://github.com/opentok/annotation-widget/tree/android#cross-platform-compatibility-notes) Annotation widgets for information specific to these platforms.
+See the [iOS](https://github.com/opentok/annotation-widget/tree/ios#cross-platform-compatibility-notes) and [Android](https://github.com/opentok/annotation-widget/tree/android#cross-platform-compatibility-notes) branches for code samples specific to these platforms.
