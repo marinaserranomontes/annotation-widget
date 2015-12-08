@@ -1,7 +1,7 @@
-OpenTok Android Annotations Widget -- Beta
+OpenTok Annotations Widget for Android -- Beta
 ===========================
 
-The Android Annotations widget adds annotation and frame grab capabilities to the [OpenTok Android SDK](https://tokbox.com/developer/sdks/android/).
+The OpenTok Annotations Widget for Android is written in Java, includes an AAR file for easy import into Android Studio, and also offers JitPack Gradle support.
 
 As a beta, this code is subject to change. Pull requests are welcome. You can also email feedback to collaboration-tools-beta-program@tokbox.com.
 
@@ -28,12 +28,12 @@ Installing
 ### Gradle
 
 1. Include the JitPack repository in your module's `build.gradle` file by adding `maven { url "https://jitpack.io" }` to the `repositories` section.
-2. Add `compile 'com.github.opentok:annotation-component-android:1.0.0'` to `dependencies` in your module's `build.gradle` file.
+2. Add `compile 'com.github.opentok:annotation-widget:1.0.0-android-beta'` to `dependencies` in your module's `build.gradle` file.
 3. Sync Gradle and build your project.
 
 ### .AAR in Android Studio
 
-1. Download the [latest version](https://github.com/opentok/annotation-widget/releases) of the widget.
+1. Download the [latest version](https://github.com/opentok/annotation-widget/releases/tag/1.0.0-android-beta) of the widget.
 2. Right click on your project module (usually called "app" but may be something else) and choose "Open Module Settings" from the bottom of the menu.
 3. Click the '+' sign in the upper left hand corner.
 4. Choose "Import .JAR or .AAR Package" from the list in the popup.
