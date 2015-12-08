@@ -25,12 +25,6 @@ Prerequisites
 Installing
 ----------
 
-### Gradle
-
-1. Include the JitPack repository in your module's `build.gradle` file by adding `maven { url "https://jitpack.io" }` to the `repositories` section.
-2. Add `compile 'com.github.opentok:annotation-widget:1.0.0-android-beta'` to `dependencies` in your module's `build.gradle` file.
-3. Sync Gradle and build your project.
-
 ### .AAR in Android Studio
 
 1. Download the [latest version](https://github.com/opentok/annotation-widget/releases/tag/1.0.0-android-beta) of the widget.
