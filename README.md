@@ -1,7 +1,7 @@
 OpenTok Annotations Widget for Android -- Beta
 ===========================
 
-The OpenTok Annotations Widget for Android is written in Java, includes an AAR file for easy import into Android Studio, and also offers JitPack Gradle support.
+The OpenTok Annotations Widget for Android is written in Java and includes an AAR file for easy import into Android Studio.
 
 As a beta, this code is subject to change. Pull requests are welcome. You can also email feedback to collaboration-tools-beta-program@tokbox.com.
 
