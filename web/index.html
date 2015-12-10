@@ -61,7 +61,7 @@
                 sessionId = res.sessionId;
                 token = res.token;
 
-                session = TB.initSession(sessionId);	// Initialize session
+                session = TB.initSession(apiKey, sessionId);	// Initialize session
 
                 // Add event listeners to the session
                 session.addEventListener('sessionConnected', sessionConnectedHandler);
@@ -72,7 +72,7 @@
                 session.addEventListener('streamDestroyed', streamDestroyedHandler);
                 session.addEventListener('signal', signalHandler);
 
-                session.connect(apiKey, token);
+                session.connect(token);
 
                 // Initialize a toolbar for controlling annotation canvases
                 toolbar = new OTSolution.Annotations.Toolbar({

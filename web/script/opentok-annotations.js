@@ -14,6 +14,8 @@ window.OTSolution = window.OTSolution || {};
 OTSolution.Annotations = function(options) {
     options || (options = {});
 
+    this.widgetVersion = "js-1.0.0-beta"
+
     this.parent = options.container;
     this.videoFeed = options.feed;
 
@@ -153,11 +155,15 @@ OTSolution.Annotations = function(options) {
     this.captureScreenshot = function() {
 
         OTSolution.Annotations.Analytics.logEvent({
-            action: 'Capture',
+            widgetVersion: self.widgetVersion,
+            guid: OTSolution.Annotations.Analytics.get_uuid(),
+            source: window.location.href,
+            logVersion: "1",
+            clientSystemTime: new Date().getTime(),
+            action: 'an_capture',
             variation: '',
-            payload: '',
             sessionId: self.session.sessionId,
-            partnerId: '',
+            partnerId: self.videoFeed.session.apiKey,
             connectionId: self.session.connection.connectionId
         });
 
@@ -267,15 +273,6 @@ OTSolution.Annotations = function(options) {
         if (self.selectedItem) {
             if (self.selectedItem.id === 'OT_pen') {
 
-                OTSolution.Annotations.Analytics.logEvent({
-                    action: 'Pen',
-                    variation: 'Draw',
-                    payload: '',
-                    sessionId: self.session.sessionId,
-                    partnerId: '',
-                    connectionId: self.session.connection.connectionId
-                });
-
                 switch (event.type) {
                     case 'mousedown':
                     case 'touchstart':
@@ -315,17 +312,21 @@ OTSolution.Annotations = function(options) {
                     case 'touchend':
                     case 'mouseout':
                         client.dragging = false;
+
+                        OTSolution.Annotations.Analytics.logEvent({
+                            widgetVersion: self.widgetVersion,
+                            guid: OTSolution.Annotations.Analytics.get_uuid(),
+                            source: window.location.href,
+                            logVersion: "1",
+                            clientSystemTime: new Date().getTime(),
+                            action: 'an_draw',
+                            variation: 'an_pen',
+                            sessionId: self.session.sessionId,
+                            partnerId: self.videoFeed.session.apiKey,
+                            connectionId: self.session.connection.connectionId
+                        });
                 }
             } else {
-                OTSolution.Annotations.Analytics.logEvent({
-                    action: 'Shape',
-                    variation: 'Draw',
-                    payload: '',
-                    sessionId: self.session.sessionId,
-                    partnerId: '',
-                    connectionId: self.session.connection.connectionId
-                });
-
                 // We have a shape or custom object
                 if (self.selectedItem && self.selectedItem.points) {
                     client.mX = x;
@@ -354,6 +355,19 @@ OTSolution.Annotations = function(options) {
                         case 'mouseup':
                         case 'touchend':
                             client.isDrawing = false;
+
+                            OTSolution.Annotations.Analytics.logEvent({
+                                widgetVersion: self.widgetVersion,
+                                guid: OTSolution.Annotations.Analytics.get_uuid(),
+                                source: window.location.href,
+                                logVersion: "1",
+                                clientSystemTime: new Date().getTime(),
+                                action: 'an_draw',
+                                variation: 'an_shape',
+                                sessionId: self.session.sessionId,
+                                partnerId: self.videoFeed.session.apiKey,
+                                connectionId: self.session.connection.connectionId
+                            });
 
                             var points = self.selectedItem.points;
 
@@ -1395,7 +1409,6 @@ OTSolution.Annotations.Analytics = function() { };
 OTSolution.Annotations.Analytics.logEvent = function (data) {
     var payload = data.payload || "";
 
-    // convert JS object payload to url query string
     if (typeof(payload) === "object") {
         payload = JSON.stringify(payload);
     }
@@ -1408,4 +1421,11 @@ OTSolution.Annotations.Analytics.logEvent = function (data) {
     http.open("POST", 'https://hlg.tokbox.com/prod/logging/ClientEvent', true);
     http.setRequestHeader("Content-type", "application/json");
     http.send(url_encoded_data);
+};
+
+OTSolution.Annotations.Analytics.get_uuid = function() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
 };
