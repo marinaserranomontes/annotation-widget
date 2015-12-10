@@ -31,6 +31,7 @@
     OTPublisher *_publisher;
     
     NSString *_sessionId;
+    NSString *_partnerId;
     NSString *_mycid;
     NSString *_canvasId;
     
@@ -51,6 +52,7 @@
     if (self = [super initWithFrame:subscriber.view.frame]) {
         _subscriber = subscriber;
         _sessionId = subscriber.session.sessionId;
+        _partnerId = [subscriber.session valueForKey:@"_apiKey"];
         _mycid = subscriber.session.connection.connectionId;
         _mirrored = false;
         
@@ -73,6 +75,7 @@
     if (self = [super initWithFrame:publisher.view.frame]) {
         _publisher = publisher;
         _sessionId = publisher.session.sessionId;
+        _partnerId = [publisher.session valueForKey:@"_apiKey"];
         _mycid = publisher.session.connection.connectionId;
         _mirrored = ((OTAnnotationVideoRender*)publisher.videoRender).mirroring;
         
@@ -296,17 +299,6 @@
     
     if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
         [self moveTouch:point smoothingEnabled:_selectedItem.enableSmoothing startPoint:_isFirstPoint endPoint:false incoming:false];
-        
-        NSDictionary* data = @{
-                                   @"action" : @"Pen",
-                                   @"variation" : @"Draw",
-                                   @"payload" : @"",
-                                   @"sessionId" : _sessionId,
-                                   @"partnerId" : @"",
-                                   @"connectionId" : _mycid
-                               };
-        
-        [OTAnnotationAnalytics logEvent:data];
     } else {
         if (_selectedItem.points != nil) {
             [self setNeedsDisplay];
@@ -454,11 +446,15 @@
         }
         
         NSDictionary* data = @{
-                                   @"action" : @"Shape",
-                                   @"variation" : @"Draw",
+                                   @"widgetVersion" : [self getCurrentWidgetVersion],
+                                   @"guid" : [self getUUID],
+                                   @"logVersion" : @"1",
+                                   @"clientSystemTime" : [self getCurrentTimeMillis],
+                                   @"action" : @"an_draw",
+                                   @"variation" : @"an_shape",
                                    @"payload" : @"",
                                    @"sessionId" : _sessionId,
-                                   @"partnerId" : @"",
+                                   @"partnerId" : _partnerId,
                                    @"connectionId" : _mycid
                                };
         
@@ -469,6 +465,21 @@
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     if ([_selectedItem.identifier isEqualToString:@"ot_pen"]) {
         [self touchesMoved:touches withEvent:event];
+        
+        NSDictionary* data = @{
+                                   @"widgetVersion" : [self getCurrentWidgetVersion],
+                                   @"guid" : [self getUUID],
+                                   @"logVersion" : @"1",
+                                   @"clientSystemTime" : [self getCurrentTimeMillis],
+                                   @"action" : @"an_draw",
+                                   @"variation" : @"an_pen",
+                                   @"payload" : @"",
+                                   @"sessionId" : _sessionId,
+                                   @"partnerId" : _partnerId,
+                                   @"connectionId" : _mycid
+                               };
+        
+        [OTAnnotationAnalytics logEvent:data];
     } else {
         [self drawShape];
     }
@@ -722,11 +733,15 @@
     [toolbar didCaptureImage:image forConnection:_canvasId];
     
     NSDictionary* data = @{
-                               @"action" : @"Capture",
+                               @"widgetVersion" : [self getCurrentWidgetVersion],
+                               @"guid" : [self getUUID],
+                               @"logVersion" : @"1",
+                               @"clientSystemTime" : [self getCurrentTimeMillis],
+                               @"action" : @"an_capture",
                                @"variation" : @"",
                                @"payload" : @"",
                                @"sessionId" : _sessionId,
-                               @"partnerId" : @"",
+                               @"partnerId" : _partnerId,
                                @"connectionId" : _mycid
                            };
     
@@ -768,6 +783,21 @@
         }
 
     }
+}
+
+- (NSString*) getCurrentWidgetVersion {
+    return [NSString stringWithFormat:@"ios-%@-beta", [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
+}
+
+- (NSString*) getUUID {
+    return [[NSUUID UUID] UUIDString];
+}
+
+-(NSString*) getCurrentTimeMillis {
+    NSTimeInterval time = ([[NSDate date] timeIntervalSince1970]);
+    long digits = (long)time;
+    int decimalDigits = (int)(fmod(time, 1) * 1000);
+    return [NSString stringWithFormat:@"%ld%d", digits, decimalDigits];
 }
 
 @end
