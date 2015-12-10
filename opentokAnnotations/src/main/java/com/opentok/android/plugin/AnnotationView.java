@@ -27,11 +27,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class AnnotationView extends View implements AnnotationToolbar.SignalListener, AnnotationToolbar.ActionListener {
 
@@ -41,6 +43,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
     private String canvascid;
 
     private String mSessionId;
+    private String mPartnerId;
 
     public int width;
     public int height;
@@ -177,6 +180,17 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 mSessionId = mSubscriber.getSession().getSessionId();
                 mycid = mSubscriber.getSession().getConnection().getConnectionId();
 
+                try {
+                    Field field = mSubscriber.getSession().getClass().getDeclaredField("apiKey");
+                    field.setAccessible(true);
+
+                    mPartnerId = (String) field.get(mSubscriber.getSession());
+                } catch (NoSuchFieldException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+
                 // TODO Make sure this also gets called onSizeChanged
                 if (mSubscriber.getRenderer() instanceof AnnotationVideoRenderer) {
                     mMirrored = ((AnnotationVideoRenderer) mSubscriber.getRenderer()).isMirrored();
@@ -213,6 +227,19 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 while (mPublisher.getSession() == null) { /* Wait */ }
                 mSessionId = mPublisher.getSession().getSessionId();
                 mycid = mPublisher.getSession().getConnection().getConnectionId();
+
+                try {
+                    Field field = mPublisher.getSession().getClass().getDeclaredField("apiKey");
+                    field.setAccessible(true);
+
+                    mPartnerId = (String) field.get(mPublisher.getSession());
+
+                    Log.v("API_KEY", mPartnerId);
+                } catch (NoSuchFieldException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
 
 //                // TODO Make sure this also gets called onSizeChanged
                 if (mPublisher.getRenderer() instanceof AnnotationVideoRenderer) {
@@ -305,16 +332,16 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
     @Override
     public void signalReceived(Session session, String type, String data, Connection connection) {
-        Log.i("Canvas Signal", type + ": " + data);
+//        Log.i("Canvas Signal", type + ": " + data);
 
         mycid = session.getConnection().getConnectionId();
         String cid = connection.getConnectionId();
 
-        Log.i("Canvas Signal", cid);
+//        Log.i("Canvas Signal", cid);
         if (!cid.equals(mycid)) { // Ensure that we only handle signals from other users on the current canvas
             if (type.contains("otAnnotation")) {
                 if (type.equalsIgnoreCase(Mode.Pen.toString())) {
-                    Log.i(TAG, data);
+//                    Log.i(TAG, data);
 
                     // Build object from JSON array
                     try {
@@ -482,7 +509,7 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                                             // We have a straight line
                                             startTouch(fromX, fromY);
                                             moveTouch(toX, toY, false);
-                                            getActivePath().close();
+                                            upTouch();
                                         } else if (isStartPoint) {
                                             startTouch(fromX, fromY);
                                         } else if (endPoint) {
@@ -610,11 +637,14 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                     try {
                         JSONObject data = new JSONObject();
 
-                        data.put("action", "Pen");
-                        data.put("variation", "Draw");
-                        data.put("payload", "");
+                        data.put("widgetVersion", getCurrentWidgetVersion());
+                        data.put("guid", getUUID());
+                        data.put("logVersion", "1");
+                        data.put("clientSystemTime", System.currentTimeMillis());
+                        data.put("action", "an_draw");
+                        data.put("variation", "an_pen");
                         data.put("sessionId", mSessionId);
-                        data.put("partnerId", "");
+                        data.put("partnerId", mPartnerId != null ? mPartnerId : "");
                         data.put("connectionId", mycid);
 
                         AnnotationAnalytics.logEvent(data);
@@ -628,11 +658,15 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
 
             try {
                 JSONObject data = new JSONObject();
-                data.put("action", "Capture");
+
+                data.put("widgetVersion", getCurrentWidgetVersion());
+                data.put("guid", getUUID());
+                data.put("logVersion", "1");
+                data.put("clientSystemTime", System.currentTimeMillis());
+                data.put("action", "an_capture");
                 data.put("variation", "");
-                data.put("payload", "");
                 data.put("sessionId", mSessionId);
-                data.put("partnerId", "");
+                data.put("partnerId", mPartnerId != null ? mPartnerId : "");
                 data.put("connectionId", mycid);
 
                 AnnotationAnalytics.logEvent(data);
@@ -731,11 +765,14 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
                 try {
                     JSONObject data = new JSONObject();
 
-                    data.put("action", "Shape");
-                    data.put("variation", "Draw");
-                    data.put("payload", "");
+                    data.put("widgetVersion", getCurrentWidgetVersion());
+                    data.put("guid", getUUID());
+                    data.put("logVersion", "1");
+                    data.put("clientSystemTime", System.currentTimeMillis());
+                    data.put("action", "an_draw");
+                    data.put("variation", "an_shape");
                     data.put("sessionId", mSessionId);
-                    data.put("partnerId", "");
+                    data.put("partnerId", mPartnerId != null ? mPartnerId : "");
                     data.put("connectionId", mycid);
 
                     AnnotationAnalytics.logEvent(data);
@@ -1055,5 +1092,13 @@ public class AnnotationView extends View implements AnnotationToolbar.SignalList
         }
 
         return pointArray;
+    }
+
+    private String getCurrentWidgetVersion() {
+        return "android-" + BuildConfig.VERSION_NAME + "-beta";
+    }
+
+    private String getUUID() {
+        return UUID.randomUUID().toString();
     }
 }

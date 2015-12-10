@@ -35,6 +35,7 @@ class AnnotationAnalytics {
                     os.close();
 
                     conn.connect();
+                    conn.disconntect();
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (UnsupportedEncodingException e) {
