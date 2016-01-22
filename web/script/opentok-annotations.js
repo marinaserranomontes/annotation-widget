@@ -25,9 +25,9 @@ OTSolution.Annotations = function(options) {
         canvas.style.position = 'absolute';
         this.parent.appendChild(canvas);
         canvas.setAttribute('width', this.parent.clientWidth + 'px');
-        canvas.style.width = this.parent.clientWidth + 'px';
+        canvas.style.width = window.getComputedStyle(this.parent).width;
         canvas.setAttribute('height', this.parent.clientHeight + 'px');
-        canvas.style.height = this.parent.clientHeight + 'px';
+        canvas.style.height = window.getComputedStyle(this.parent).height;
     }
 
     var self = this,
@@ -55,6 +55,7 @@ OTSolution.Annotations = function(options) {
      * @param session The OpenTok session.
      */
     this.link = function(session) {
+        console.log('linking session to canvas', session);
         this.session = session;
     };
 
@@ -96,7 +97,7 @@ OTSolution.Annotations = function(options) {
                 self.overlay.style.position = 'absolute';
                 self.overlay.style.width = self.parent.clientWidth + 'px';
                 self.overlay.style.height = self.parent.clientHeight + 'px';
-                self.overlay.style.background = 'rgba(0,0,0,0.4) url("image/camera.png") no-repeat center';
+                self.overlay.style.background = 'rgba(0,0,0,0.4) url("../images/annotation/camera.png") no-repeat center';
                 self.overlay.style.backgroundSize = "50px 50px";
                 self.overlay.style.cursor = 'pointer';
                 self.overlay.style.opacity = 0;
@@ -141,8 +142,8 @@ OTSolution.Annotations = function(options) {
      */
     this.clear = function () {
         clearCanvas(false, self.session.connection.connectionId);
-        if (session) {
-            session.signal({
+        if (self.session) {
+            self.session.signal({
                 type: 'otAnnotation_clear'
             });
         }
@@ -253,12 +254,21 @@ OTSolution.Annotations = function(options) {
         }
         event.preventDefault();
 
+        // Ensure that our canvas has been properly sized
+        if (canvas.width === 0) {
+            canvas.width = self.parent.getBoundingClientRect().width;
+        }
+
+        if (canvas.height === 0) {
+            canvas.height = self.parent.getBoundingClientRect().height;
+        }
+
         var scaleX = canvas.width / self.parent.clientWidth;
         var scaleY = canvas.height / self.parent.clientHeight;
         var offsetX = event.offsetX || event.pageX - canvas.offsetLeft ||
-                event.changedTouches[0].pageX - canvas.offsetLeft;
+            event.changedTouches[0].pageX - canvas.offsetLeft;
         var offsetY = event.offsetY || event.pageY - canvas.offsetTop ||
-                event.changedTouches[0].pageY - canvas.offsetTop;
+            event.changedTouches[0].pageY - canvas.offsetTop;
         var x = offsetX * scaleX;
         var y = offsetY * scaleY;
 
@@ -688,8 +698,8 @@ OTSolution.Annotations = function(options) {
         });
 
         if (!incoming) {
-            if (session) {
-                session.signal({
+            if (self.session) {
+                self.session.signal({
                     type: 'otAnnotation_clear'
                 });
             }
@@ -790,14 +800,14 @@ OTSolution.Annotations.Toolbar = function(options) {
         {
             id: 'OT_pen',
             title: 'Pen',
-            icon: 'image/freehand.png',
-            selectedIcon: 'image/freehand_selected.png'
+            icon: '../images/annotation/freehand.png',
+            selectedIcon: '../images/annotation/freehand_selected.png'
         },
         {
             id: 'OT_line',
             title: 'Line',
-            icon: 'image/line.png',
-            selectedIcon: 'image/line_selected.png',
+            icon: '../images/annotation/line.png',
+            selectedIcon: '../images/annotation/line_selected.png',
             points: [
                 [0, 0],
                 [0, 1]
@@ -806,12 +816,12 @@ OTSolution.Annotations.Toolbar = function(options) {
         {
             id: 'OT_shapes',
             title: 'Shapes',
-            icon: 'image/shapes.png',
+            icon: '../images/annotation/shapes.png',
             items: [
                 {
                     id: 'OT_arrow',
                     title: 'Arrow',
-                    icon: 'image/arrow.png',
+                    icon: '../images/annotation/arrow.png',
                     points: [
                         [0, 1],
                         [3, 1],
@@ -826,7 +836,7 @@ OTSolution.Annotations.Toolbar = function(options) {
                 {
                     id: 'OT_rect',
                     title: 'Rectangle',
-                    icon: 'image/rectangle.png',
+                    icon: '../images/annotation/rectangle.png',
                     points: [
                         [0, 0],
                         [1, 0],
@@ -838,7 +848,7 @@ OTSolution.Annotations.Toolbar = function(options) {
                 {
                     id: 'OT_oval',
                     title: 'Oval',
-                    icon: 'image/oval.png',
+                    icon: '../images/annotation/oval.png',
                     enableSmoothing: true,
                     points: [
                         [0, 0.5],
@@ -864,30 +874,42 @@ OTSolution.Annotations.Toolbar = function(options) {
         {
             id: 'OT_line_width',
             title: 'Line Width',
-            icon: 'image/line_width.png',
+            icon: '../images/annotation/line_width.png',
             items: { /* Built dynamically */ }
         },
         {
             id: 'OT_clear',
             title: 'Clear',
-            icon: 'image/clear.png'
+            icon: '../images/annotation/clear.png'
         },
         {
             id: 'OT_capture',
             title: 'Capture',
-            icon: 'image/camera.png',
-            selectedIcon: 'image/camera_selected.png'
+            icon: '../images/annotation/camera.png',
+            selectedIcon: '../images/annotation/camera_selected.png'
         }
     ];
     this.colors = options.colors || [
-        '#000000',  // Black
-        '#0000FF',  // Blue
-        '#FF0000',  // Red
-        '#00FF00',  // Green
-        '#FF8C00',  // Orange
-        '#FFD700',  // Yellow
-        '#4B0082',  // Purple
-        '#800000'   // Brown
+        "#1abc9c",
+        "#2ecc71",
+        "#3498db",
+        "#9b59b6",
+        "#34495e",
+        "#16a085",
+        "#27ae60",
+        "#2980b9",
+        "#8e44ad",
+        "#2c3e50",
+        "#f1c40f",
+        "#e67e22",
+        "#e74c3c",
+        "#ecf0f1",
+        "#95a5a6",
+        "#f39c12",
+        "#d35400",
+        "#c0392b",
+        "#bdc3c7",
+        "#7f8c8d"
     ];
 
     this.cbs = [];
@@ -986,7 +1008,7 @@ OTSolution.Annotations.Toolbar = function(options) {
         panel.style.width = '100%';
         panel.style.height = '100%';
         panel.style.backgroundColor = this.backgroundColor;
-        panel.style.paddingLeft = '15px';
+        // panel.style.paddingLeft = '15px';
         this.parent.appendChild(panel);
         this.parent.style.position = 'relative';
         this.parent.zIndex = 1000;
@@ -1358,9 +1380,10 @@ OTSolution.Annotations.Toolbar = function(options) {
      */
     this.addCanvas = function(canvas) {
         var self = this;
-        canvas.link(session);
+        canvas.link(self.session);
         canvas.colors(self.colors);
         canvases.push(canvas);
+        console.log('what are the canvases', canvases);
     };
 
     /**
