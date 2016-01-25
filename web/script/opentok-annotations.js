@@ -55,7 +55,6 @@ OTSolution.Annotations = function(options) {
      * @param session The OpenTok session.
      */
     this.link = function(session) {
-        console.log('linking session to canvas', session);
         this.session = session;
     };
 
@@ -747,7 +746,7 @@ OTSolution.Annotations = function(options) {
     var batchSignal = function (type, data, toConnection) {
         // We send data in small chunks so that they fit in a signal
         // Each packet is maximum ~250 chars, we can fit 8192/250 ~= 32 updates per signal
-        var dataCopy = data.slice(), self = this;
+        var dataCopy = data.slice();
         var signalError = function (err) {
             if (err) {
                 TB.error(err);
@@ -1383,7 +1382,6 @@ OTSolution.Annotations.Toolbar = function(options) {
         canvas.link(self.session);
         canvas.colors(self.colors);
         canvases.push(canvas);
-        console.log('what are the canvases', canvases);
     };
 
     /**
