@@ -4,7 +4,9 @@ OpenTok Annotations Widget for JavaScript -- Beta
 While TokBox hosts [OpenTok.js](https://tokbox.com/developer/sdks/js/), you must host the JavaScript Annotations widget yourself. This allows you to modify the widget as desired. 
 
 * **[opentok-annotations.js](https://github.com/opentok/annotation-widget/tree/js/web/script)**: includes the CSS. If you already have a website that's making calls against the OpenTok JavaScript client, you can just grab this file and the image files.
+
 * **[Image files](https://github.com/opentok/annotation-widget/tree/js/web/image)**: used for the toolbar icons. 
+
 * **[index.html](https://github.com/opentok/annotation-widget/blob/js/web/index.html)**: this web page provides you with a quick start if you don't already have a web page that's making calls against OpenTok.js. You can also look at this file to see how to implement the toolbar in your own page.
 
 As a beta, this code is subject to change. You can email feedback to collaboration-tools-beta-program@tokbox.com.
@@ -20,8 +22,10 @@ Prerequisites
 
 * **OpenTok JavaScript client SDK**: your web page must load [OpenTok.js](https://tokbox.com/developer/sdks/js/) first, then [opentok-annotations.js](https://github.com/opentok/annotation-widg
 et/tree/js/web/script).  
+
 * **An API key**: obtained when you sign up for a [developer account](https://dashboard.tokbox.com/users/sign_up).
-* **Session ID and token**: during testing and development phases, you can generate these inside the [Dashboard](https://dashboard.tokbox.com/). Before going live, you will need to deploy a [server SDK](https://tokbox.com/developer/sdks/server/) and generate these values automatically.
+
+* **Session ID and token**: during testing and development phases, you can generate these manually inside the [Dashboard](https://dashboard.tokbox.com/). Before going live, you will need to deploy a [server SDK](https://tokbox.com/developer/sdks/server/) and generate these values dynamically.
 
 
 Downloading the widget
@@ -35,7 +39,7 @@ Downloading the widget
 Deploying the widget
 -----
 
-The web page that loads the Annotations Widget for JavaScript must be served over HTTP/HTTPS. Browser security limitations prevent you from publishing video using a `file://` path, as discussed in the OpenTok.js [Release Notes](https://www-tbrel.tokbox.com/developer/sdks/js/release-notes.html#knownIssues). A web server such as [MAMP](https://www.mamp.info/) or [Apache](https://httpd.apache.org/) will work, or else you can use a cloud service such as [Heroku](https://www.heroku.com/) to host the widget. Click the following button for a very quick deploy to Heroku.
+The web page that loads the Annotations Widget for JavaScript must be served over HTTP/HTTPS. Browser security limitations prevent you from publishing video using a `file://` path, as discussed in the OpenTok.js [Release Notes](https://www.tokbox.com/developer/sdks/js/release-notes.html#knownIssues). To support clients running [Chrome 47 or later](https://groups.google.com/forum/#!topic/discuss-webrtc/sq5CVmY69sc), HTTPS is required. A web server such as [MAMP](https://www.mamp.info/) or [Apache](https://httpd.apache.org/) will work, or else you can use a cloud service such as [Heroku](https://www.heroku.com/) to host the widget. Click the following button for a very quick deploy to Heroku.
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/opentok/annotation-widget/tree/js)
 
@@ -107,17 +111,17 @@ Below is a list of default menu items that can be used in your custom menu. Thes
 If no custom items are added to the toolbar initializer, these will be automatically added to your toolbar.
 
 | id            | Action        |
-| ------------- | ------------- |
-| OT_pen | Freehand/Pen tool |
-| OT_line | Line tool |
-| OT_shapes | Shapes group/submenu |
-| OT_arrow | Arrow tool |
-| OT_rect | Rectangle tool |
-| OT_oval | Oval tool |
-| OT_colors | Color picker submenu |
-| OT_line_width | Line width picker submenu |
-| OT_clear | Clears active user annotations |
-| OT_capture | Tap a video frame to capture a screenshot |
+| :------------ | :------------- |
+| `OT_pen` | Freehand/Pen tool |
+| `OT_line` | Line tool |
+| `OT_shapes` | Shapes group/submenu |
+| `OT_arrow` | Arrow tool |
+| `OT_rect` | Rectangle tool |
+| `OT_oval` | Oval tool |
+| `OT_colors` | Color picker submenu |
+| `OT_line_width` | Line width picker submenu |
+| `OT_clear` | Clears active user annotations |
+| `OT_capture` | Tap a video frame to capture a screenshot |
 
 
 ### Adding menu items
