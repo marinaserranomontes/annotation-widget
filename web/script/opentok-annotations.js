@@ -14,7 +14,7 @@ window.OTSolution = window.OTSolution || {};
 OTSolution.Annotations = function(options) {
     options || (options = {});
 
-    this.widgetVersion = "js-1.0.0-beta"
+    this.widgetVersion = "js-1.0.0-beta";
 
     this.parent = options.container;
     this.videoFeed = options.feed;

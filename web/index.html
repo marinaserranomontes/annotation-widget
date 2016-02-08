@@ -4,318 +4,204 @@
 <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 <title>OpenTok Annotations Demo</title>
 
-<script src='https://static.opentok.com/webrtc/v2.2/js/opentok.min.js'></script>
+<script src='//static.opentok.com/webrtc/v2.2/js/opentok.min.js'></script>
 <script src="script/opentok-annotations.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript" charset="utf-8">
 
-    var apiKey,
-        sessionId,
-        token;
+var apiKey;
+var sessionId;
+var token;
 
-    var toolbar;
-    var session;
-    var publisher;
-    var subscribers = {};
+var toolbar;
+var session;
+var publisher;
+var subscribers = {};
 
-    // Un-comment either of the following to set automatic logging and exception handling.
-    // See the exceptionHandler() method below.
-    // TB.setLogLevel(TB.DEBUG);
-    // TB.addEventListener('exception', exceptionHandler);
+// Un-comment either of the following to set automatic logging and exception handling.
+// See the exceptionHandler() method below.
+// TB.setLogLevel(TB.DEBUG);
+// TB.addEventListener('exception', exceptionHandler);
 
-    var palette = [
-        "#1abc9c",
-        "#2ecc71",
-        "#3498db",
-        "#9b59b6",
-        "#34495e",
-        "#16a085",
-        "#27ae60",
-        "#2980b9",
-        "#8e44ad",
-        "#2c3e50",
-        "#f1c40f",
-        "#e67e22",
-        "#e74c3c",
-        "#ecf0f1",
-        "#95a5a6",
-        "#f39c12",
-        "#d35400",
-        "#c0392b",
-        "#bdc3c7",
-        "#7f8c8d"
-    ];
+var palette = [
+    "#1abc9c",
+    "#2ecc71",
+    "#3498db",
+    "#9b59b6",
+    "#34495e",
+    "#16a085",
+    "#27ae60",
+    "#2980b9",
+    "#8e44ad",
+    "#2c3e50",
+    "#f1c40f",
+    "#e67e22",
+    "#e74c3c",
+    "#ecf0f1",
+    "#95a5a6",
+    "#f39c12",
+    "#d35400",
+    "#c0392b",
+    "#bdc3c7",
+    "#7f8c8d"
+];
 
-    //--------------------------------------
-    //  LINK CLICK HANDLERS
-    //--------------------------------------
+//--------------------------------------
+//  LINK CLICK HANDLERS
+//--------------------------------------
 
-    function connect() {
-        // Make an HTTP request to get the OpenTok API key, session ID, and token from the server
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function() {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                var res = JSON.parse(xmlHttp.responseText);
+function connect() {
+    // Make an HTTP request to get the OpenTok API key, session ID, and token from the server
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            var res = JSON.parse(xmlHttp.responseText);
 
-                apiKey = res.key;
-                sessionId = res.sessionId;
-                token = res.token;
+            apiKey = res.key;
+            sessionId = res.sessionId;
+            token = res.token;
 
-                session = TB.initSession(apiKey, sessionId);	// Initialize session
+            session = TB.initSession(apiKey, sessionId);	// Initialize session
 
-                // Add event listeners to the session
-                session.addEventListener('sessionConnected', sessionConnectedHandler);
-                session.addEventListener('sessionDisconnected', sessionDisconnectedHandler);
-                session.addEventListener('connectionCreated', connectionCreatedHandler);
-                session.addEventListener('connectionDestroyed', connectionDestroyedHandler);
-                session.addEventListener('streamCreated', streamCreatedHandler);
-                session.addEventListener('streamDestroyed', streamDestroyedHandler);
-                session.addEventListener('signal', signalHandler);
+            // Add event listeners to the session
+            session.addEventListener('sessionConnected', sessionConnectedHandler);
+            session.addEventListener('sessionDisconnected', sessionDisconnectedHandler);
+            session.addEventListener('connectionCreated', connectionCreatedHandler);
+            session.addEventListener('connectionDestroyed', connectionDestroyedHandler);
+            session.addEventListener('streamCreated', streamCreatedHandler);
+            session.addEventListener('streamDestroyed', streamDestroyedHandler);
+            session.addEventListener('signal', signalHandler);
 
-                session.connect(token);
+            session.connect(token);
 
-                // Initialize a toolbar for controlling annotation canvases
-                toolbar = new OTSolution.Annotations.Toolbar({
-                    session: session,
-                    container: document.getElementById('toolbar'),
-                    colors: palette,
-                    items: [
-                        {
-                            id: 'OT_pen',
-                            title: 'Pen',
-                            icon: 'image/freehand.png',
-                            selectedIcon: 'image/freehand_selected.png'
-                        },
-                        {
-                            id: 'OT_line',
-                            title: 'Line',
-                            icon: 'image/line.png',
-                            selectedIcon: 'image/line_selected.png'
-                        },
-                        {
-                            id: 'OT_shapes',
-                            title: 'Shapes',
-                            icon: 'image/shapes.png',
-                            items: [
-                                {
-                                    id: 'OT_arrow',
-                                    title: 'Arrow',
-                                    icon: 'image/arrow.png'
-                                },
-                                {
-                                    id: 'OT_rect',
-                                    title: 'Rectangle',
-                                    icon: 'image/rectangle.png'
-                                },
-                                {
-                                    id: 'OT_oval',
-                                    title: 'Oval',
-                                    icon: 'image/oval.png'
-                                },
-                                {
-                                    id: 'OT_star',
-                                    title: 'Star',
-                                    icon: 'image/star.png',
-                                    points: [
-                                        [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
-                                        [0.5 + 0.25 * Math.cos(126 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(126 * (Math.PI / 180))],
-                                        [0.5 + 0.5 * Math.cos(162 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(162 * (Math.PI / 180))],
-                                        [0.5 + 0.25 * Math.cos(198 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(198 * (Math.PI / 180))],
-                                        [0.5 + 0.5 * Math.cos(234 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(234 * (Math.PI / 180))],
-                                        [0.5 + 0.25 * Math.cos(270 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(270 * (Math.PI / 180))],
-                                        [0.5 + 0.5 * Math.cos(306 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(306 * (Math.PI / 180))],
-                                        [0.5 + 0.25 * Math.cos(342 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(342 * (Math.PI / 180))],
-                                        [0.5 + 0.5 * Math.cos(18 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(18 * (Math.PI / 180))],
-                                        [0.5 + 0.25 * Math.cos(54 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(54 * (Math.PI / 180))],
-                                        [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))]
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            id: 'OT_colors',
-                            title: 'Colors',
-                            icon: '',
-                            items: { /* Built dynamically */ }
-                        },
-                        {
-                            id: 'OT_line_width',
-                            title: 'Line Width',
-                            icon: 'image/line_width.png',
-                            items: { /* Built dynamically */ }
-                        },
-                        {
-                            id: 'OT_clear',
-                            title: 'Clear',
-                            icon: 'image/clear.png'
-                        },
-                        {
-                            id: 'OT_capture',
-                            title: 'Capture',
-                            icon: 'image/camera.png',
-                            selectedIcon: 'image/camera_selected.png'
-                        }
-                    ]
-                });
+            // Initialize a toolbar for controlling annotation canvases
+            toolbar = new OTSolution.Annotations.Toolbar({
+                session: session,
+                container: document.getElementById('toolbar'),
+                colors: palette,
+                items: [
+                    {
+                        id: 'OT_pen',
+                        title: 'Pen',
+                        icon: 'image/freehand.png',
+                        selectedIcon: 'image/freehand_selected.png'
+                    },
+                    {
+                        id: 'OT_line',
+                        title: 'Line',
+                        icon: 'image/line.png',
+                        selectedIcon: 'image/line_selected.png'
+                    },
+                    {
+                        id: 'OT_shapes',
+                        title: 'Shapes',
+                        icon: 'image/shapes.png',
+                        items: [
+                            {
+                                id: 'OT_arrow',
+                                title: 'Arrow',
+                                icon: 'image/arrow.png'
+                            },
+                            {
+                                id: 'OT_rect',
+                                title: 'Rectangle',
+                                icon: 'image/rectangle.png'
+                            },
+                            {
+                                id: 'OT_oval',
+                                title: 'Oval',
+                                icon: 'image/oval.png'
+                            },
+                            {
+                                id: 'OT_star',
+                                title: 'Star',
+                                icon: 'image/star.png',
+                                points: [
+                                    [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
+                                    [0.5 + 0.25 * Math.cos(126 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(126 * (Math.PI / 180))],
+                                    [0.5 + 0.5 * Math.cos(162 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(162 * (Math.PI / 180))],
+                                    [0.5 + 0.25 * Math.cos(198 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(198 * (Math.PI / 180))],
+                                    [0.5 + 0.5 * Math.cos(234 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(234 * (Math.PI / 180))],
+                                    [0.5 + 0.25 * Math.cos(270 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(270 * (Math.PI / 180))],
+                                    [0.5 + 0.5 * Math.cos(306 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(306 * (Math.PI / 180))],
+                                    [0.5 + 0.25 * Math.cos(342 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(342 * (Math.PI / 180))],
+                                    [0.5 + 0.5 * Math.cos(18 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(18 * (Math.PI / 180))],
+                                    [0.5 + 0.25 * Math.cos(54 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(54 * (Math.PI / 180))],
+                                    [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))]
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'OT_colors',
+                        title: 'Colors',
+                        icon: '',
+                        items: { /* Built dynamically */ }
+                    },
+                    {
+                        id: 'OT_line_width',
+                        title: 'Line Width',
+                        icon: 'image/line_width.png',
+                        items: { /* Built dynamically */ }
+                    },
+                    {
+                        id: 'OT_clear',
+                        title: 'Clear',
+                        icon: 'image/clear.png'
+                    },
+                    {
+                        id: 'OT_capture',
+                        title: 'Capture',
+                        icon: 'image/camera.png',
+                        selectedIcon: 'image/camera_selected.png'
+                    }
+                ]
+            });
 
-                // Callback for handling menu actions
-                toolbar.itemClicked(function (id) {
-                    console.log("Callback item id: " + id);
-                });
-            }
+            // Callback for handling menu actions
+            toolbar.itemClicked(function (id) {
+                console.log("Callback item id: " + id);
+            });
+        }
+    };
+    xmlHttp.open( "GET", "config.php", true );
+    xmlHttp.send( null );
+}
+
+function disconnect() {
+    // TODO Handle removing all canvases
+    toolbar.remove();
+
+    session.disconnect();
+    hide('disconnectLink');
+    hide('publishLink');
+    hide('unpublishLink');
+    hide('screenshareLink');
+}
+
+// Called when user wants to start publishing to the session
+function startPublishing() {
+    if (!publisher) {
+        var parentDiv = document.getElementById('myCamera');
+        var publisherDiv = document.createElement('div'); // Create a div for the publisher to replace
+        var publisherProperties = {
+            name: 'A web-based OpenTok client',
+            width: '360px',
+            height: '480px'
         };
-        xmlHttp.open( "GET", "config.php", true );
-        xmlHttp.send( null );
-    }
-
-    function disconnect() {
-        // TODO Handle removing all canvases
-        toolbar.remove();
-
-        session.disconnect();
-        hide('disconnectLink');
-        hide('publishLink');
-        hide('unpublishLink');
-    }
-
-    // Called when user wants to start publishing to the session
-    function startPublishing() {
-        if (!publisher) {
-            var parentDiv = document.getElementById('myCamera');
-            var publisherDiv = document.createElement('div'); // Create a div for the publisher to replace
-            var publisherProperties = {
-                name: 'A web-based OpenTok client',
-                width: '360px',
-                height: '480px'
-            };
-            publisherDiv.setAttribute('id', 'opentok_publisher');
-            parentDiv.appendChild(publisherDiv);
-            publisher = OT.initPublisher(publisherDiv.id, publisherProperties);
-            publisher.publishAudio(false);
-            session.publish(publisher, function (error) {
-                if (error) {
-                    console.log('The publisher failed to connect.');
-                }
-            });
-
-            var canvas = new OTSolution.Annotations({
-                feed: publisher,
-                container: publisherDiv
-            });
-            toolbar.addCanvas(canvas);
-
-            // Callback for screen capture event
-            canvas.onScreenCapture(function (dataUrl) {
-                var win = window.open(dataUrl, '_blank');
-                win.focus();
-            });
-
-            show('unpublishLink');
-            hide('publishLink');
-        }
-    }
-
-    function stopPublishing() {
-        // Clean up canvas elements
-        toolbar.removeCanvas(publisher.stream.connection.connectionId);
-
-        if (publisher) {
-            session.unpublish(publisher);
-        }
-        publisher = null;
-
-        show('publishLink');
-        hide('unpublishLink');
-    }
-
-    //--------------------------------------
-    //  OPENTOK EVENT HANDLERS
-    //--------------------------------------
-
-    function sessionConnectedHandler(event) {
-        // Subscribe to all streams currently in the Session
-        for (var i = 0; i < event.streams.length; i++) {
-            addStream(event.streams[i]);
-        }
-        show('disconnectLink');
-        show('publishLink');
-        hide('connectLink');
-    }
-
-    function streamCreatedHandler(event) {
-        // Subscribe to the newly created streams
-        for (var i = 0; i < event.streams.length; i++) {
-            TB.log('streamCreated - connectionId: ' + event.streams[i].connection.connectionId);
-            TB.log('streamCreated - connectionData: ' + event.streams[i].connection.data);
-            addStream(event.streams[i]);
-        }
-    }
-
-    function streamDestroyedHandler(event) {
-        // This signals that a stream was destroyed. Any Subscribers will automatically be removed.
-        // This default behaviour can be prevented using event.preventDefault()
-
-        // FIXME toolbar.removeCanvas(id) should be called here to clean up the view
-    }
-
-    function sessionDisconnectedHandler(event) {
-        // This signals that the user was disconnected from the Session. Any subscribers and publishers
-        // will automatically be removed. This default behaviour can be prevented using event.preventDefault()
-        publisher = null;
-
-        show('connectLink');
-        hide('disconnectLink');
-        hide('publishLink');
-        hide('unpublishLink');
-    }
-
-    function connectionDestroyedHandler(event) {
-        // This signals that connections were destroyed
-    }
-
-    function connectionCreatedHandler(event) {
-        // This signals new connections have been created.
-    }
-
-    function signalHandler(event) {
-//			var signalsDiv = document.getElementById("signals");
-//			var messageP = document.createElement("p");
-//			messageP.innerHTML = event.data;
-//			signalsDiv.appendChild(messageP);
-
-        console.log(event.data)
-    }
-
-    /*
-     If you un-comment the call to TB.addEventListener('exception', exceptionHandler) above, OpenTok calls the
-     exceptionHandler() method when exception events occur. You can modify this method to further process exception events.
-     If you un-comment the call to TB.setLogLevel(), above, OpenTok automatically displays exception event messages.
-     */
-    function exceptionHandler(event) {
-        alert('Exception: ' + event.code + '::' + event.message);
-    }
-
-    //--------------------------------------
-    //  HELPER METHODS
-    //--------------------------------------
-
-    function addStream(stream) {
-        // Check if this is the stream that I am publishing, and if so do not publish.
-        if (stream.connection.connectionId == session.connection.connectionId) {
-            return;
-        }
-        var subscriberDiv = document.createElement('div'); // Create a div for the subscriber to replace
-        subscriberDiv.setAttribute('id', stream.streamId); // Give the replacement div the id of the stream as its id.
-        document.getElementById('subscribers').appendChild(subscriberDiv);
-        var subscriber = session.subscribe(stream, subscriberDiv.id);
-        subscribers[stream.streamId] = subscriber;
-
-        console.log("Stream ID: " + stream.connection.connectionId + ", Subscriber ID: " + subscriber.stream.connection.connectionId
-            + ", Session ID: " + session.connection.connectionId);
+        publisherDiv.setAttribute('id', 'opentok_publisher');
+        parentDiv.appendChild(publisherDiv);
+        publisher = OT.initPublisher(publisherDiv.id, publisherProperties);
+        publisher.publishAudio(false);
+        session.publish(publisher, function (error) {
+            if (error) {
+                console.log('The publisher failed to connect.');
+            }
+        });
 
         var canvas = new OTSolution.Annotations({
-            feed:  subscriber,
-            container: subscriberDiv
+            feed: publisher,
+            container: publisherDiv
         });
         toolbar.addCanvas(canvas);
 
@@ -324,15 +210,146 @@
             var win = window.open(dataUrl, '_blank');
             win.focus();
         });
-    }
 
-    function show(id) {
-        document.getElementById(id).style.display = 'block';
+        show('unpublishLink');
+        show('screenshareLink');
+        hide('publishLink');
     }
+}
 
-    function hide(id) {
-        document.getElementById(id).style.display = 'none';
+function stopPublishing() {
+    // Clean up canvas elements
+    toolbar.removeCanvas(publisher.stream.connection.connectionId);
+
+    if (publisher) {
+        session.unpublish(publisher);
     }
+    publisher = null;
+
+    show('publishLink');
+    hide('unpublishLink');
+    hide('screenshareLink');
+}
+
+//--------------------------------------
+//  OPENTOK EVENT HANDLERS
+//--------------------------------------
+
+function sessionConnectedHandler(event) {
+    // Subscribe to all streams currently in the Session
+    for (var i = 0; i < event.streams.length; i++) {
+        addStream(event.streams[i]);
+    }
+    show('disconnectLink');
+    show('publishLink');
+    hide('connectLink');
+}
+
+function streamCreatedHandler(event) {
+    // Subscribe to the newly created streams
+    for (var i = 0; i < event.streams.length; i++) {
+        TB.log('streamCreated - connectionId: ' + event.streams[i].connection.connectionId);
+        TB.log('streamCreated - connectionData: ' + event.streams[i].connection.data);
+        addStream(event.streams[i]);
+    }
+}
+
+function streamDestroyedHandler(event) {
+    // This signals that a stream was destroyed. Any Subscribers will automatically be removed.
+    // This default behaviour can be prevented using event.preventDefault()
+
+    // FIXME toolbar.removeCanvas(id) should be called here to clean up the view
+}
+
+function sessionDisconnectedHandler(event) {
+    // This signals that the user was disconnected from the Session. Any subscribers and publishers
+    // will automatically be removed. This default behaviour can be prevented using event.preventDefault()
+    publisher = null;
+
+    show('connectLink');
+    hide('disconnectLink');
+    hide('publishLink');
+    hide('unpublishLink');
+}
+
+function connectionDestroyedHandler(event) {
+    // This signals that connections were destroyed
+}
+
+function connectionCreatedHandler(event) {
+    // This signals new connections have been created.
+}
+
+function signalHandler(event) {
+//			var signalsDiv = document.getElementById("signals");
+//			var messageP = document.createElement("p");
+//			messageP.innerHTML = event.data;
+//			signalsDiv.appendChild(messageP);
+
+    console.log(event.data)
+}
+
+/*
+ If you un-comment the call to TB.addEventListener('exception', exceptionHandler) above, OpenTok calls the
+ exceptionHandler() method when exception events occur. You can modify this method to further process exception events.
+ If you un-comment the call to TB.setLogLevel(), above, OpenTok automatically displays exception event messages.
+ */
+function exceptionHandler(event) {
+    alert('Exception: ' + event.code + '::' + event.message);
+}
+
+//--------------------------------------
+//  HELPER METHODS
+//--------------------------------------
+
+function addStream(stream) {
+    // Check if this is the stream that I am publishing, and if so do not publish.
+    if (stream.connection.connectionId == session.connection.connectionId) {
+        return;
+    }
+    var subscriberDiv = document.createElement('div'); // Create a div for the subscriber to replace
+    subscriberDiv.setAttribute('id', stream.streamId); // Give the replacement div the id of the stream as its id.
+    document.getElementById('subscribers').appendChild(subscriberDiv);
+    var subscriber = session.subscribe(stream, subscriberDiv.id);
+    subscribers[stream.streamId] = subscriber;
+
+    console.log("Stream ID: " + stream.connection.connectionId + ", Subscriber ID: " + subscriber.stream.connection.connectionId
+            + ", Session ID: " + session.connection.connectionId);
+
+    var canvas = new OTSolution.Annotations({
+        feed:  subscriber,
+        container: subscriberDiv
+    });
+    toolbar.addCanvas(canvas);
+
+    // Callback for screen capture event
+    canvas.onScreenCapture(function (dataUrl) {
+        var win = window.open(dataUrl, '_blank');
+        win.focus();
+    });
+}
+
+function show(id) {
+    document.getElementById(id).style.display = 'block';
+}
+
+function hide(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function screenshare() {
+    popupCenter("screenshare.html", 800, 600);
+}
+
+function popupCenter(url, w, h) {
+    var left = (screen.width/2)-(w/2);
+    var top = (screen.height/2)-(h/2);
+    var win = window.open(url, '', 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+
+    // Set the variables to share with the window
+    win.toolbar = toolbar;
+}
+
 </script>
 
 <style type="text/css" media="screen">
@@ -340,7 +357,6 @@
         margin: 0;
         padding: 0;
     }
-
     #opentok_publisher, .publisherContainer {
         display: block;
         top: 45px; /* Set the container below the toolbar */
@@ -349,11 +365,15 @@
         left: 0;
         right: 0;
     }
+    #OT_toolbar {
+        padding-left: 15px;
+    }
 </style>
 </head>
 <body>
 <div id="links">
     <input type="button" value="Connect" id="connectLink" onClick="javascript:connect()"/>
+    <input type="button" value="Share screen" id="screenshareLink" onClick="javascript:screenshare()" style="display:none"/>
     <input type="button" value="Disconnect" id="disconnectLink" onClick="javascript:disconnect()" style="display:none"/>
     <input type="button" value="Publish" id="publishLink" onClick="javascript:startPublishing()" style="display:none"/>
     <input type="button" value="Unpublish" id="unpublishLink" onClick="javascript:stopPublishing()"
