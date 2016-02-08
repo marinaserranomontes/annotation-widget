@@ -289,7 +289,7 @@ var parentDiv = document.getElementById('screenshareContainer');
 
 For best results, we recommend that a new window is opened for annotations with screen sharing. This allows annotations to be added to extents
 beyond the browser window (on your desktop, for example). The code snippet below is used to create a new window that points to the URL of the
-screen sharing with annotations sample ([screenshare.html](screenshare.html)) and height and width values for the new window.
+screen sharing with annotations sample ([screenshare.html](web/screenshare.html)) and height and width values for the new window.
 
 ```javascript
 function popupCenter(url, w, h) {
