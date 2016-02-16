@@ -72,7 +72,14 @@ The Android Annotation widget includes a `AnnotationVideoRenderer` class which e
 AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
 ```
 
-You can then attach this to a publisher/subscriber using the `setRenderer(...)` method.
+You can then attach this to a publisher/subscriber using the `setRenderer(...)` method. Please note, you have to set the new renderer before to start publishing/subscribing.
+
+```java
+    ....
+    AnnotationVideoRenderer renderer = new AnnotationVideoRenderer(this);
+    mPublisher.setRenderer(renderer);
+    mSession.publish(mPublisher);
+```
 
 **PRO TIP**: If you have already developed your own custom video renderer simply modify it so that it extends `AnnotationVideoRenderer` instead of `BaseVideoRenderer`.
 

@@ -370,11 +370,17 @@ public class AnnotationVideoRenderer extends BaseVideoRenderer {
     }
 
     public int getVideoWidth() {
-        return mRenderer.mCurrentFrame.getWidth();
+        if ( mRenderer.mCurrentFrame != null ) {
+            return mRenderer.mCurrentFrame.getWidth();
+        }
+        return 0;
     }
 
     public int getVideoHeight() {
-        return mRenderer.mCurrentFrame.getHeight();
+        if ( mRenderer.mCurrentFrame != null ) {
+            return mRenderer.mCurrentFrame.getHeight();
+        }
+        return 0;
     }
 
     public Bitmap captureScreenshot() {
