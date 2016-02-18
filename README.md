@@ -27,11 +27,11 @@ Installing
 
 ### .AAR in Android Studio
 
-1. Download the [latest version](https://github.com/opentok/annotation-widget/releases/tag/1.0.0-android-beta) of the widget.
+1. Download the [latest version](https://github.com/opentok/annotation-widget/releases/tag/1.0.1-android-beta) of the widget.
 2. Right click on your project module (usually called "app" but may be something else) and choose "Open Module Settings" from the bottom of the menu.
 3. Click the '+' sign in the upper left hand corner.
 4. Choose "Import .JAR or .AAR Package" from the list in the popup.
-5. Locate the AAR file in the zip downloaded in step 1. You can set the module name to `:opentokAnnotations` or similar.
+5. Locate the AAR file in the zip downloaded in step 1. You can set the module name to `:opentokAnnotations-1.0.1` or similar.
 6. Follow the prompts and build your project.
 7. Click the "+" button at the bottom of the dependencies screen, and choose "module dependency". It will add the line `compile project(':opentokAnnotations')` to the app build.gradle.
 
